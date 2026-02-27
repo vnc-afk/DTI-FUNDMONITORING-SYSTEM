@@ -1,0 +1,515 @@
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design Tokens ── */
+:root {
+  --bg: #f0f2f7;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --border: #e8eaef;
+  --border-strong: #d0d4de;
+  --text: #111827;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+  --accent: #2563eb;
+  --accent-soft: #eff6ff;
+  --accent-mid: #bfdbfe;
+  --debit: #dc2626;
+  --debit-soft: #fff1f1;
+  --credit: #059669;
+  --credit-soft: #f0fdf8;
+  --warning: #d97706;
+  --warning-soft: #fffbeb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 4px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 150ms ease;
+}
+
+/* ── TABLE NAMESPACE ── */
+.table-namespace {
+  --table-bg: var(--bg);
+  --table-surface: var(--surface);
+}
+
+/* ── Base ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  min-height: 100vh;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Page Header ── */
+.table-namespace .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+.table-namespace .page-header-left h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  line-height: 1.1;
+}
+.table-namespace .page-header-left p {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+.table-namespace .btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(37,99,235,.25);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.table-namespace .btn-add:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37,99,235,.35);
+  transform: translateY(-1px);
+}
+.table-namespace .btn-add svg { width: 15px; height: 15px; }
+
+/* ── Summary Cards ── */
+.table-namespace .summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.table-namespace .summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s ease both;
+}
+.table-namespace .summary-card:nth-child(1) { animation-delay: 0s; }
+.table-namespace .summary-card:nth-child(2) { animation-delay: 0.06s; }
+.table-namespace .summary-card:nth-child(3) { animation-delay: 0.12s; }
+.table-namespace .summary-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-3);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.table-namespace .summary-card-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+.table-namespace .summary-card-value.debit   { color: var(--debit); }
+.table-namespace .summary-card-value.credit  { color: var(--credit); }
+.table-namespace .summary-card-value.balance { color: var(--text); }
+.table-namespace .summary-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* ── Table Card ── */
+.table-namespace .table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.4s ease 0.2s both;
+}
+
+/* ── Toolbar ── */
+.table-namespace .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.table-namespace .toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.table-namespace .toolbar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-namespace .toolbar-title svg { color: var(--accent); width: 16px; height: 16px; }
+.table-namespace .toolbar-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+.table-namespace .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Search ── */
+.table-namespace .search-wrap { position: relative; }
+.table-namespace .search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.table-namespace .search-input {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px 7px 32px;
+  background: var(--surface-2);
+  width: 210px;
+  transition: all var(--transition);
+  outline: none;
+  color: var(--text);
+}
+.table-namespace .search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  background: var(--surface);
+  width: 240px;
+}
+.table-namespace .search-input::placeholder { color: var(--text-3); }
+
+/* ── Filter Select ── */
+.table-namespace .filter-select {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.table-namespace .filter-select:focus { border-color: var(--accent); }
+
+/* ── Icon Buttons ── */
+.table-namespace .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  outline: none;
+}
+.table-namespace .icon-btn svg { width: 14px; height: 14px; }
+.table-namespace .icon-btn:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+/* ── Table ── */
+.table-namespace .table-wrap { overflow-x: auto; }
+
+.table-namespace table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  table-layout: auto;
+}
+
+.table-namespace thead th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition);
+}
+.table-namespace thead th:hover { color: var(--text-2); }
+.table-namespace thead th.sorted-asc,
+.table-namespace thead th.sorted-desc { color: var(--accent); }
+.table-namespace thead th.col-r { text-align: right; }
+
+/* Sort arrows */
+.table-namespace .sort-icon {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 4px;
+  vertical-align: middle;
+  gap: 1px;
+}
+.table-namespace .sort-icon span {
+  width: 0; height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  opacity: 0.3;
+}
+.table-namespace .sort-icon .up  { border-bottom: 4px solid currentColor; }
+.table-namespace .sort-icon .dn  { border-top: 4px solid currentColor; }
+.table-namespace thead th.sorted-asc  .sort-icon .up { opacity: 1; }
+.table-namespace thead th.sorted-desc .sort-icon .dn { opacity: 1; }
+
+.table-namespace tbody tr {
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  transition: background var(--transition), border-color var(--transition);
+}
+.table-namespace tbody tr:last-child { border-bottom: none; }
+.table-namespace tbody tr:hover { 
+  background: #fafbfd;
+  border-left-color: var(--accent);
+}
+.table-namespace tbody tr.hidden { display: none; }
+
+.table-namespace tbody td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+.table-namespace tbody td.col-r { text-align: right; }
+
+/* Date column - allow some width */
+.table-namespace tbody td:nth-child(1) { min-width: 80px; }
+
+/* Description column - flexible width */
+.table-namespace tbody td:nth-child(2) { min-width: 120px; }
+
+/* Check No, Debit, Credit, Balance, Status columns - no wrap */
+.table-namespace tbody td:nth-child(3),  /* Check No */
+.table-namespace tbody td:nth-child(4),  /* Debit */
+.table-namespace tbody td:nth-child(5),  /* Credit */
+.table-namespace tbody td:nth-child(6),  /* Balance */
+.table-namespace tbody td:nth-child(7)   /* Status */
+{
+  white-space: nowrap;
+}
+
+/* Actions column - fixed width */
+.table-namespace tbody td:nth-child(8) { 
+  min-width: 70px;
+  white-space: nowrap;
+}
+
+/* ── Cell Types ── */
+.table-namespace .date-main { font-weight: 600; color: var(--text); font-size: 0.8rem; }
+.table-namespace .date-sub   { font-size: 0.7rem; color: var(--text-3); margin-top: 1px; }
+
+.table-namespace .desc-cell .desc-main { font-weight: 500; color: var(--text); }
+.table-namespace .desc-cell .desc-cat  { font-size: 0.7rem; color: var(--text-3); margin-top: 2px; }
+
+.table-namespace .mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+}
+.table-namespace .mono.empty { background: none; border-color: transparent; color: var(--text-3); }
+
+.table-namespace .amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.table-namespace .amount.debit   { color: var(--debit); }
+.table-namespace .amount.credit  { color: var(--credit); }
+.table-namespace .amount.balance { color: var(--text); }
+.table-namespace .amount.empty   { color: var(--text-3); font-weight: 400; font-size: 0.8rem; }
+
+/* Balance bar */
+.table-namespace .balance-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.table-namespace .balance-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-mid), var(--accent));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ── Status Badges ── */
+.table-namespace .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.table-namespace .badge svg { width: 10px; height: 10px; flex-shrink: 0; }
+.table-namespace .badge-cleared {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.table-namespace .badge-process {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border: 1px solid #fed7aa;
+}
+.table-namespace .badge-failed {
+  background: var(--debit-soft);
+  color: var(--debit);
+  border: 1px solid #fecaca;
+}
+
+/* ── Action Buttons ── */
+.table-namespace .actions { display: flex; align-items: center; gap: 5px; }
+.table-namespace .act-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+.table-namespace .act-btn svg { width: 13px; height: 13px; }
+.table-namespace .act-edit  { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-mid); }
+.table-namespace .act-edit:hover  { background: #dbeafe; border-color: #93c5fd; }
+.table-namespace .act-delete { background: var(--debit-soft); color: var(--debit); border-color: #fecaca; }
+.table-namespace .act-delete:hover { background: #fee2e2; border-color: #fca5a5; }
+
+/* ── tfoot ── */
+.table-namespace tfoot tr td {
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-top: 2px solid var(--border-strong);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.table-namespace tfoot td.col-r { text-align: right; }
+
+/* ── No Results ── */
+.table-namespace .no-results {
+  display: none;
+  padding: 48px;
+  text-align: center;
+  color: var(--text-3);
+}
+.table-namespace .no-results-icon { font-size: 2rem; margin-bottom: 10px; }
+.table-namespace .no-results-label { font-size: 0.85rem; }
+
+/* ── Table Footer ── */
+.table-namespace .table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 13px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.table-namespace .footer-info { font-size: 0.78rem; color: var(--text-2); }
+.table-namespace .footer-info strong { font-weight: 600; color: var(--text); }
+
+/* ── Pagination ── */
+.table-namespace .pagination { display: flex; align-items: center; gap: 3px; }
+.table-namespace .page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  padding: 0 8px;
+}
+.table-namespace .page-btn svg { width: 13px; height: 13px; }
+.table-namespace .page-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.table-namespace .page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.table-namespace .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.table-namespace .page-dots { font-size: 0.78rem; color: var(--text-3); padding: 0 2px; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  body { padding: 16px; }
+  .table-namespace .summary-row { grid-template-columns: 1fr; }
+  .table-namespace .page-header { flex-direction: column; }
+}

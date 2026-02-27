@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Negosyo Center Report</h2>
+
+<!-- Top Summary -->
+<table class="table table-bordered table-sm">
+    <tbody>
+        <tr>
+            <td>Annual Budget</td>
+            <td>₱ 1,480,700.00</td>
+        </tr>
+        <tr>
+            <td>Total Downloads</td>
+            <td>₱ 0.00</td>
+        </tr>
+        <tr>
+            <td>Total Disbursement</td>
+            <td>₱ 29,484.46</td>
+        </tr>
+        <tr>
+            <td>Current Balance</td>
+            <td>(₱ 29,484.46)</td>
+        </tr>
+        <tr>
+            <td>BUR (Current)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Annual Balance</td>
+            <td>₱ 1,451,215.54</td>
+        </tr>
+        <tr>
+            <td>BUR (Annual)</td>
+            <td>1.99%</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Buttons to switch district tables -->
+<div class="mb-3">
+    <button class="btn btn-primary btn-sm" onclick="showDistrict('district1')">1st District</button>
+    <button class="btn btn-secondary btn-sm" onclick="showDistrict('district2')">2nd District</button>
+    <button class="btn btn-info btn-sm" onclick="showDistrict('district3')">3rd District</button>
+</div>
+
+
+
+<!-- District 1 Table -->
+<div id="district1-table">
+    <h5>1st District</h5>
+    {% include "nc_district1_table.html" %}
+</div>
+
+<!-- District 2 Table -->
+<div id="district2-table" style="display:none;">
+    <h5>2nd District</h5>
+    {% include "nc_district2_table.html" %}
+</div>
+
+<!-- District 3 Table -->
+<div id="district3-table" style="display:none;">
+    <h5>3rd District</h5>
+    {% include "nc_district3_table.html" %}
+</div>
+
+<script>
+function showDistrict(district) {
+    document.getElementById('district1-table').style.display = district === 'district1' ? 'block' : 'none';
+    document.getElementById('district2-table').style.display = district === 'district2' ? 'block' : 'none';
+    document.getElementById('district3-table').style.display = district === 'district3' ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}

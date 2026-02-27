@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard Overview</h2>
+<div class="row mt-3">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white p-3 mb-3">
+            <h5>Total Annual Budget</h5>
+            <h3>₱ 22,072,979.73</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white p-3 mb-3">
+            <h5>Total Disbursement</h5>
+            <h3>₱ 312,316.39</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-white p-3 mb-3">
+            <h5>Current Balance</h5>
+            <h3>₱ 21,760,663.34</h3>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Fund Status</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fund</th>
+            <th>Annual Budget</th>
+            <th>Total Disbursement</th>
+            <th>Current Balance</th>
+            <th>BUR (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>MOOE</td>
+            <td>₱ 2,456,570.00</td>
+            <td>₱ 224,423.62</td>
+            <td>₱ 2,232,146.38</td>
+            <td>9.14%</td>
+        </tr>
+        <tr>
+            <td>Negosyo Center</td>
+            <td>₱ 1,480,700.00</td>
+            <td>₱ 29,484.46</td>
+            <td>₱ 1,451,215.54</td>
+            <td>1.99%</td>
+        </tr>
+        <tr>
+            <td>LSP-NSB</td>
+            <td>₱ 2,535,630.00</td>
+            <td>₱ 0.00</td>
+            <td>₱ 2,535,630.00</td>
+            <td>0.00%</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
