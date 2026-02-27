@@ -4,31 +4,7 @@
 //   q3: [Jul, Aug, Sep]   q4: [Oct, Nov, Dec]
 // Add or remove as many objects as needed — everything renders automatically.
 
-const EXPENSES = [
-  { name: "Traveling Expenses - Local",  color: "#c8f065", q1: [58408.31, 0, 0],              q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Training Expenses",           color: "#f0c865", q1: [33330.12, 0, 0],              q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Office Supplies",             color: "#65c8f0", q1: [12400.00, 5200.00, 0],        q2: [8900.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Representation Expenses",     color: "#f065c8", q1: [9800.00, 0, 0],               q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Communication Expenses",      color: "#c865f0", q1: [4500.00, 4500.00, 4500.00],   q2: [4500.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Fuel Expenses",               color: "#65f0c8", q1: [7200.00, 6800.00, 0],         q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Postage & Delivery",          color: "#f0e865", q1: [1200.00, 0, 0],               q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Printing & Reproduction",     color: "#65f0f0", q1: [3400.00, 2100.00, 0],         q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Subscription Expenses",       color: "#a0c8ff", q1: [8500.00, 8500.00, 8500.00],   q2: [8500.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Rent/Lease Expenses",         color: "#ffaac8", q1: [45000.00, 45000.00, 45000.00],q2: [45000.00,0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Electricity",                 color: "#c8ffc8", q1: [18200.00, 17400.00, 19100.00],q2: [18600.00,0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Water",                       color: "#c8e0ff", q1: [3200.00, 3100.00, 3400.00],   q2: [3300.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Internet & Telecom",          color: "#ffd4a0", q1: [5200.00, 5200.00, 5200.00],   q2: [5200.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Insurance",                   color: "#d4a0ff", q1: [22000.00, 0, 0],              q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Janitorial Supplies",         color: "#a0ffd4", q1: [4800.00, 4200.00, 0],         q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Security Services",           color: "#ffc8a0", q1: [15000.00, 15000.00, 15000.00],q2: [15000.00,0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Advertising & Promotions",    color: "#a0c8c8", q1: [12000.00, 0, 0],              q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Professional Fees",           color: "#c8a0ff", q1: [30000.00, 0, 0],              q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Depreciation - Equipment",    color: "#ffd4d4", q1: [8750.00, 8750.00, 8750.00],   q2: [8750.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Depreciation - Furniture",    color: "#d4ffd4", q1: [2100.00, 2100.00, 2100.00],   q2: [2100.00, 0, 0], q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Repairs & Maintenance",       color: "#f09065", q1: [0, 0, 0],                     q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Medical & Dental",            color: "#ffa0a0", q1: [0, 0, 0],                     q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-  { name: "Miscellaneous Expenses",      color: "#d4d4ff", q1: [5500.00, 3200.00, 0],         q2: [0, 0, 0],       q3: [0, 0, 0], q4: [0, 0, 0] },
-];
+const EXPENSES = [];
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

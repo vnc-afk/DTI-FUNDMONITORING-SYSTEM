@@ -41,6 +41,18 @@
                 <i class="bi bi-grid-1x2"></i>
                 Dashboard
             </a>
+            <a href="{% url 'bank_statement_list' %}" class="{% if request.resolver_match.url_name == 'bank_statement_list' %}active{% endif %}">
+                <i class="bi bi-bank"></i>
+                Bank Statements
+            </a>
+            <a href="{% url 'master_fund_monitoring_list' %}" class="{% if request.resolver_match.url_name == 'master_fund_monitoring_list' %}active{% endif %}">
+                <i class="bi bi-table"></i>
+                Master Fund Monitoring
+            </a>
+        </nav>
+
+        <div class="sidebar-section-label">Data Management</div>
+        <nav>
             <a href="{% url 'supplier_list' %}" class="{% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
                 <i class="bi bi-person-vcard"></i>
                 TIN / Suppliers
@@ -52,10 +64,6 @@
             <a href="{% url 'staff' %}" class="{% if request.resolver_match.url_name == 'staff' %}active{% endif %}">
                 <i class="bi bi-people"></i>
                 Staff List
-            </a>
-            <a href="{% url 'bank_statement_list' %}" class="{% if request.resolver_match.url_name == 'bank_statement_list' %}active{% endif %}">
-                <i class="bi bi-people"></i>
-                Bank Statements
             </a>
         </nav>
 

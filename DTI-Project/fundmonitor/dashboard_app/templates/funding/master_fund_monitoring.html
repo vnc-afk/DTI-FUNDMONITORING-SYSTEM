@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block content %}
+<div class="table-namespace">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1>Master Fund Monitoring Table</h1>
+      <p>Track all fund monitoring records and transactions</p>
+    </div>
+    <a href="{% url 'master_fund_monitoring_add' %}" class="btn-add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5"  y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Record
+    </a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SUMMARY CARDS
+  ══════════════════════════════════ -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="summary-card-label">Total Payments</div>
+      <div class="summary-card-value debit">₱ {% load humanize %}{{ total_payments|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-sub">{{ record_count }} records</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Total Downloads</div>
+      <div class="summary-card-value credit">₱ {{ total_downloads|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-sub">{{ record_count }} records</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Records Count</div>
+      <div class="summary-card-value balance">{{ record_count }}</div>
+      <div class="summary-card-sub">Total entries</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       TABLE CARD
+  ══════════════════════════════════ -->
+  <div class="table-card">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="toolbar-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+          Fund Monitoring Records
+        </div>
+        <span class="toolbar-count" id="entryCount">{{ record_count }} entries</span>
+      </div>
+      <div class="toolbar-right">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" placeholder="Search records…" id="searchInput">
+        </div>
+        <select class="filter-select" id="statusFilter">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="cleared">Cleared</option>
+          <option value="bounced">Bounced</option>
+        </select>
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="fundTable">
+        <thead>
+          <tr>
+            <th data-col="0">Division</th>
+            <th data-col="1">Fund Source</th>
+            <th data-col="2">MOOE</th>
+            <th data-col="3">NC</th>
+            <th data-col="4" class="sorted-asc">
+              Date <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th data-col="5">Payee</th>
+            <th data-col="6">Particulars</th>
+            <th data-col="7">TIN</th>
+            <th data-col="8">Tax Type</th>
+            <th data-col="9">Purchase Type</th>
+            <th data-col="10" class="col-r">Payments</th>
+            <th data-col="11">DV No.</th>
+            <th data-col="12">Cheque No.</th>
+            <th data-col="13">Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="tableBody">
+          {% for record in records %}
+          <tr data-status="{% if record.cheque_status == 'Cleared' %}cleared{% elif record.cheque_status == 'Pending' %}pending{% else %}bounced{% endif %}">
+            <td>{{ record.division }}</td>
+            <td>{{ record.fund_source }}</td>
+            <td>{{ record.mooe }}</td>
+            <td>{{ record.nc }}</td>
+            <td>
+              {% if record.date %}
+              <div class="date-main">{{ record.date|date:"M d, Y" }}</div>
+              <div class="date-sub">{{ record.date|date:"l" }}</div>
+              {% else %}
+              <div class="date-main">—</div>
+              {% endif %}
+            </td>
+            <td class="desc-cell">
+              <div class="desc-main">{{ record.payee }}</div>
+              <div class="desc-cat">Payee</div>
+            </td>
+            <td class="desc-cell">
+              <div class="desc-main">{{ record.particulars|truncatewords:5 }}</div>
+            </td>
+            <td>
+              <span class="mono">{{ record.tin|default:"—" }}</span>
+            </td>
+            <td>{{ record.tax_type|default:"—" }}</td>
+            <td>{{ record.purchase_type|default:"—" }}</td>
+            <td class="col-r">
+              <span class="amount {% if record.payments %}debit{% else %}empty{% endif %}">
+                {% if record.payments and record.payments > 0 %}₱ {{ record.payments|floatformat:2 }}{% else %}—{% endif %}
+              </span>
+            </td>
+            <td><span class="mono">{{ record.dv_number|default:"—" }}</span></td>
+            <td><span class="mono">{{ record.cheque_number|default:"—" }}</span></td>
+            <td>
+              {% if record.cheque_status == 'Cleared' %}
+                <span class="badge badge-cleared">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  {{ record.cheque_status }}
+                </span>
+              {% elif record.cheque_status == 'Pending' %}
+                <span class="badge badge-process">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  {{ record.cheque_status }}
+                </span>
+              {% else %}
+                <span class="badge badge-failed">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9"  y1="9" x2="15" y2="15"/>
+                  </svg>
+                  {{ record.cheque_status }}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="actions">
+                <a href="{% url 'master_fund_monitoring_edit' record.pk %}" class="act-btn act-edit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </a>
+                <a href="{% url 'master_fund_monitoring_delete' record.pk %}" class="act-btn act-delete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  </svg>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="15" style="text-align:center; padding: 32px; color: var(--text-3);">No fund monitoring records available.</td>
+          </tr>
+          {% endfor %}
+
+        <tfoot>
+          <tr>
+            <td colspan="10">Totals ({{ record_count }} records)</td>
+            <td class="col-r"><span class="amount debit">₱ {{ total_payments|default:"0.00"|floatformat:2 }}</span></td>
+            <td colspan="4"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- No Results -->
+      <div class="no-results" id="noResults">
+        <div class="no-results-icon">🔍</div>
+        <div class="no-results-label">No records match your search</div>
+      </div>
+    </div>
+
+    <!-- Table Footer -->
+    <div class="table-footer">
+      <div class="footer-info">
+        Showing <strong id="visibleCount">{{ record_count }}</strong> of <strong>{{ record_count }}</strong> entries
+      </div>
+      <div class="pagination">
+        <button class="page-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+
+  </div><!-- /.table-card -->
+
+</div><!-- /.container -->
+</div><!-- /.table-namespace -->
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'dashboard_app/js/table.js' %}"></script>
+{% endblock %}

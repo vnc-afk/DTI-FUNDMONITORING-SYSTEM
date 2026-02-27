@@ -140,7 +140,7 @@
                 {{ supplier.vat_status|default:"Unknown" }}
               </span>
             </td>
-            <td><span class="mono {% if not supplier.philgeps_registration %}empty{% endif %}">{{ supplier.philgeps_registration|default:"—" }}</span></td>
+            <td><span class="desc-main">{{ supplier.philgeps_registration|default:"—" }}</span></td>
             <td><span class="desc-main">{{ supplier.address|default:"—" }}</span></td>
             <td><span class="desc-main">{{ supplier.propprietor|default:"—" }}</span></td>
             <td><span class="desc-main">{{ supplier.contact_number|default:"—" }}</span></td>

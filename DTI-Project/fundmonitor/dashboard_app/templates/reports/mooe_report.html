@@ -29,22 +29,22 @@
   <div class="summary-cards">
     <div class="scard">
       <div class="scard-label">Annual Budget</div>
-      <div class="scard-amount">₱2,456,570.00</div>
+      <div class="scard-amount">—</div>
       <div class="scard-pct">All Output Objectives</div>
     </div>
     <div class="scard">
       <div class="scard-label">Total Disbursed</div>
-      <div class="scard-amount">₱0.00</div>
-      <div class="scard-pct">0.00% Utilization</div>
+      <div class="scard-amount">—</div>
+      <div class="scard-pct">—</div>
     </div>
     <div class="scard">
       <div class="scard-label">Current Balance</div>
-      <div class="scard-amount">₱2,456,570.00</div>
+      <div class="scard-amount">—</div>
       <div class="scard-pct">Remaining Budget</div>
     </div>
     <div class="scard">
       <div class="scard-label">Budget Utilization Rate</div>
-      <div class="scard-amount">0.00%</div>
+      <div class="scard-amount">—</div>
       <div class="scard-pct">Current Period</div>
     </div>
   </div>
@@ -68,13 +68,13 @@
             <tbody>
                 <tr class="report-row-budget">
                     <td>Annual Budget</td>
-                    <td>₱375,600.00</td>
-                    <td>₱547,750.00</td>
-                    <td>₱907,020.00</td>
-                    <td>₱76,200.00</td>
-                    <td>₱98,750.00</td>
-                    <td>₱451,250.00</td>
-                    <td class="col-total">₱2,456,570.00</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="col-total">—</td>
                 </tr>
                 <tr class="report-row-disburse">
                     <td>Total Disbursement</td>
@@ -84,17 +84,17 @@
                     <td><span style="color:#d1d5db;">—</span></td>
                     <td><span style="color:#d1d5db;">—</span></td>
                     <td><span style="color:#d1d5db;">—</span></td>
-                    <td class="col-total">₱0.00</td>
+                    <td class="col-total">—</td>
                 </tr>
                 <tr class="report-row-balance">
                     <td>Current Balance</td>
-                    <td>₱375,600.00</td>
-                    <td>₱547,750.00</td>
-                    <td>₱907,020.00</td>
-                    <td>₱76,200.00</td>
-                    <td>₱98,750.00</td>
-                    <td>₱451,250.00</td>
-                    <td class="col-total">₱2,456,570.00</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="col-total">—</td>
                 </tr>
                 <tr class="report-row-bur">
                     <td>BUR (%)</td>
@@ -161,7 +161,7 @@
   <!-- Disbursement Panel -->
   <div id="tab-disbursement" class="tab-panel">
     <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      {% include "disbursement_table.html" %}
+      {% include "reports/allocations/disbursement_table.html" %}
     </div>
     <div class="tab-download-bar">
       <span><i class="bi bi-info-circle me-1"></i>Monthly disbursement data across all output objectives</span>
@@ -179,7 +179,7 @@
   <!-- Downloads Panel -->
   <div id="tab-downloads" class="tab-panel" style="display:none;">
     <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      {% include "downloads_table.html" %}
+      {% include "reports/allocations/downloads_table.html" %}
     </div>
     <div class="tab-download-bar">
       <span><i class="bi bi-info-circle me-1"></i>Available report files for download</span>
