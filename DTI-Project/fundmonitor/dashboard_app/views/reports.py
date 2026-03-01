@@ -1,13 +1,68 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.db.models import Sum, Q
+from django.utils.timezone import now
+from dashboard_app.models import ExpenseObject, MasterFundMonitoring
 import csv
+import json
+from decimal import Decimal
 
 
 def expense_report(request):
     """Generate expense report with monthly breakdown"""
-    # placeholder dataset for demonstration; replace with real query logic later
-    report_data = []
-    return render(request, 'reports/expenses_report.html', {'report_data': report_data})
+    # Fetch all active expense objects
+    object = ExpenseObject.objects.filter(is_active=True).values('id', 'code', 'name', 'color')
+    
+    # Prepare objects for template with monthly data
+    current_year = now().year
+    expense_data = []
+    
+    for cat in object:
+        # Query expenses for this category from MasterFundMonitoring
+        expenses = MasterFundMonitoring.objects.filter(
+            account_title_id=cat['id'],
+            date__year=current_year
+        ).values_list('date', 'payments')
+        
+        # Initialize quarterly arrays
+        q1 = [Decimal(0), Decimal(0), Decimal(0)]  # Jan, Feb, Mar
+        q2 = [Decimal(0), Decimal(0), Decimal(0)]  # Apr, May, Jun
+        q3 = [Decimal(0), Decimal(0), Decimal(0)]  # Jul, Aug, Sep
+        q4 = [Decimal(0), Decimal(0), Decimal(0)]  # Oct, Nov, Dec
+        
+        # Populate with actual data
+        for date, payment in expenses:
+            if date and payment:
+                month = date.month - 1  # 0-indexed
+                quarter_idx = month // 3
+                month_in_quarter = month % 3
+                
+                if quarter_idx == 0:
+                    q1[month_in_quarter] += Decimal(str(payment))
+                elif quarter_idx == 1:
+                    q2[month_in_quarter] += Decimal(str(payment))
+                elif quarter_idx == 2:
+                    q3[month_in_quarter] += Decimal(str(payment))
+                elif quarter_idx == 3:
+                    q4[month_in_quarter] += Decimal(str(payment))
+        
+        # Convert to floats for JSON serialization
+        expense_data.append({
+            'name': f"({cat['code']}) {cat['name']}",
+            'color': cat['color'],
+            'q1': [float(x) for x in q1],
+            'q2': [float(x) for x in q2],
+            'q3': [float(x) for x in q3],
+            'q4': [float(x) for x in q4]
+        })
+    
+    # Convert to JSON for JavaScript
+    expense_json = json.dumps(expense_data)
+    
+    return render(request, 'reports/expenses_report.html', {
+        'report_data': expense_data,
+        'expense_json': expense_json
+    })
 
 
 def mooe_report(request):

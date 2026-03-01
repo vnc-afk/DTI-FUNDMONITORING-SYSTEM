@@ -336,10 +336,14 @@ body {
 /* Description column - flexible width */
 .table-namespace tbody td:nth-child(2) { min-width: 120px; }
 
+/* TIN column - auto fit */
+.table-namespace tbody td:nth-child(2) {
+  width: auto;
+}
+
 /* Check No, Debit, Credit, Balance, Status columns - no wrap */
 .table-namespace tbody td:nth-child(3),  /* Check No */
 .table-namespace tbody td:nth-child(4),  /* Debit */
-.table-namespace tbody td:nth-child(5),  /* Credit */
 .table-namespace tbody td:nth-child(6),  /* Balance */
 .table-namespace tbody td:nth-child(7)   /* Status */
 {
@@ -358,6 +362,19 @@ body {
 
 .table-namespace .desc-cell .desc-main { font-weight: 500; color: var(--text); }
 .table-namespace .desc-cell .desc-cat  { font-size: 0.7rem; color: var(--text-3); margin-top: 2px; }
+
+.table-namespace .desc-main.desc-wrap {
+  display: inline-block;
+  max-width: 220px;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  font-size: 0.75rem;
+}
 
 .table-namespace .mono {
   font-family: 'DM Mono', monospace;
@@ -512,4 +529,197 @@ body {
   body { padding: 16px; }
   .table-namespace .summary-row { grid-template-columns: 1fr; }
   .table-namespace .page-header { flex-direction: column; }
+}
+
+/* ── EXPANDABLE ROW STYLES ── */
+.expandable-row {
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.expandable-row:hover {
+  background-color: var(--surface-2, #f8f9fb);
+}
+
+.expandable-row.expanded {
+  background-color: var(--accent-soft, #eff6ff);
+}
+
+.expand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--text-2, #6b7280);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.18s ease;
+}
+
+.expandable-row:hover .expand-icon {
+  color: var(--accent, #2563eb);
+}
+
+.expandable-row.expanded .expand-icon {
+  transform: rotate(180deg);
+  color: var(--accent, #2563eb);
+}
+
+/* ── Detail Row — use max-height animation ── */
+.detail-row {
+  background-color: var(--surface-2, #f8f9fb);
+}
+
+.detail-row td {
+  padding: 0 !important;
+  border: none;
+}
+
+/* Inner wrapper does the actual animation */
+.detail-inner {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease;
+  padding: 0 16px;
+  border-top: 0px solid var(--border, #e8eaef);
+  border-bottom: 0px solid var(--border, #e8eaef);
+}
+
+/* Open state */
+.detail-row.open .detail-inner {
+  max-height: 1500px;
+  opacity: 1;
+  padding: 16px;
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+}
+
+/* ── Detail Content Grid ── */
+.detail-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+/* ── Detail Section Cards ── */
+.detail-section {
+  background-color: var(--surface, #ffffff);
+  border: 1.5px solid var(--border, #e8eaef);
+  border-radius: var(--radius-sm, 8px);
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.detail-section:hover {
+  border-color: var(--accent-mid, #bfdbfe);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+
+.detail-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text, #111827);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent, #2563eb);
+  font-family: 'Syne', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-section h4 .bi {
+  font-size: 0.85rem;
+  color: var(--accent, #2563eb);
+}
+
+/* ── Detail Grid ── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+/* ── Detail Item ── */
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 0.65rem;
+  color: var(--text-2, #6b7280);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detail-value {
+  font-size: 0.8rem;
+  color: var(--text, #111827);
+  font-weight: 500;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.detail-value.empty {
+  color: var(--text-3, #9ca3af);
+  font-weight: 400;
+}
+
+/* Currency values */
+.detail-value.currency {
+  font-family: 'DM Mono', monospace;
+  color: var(--debit, #dc2626);
+  font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .detail-content {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-content {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detail-row.open .detail-inner {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-section {
+    padding: 10px;
+  }
+
+  .detail-section h4 {
+    font-size: 0.65rem;
+    margin-bottom: 8px;
+  }
+
+  .detail-label {
+    font-size: 0.6rem;
+  }
+
+  .detail-value {
+    font-size: 0.75rem;
+  }
 }

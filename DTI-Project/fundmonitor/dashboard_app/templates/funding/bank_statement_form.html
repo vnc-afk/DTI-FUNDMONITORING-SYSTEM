@@ -135,7 +135,11 @@
                                 {{ form.balance }}
                             </div>
                             {{ form.balance.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Running account balance</div>
+                            {% if is_first_transaction %}
+                            <div class="form-hint"><i class="bi bi-info-circle"></i> Enter opening balance for first transaction</div>
+                            {% else %}
+                            <div class="form-hint"><i class="bi bi-info-circle"></i> Auto-calculated: Previous Balance + Credit - Debit</div>
+                            {% endif %}
                         </div>
 
                     </div>
@@ -186,4 +190,37 @@
 
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debitInput = document.querySelector('input[name="debit"]');
+            const creditInput = document.querySelector('input[name="credit"]');
+            const balanceInput = document.querySelector('input[name="balance"]');
+            
+            // Get context variables from Django template
+            const isFirstTransaction = {{ is_first_transaction|lower }};
+            const previousBalance = parseFloat({{ previous_balance }}) || 0;
+
+            // Function to calculate balance
+            function calculateBalance() {
+                const debit = parseFloat(debitInput.value) || 0;
+                const credit = parseFloat(creditInput.value) || 0;
+                
+                // Calculate: Previous Balance + Credit - Debit
+                const newBalance = previousBalance + credit - debit;
+                
+                // Update balance field
+                balanceInput.value = newBalance.toFixed(2);
+            }
+
+            // For subsequent transactions, add event listeners to auto-calculate
+            if (!isFirstTransaction && debitInput && creditInput && balanceInput) {
+                // Set initial balance to previous balance
+                balanceInput.value = previousBalance.toFixed(2);
+                
+                // Add event listeners for real-time calculation
+                debitInput.addEventListener('input', calculateBalance);
+                creditInput.addEventListener('input', calculateBalance);
+            }
+        });
+    </script>
 {% endblock %}

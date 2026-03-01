@@ -190,7 +190,7 @@
 
                         <div class="col-md-4">
                             <label class="form-label">
-                                <i class="bi bi-arrow-up-circle" style="color:#dc2626;"></i>
+                                <i class="bi bi-receipt"></i>
                                 Payments
                             </label>
                             <div class="input-group-custom">
@@ -199,29 +199,6 @@
                             </div>
                             {{ form.payments.errors }}
                             <div class="form-hint"><i class="bi bi-info-circle"></i> Payment amount</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                <i class="bi bi-arrow-down-circle" style="color:#16a34a;"></i>
-                                Downloads
-                            </label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.downloads }}
-                            </div>
-                            {{ form.downloads.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Download amount</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                <i class="bi bi-receipt"></i>
-                                DV No.
-                            </label>
-                            {{ form.dv_number }}
-                            {{ form.dv_number.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Disbursement Voucher number</div>
                         </div>
 
                     </div>
@@ -235,7 +212,7 @@
                     </div>
                     <div class="row g-3">
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">
                                 <i class="bi bi-upc"></i>
                                 Cheque No.
@@ -245,7 +222,7 @@
                             <div class="form-hint"><i class="bi bi-info-circle"></i> Cheque number</div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">
                                 <i class="bi bi-calendar3"></i>
                                 Cleared Date
@@ -253,16 +230,6 @@
                             {{ form.cleared_date }}
                             {{ form.cleared_date.errors }}
                             <div class="form-hint"><i class="bi bi-info-circle"></i> Date cheque was cleared</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                <i class="bi bi-flag"></i>
-                                Cheque Status <span class="required">*</span>
-                            </label>
-                            {{ form.cheque_status }}
-                            {{ form.cheque_status.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Current cheque status</div>
                         </div>
 
                     </div>
@@ -313,7 +280,7 @@
                 <div class="form-section">
                     <div class="form-section-title">
                         <i class="bi bi-percent" style="color:var(--accent);"></i>
-                        Tax Breakdown (Set 1)
+                        Manual Tax Entry
                     </div>
                     <div class="row g-3">
 
@@ -378,80 +345,6 @@
                                 {{ form.prof_fee_10_percent }}
                             </div>
                             {{ form.prof_fee_10_percent.errors }}
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Section: Tax Breakdown (Second Set) -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="bi bi-percent" style="color:var(--accent);"></i>
-                        Tax Breakdown (Set 2)
-                    </div>
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-                            <label class="form-label">Goods (5%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.goods_5_percent_2 }}
-                            </div>
-                            {{ form.goods_5_percent_2.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Services (5%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.services_5_percent_2 }}
-                            </div>
-                            {{ form.services_5_percent_2.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Goods & Services (1%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.goods_services_1_percent }}
-                            </div>
-                            {{ form.goods_services_1_percent.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Goods (1%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.goods_1_percent_2 }}
-                            </div>
-                            {{ form.goods_1_percent_2.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Services (2%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.services_2_percent_2 }}
-                            </div>
-                            {{ form.services_2_percent_2.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Rental (5%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.rental_5_percent_2 }}
-                            </div>
-                            {{ form.rental_5_percent_2.errors }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Prof. Fee (10%)</label>
-                            <div class="input-group-custom">
-                                <span class="input-prefix">₱</span>
-                                {{ form.prof_fee_10_percent_2 }}
-                            </div>
-                            {{ form.prof_fee_10_percent_2.errors }}
                         </div>
 
                     </div>

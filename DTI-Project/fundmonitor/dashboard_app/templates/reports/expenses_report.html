@@ -54,7 +54,7 @@
         <tbody id="table-body"></tbody>
         <tfoot id="table-foot"></tfoot>
       </table>
-      <div class="no-results" id="no-results">No matching categories found.</div>
+      <div class="no-results" id="no-results">No matching objects found.</div>
     </div>
 
     <!-- MONTHLY BREAKDOWN ACCORDION -->
@@ -65,5 +65,9 @@
   {% endblock %}
 
   {% block scripts %}
+  <script>
+    // Load expense data from Django view
+    const EXPENSES = {{ expense_json|safe }};
+  </script>
   <script src="{% static 'dashboard_app/js/expenses.js' %}"></script>
   {% endblock %}

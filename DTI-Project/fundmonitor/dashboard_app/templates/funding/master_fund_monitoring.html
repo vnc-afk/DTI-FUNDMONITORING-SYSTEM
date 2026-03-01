@@ -28,11 +28,6 @@
       <div class="summary-card-sub">{{ record_count }} records</div>
     </div>
     <div class="summary-card">
-      <div class="summary-card-label">Total Downloads</div>
-      <div class="summary-card-value credit">₱ {{ total_downloads|default:"0.00"|floatformat:2 }}</div>
-      <div class="summary-card-sub">{{ record_count }} records</div>
-    </div>
-    <div class="summary-card">
       <div class="summary-card-label">Records Count</div>
       <div class="summary-card-value balance">{{ record_count }}</div>
       <div class="summary-card-sub">Total entries</div>
@@ -86,59 +81,50 @@
       <table id="fundTable">
         <thead>
           <tr>
-            <th data-col="0">Division</th>
-            <th data-col="1">Fund Source</th>
-            <th data-col="2">MOOE</th>
-            <th data-col="3">NC</th>
-            <th data-col="4" class="sorted-asc">
+            <th data-col="0" class="sorted-asc">
               Date <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
             </th>
-            <th data-col="5">Payee</th>
-            <th data-col="6">Particulars</th>
-            <th data-col="7">TIN</th>
-            <th data-col="8">Tax Type</th>
-            <th data-col="9">Purchase Type</th>
-            <th data-col="10" class="col-r">Payments</th>
-            <th data-col="11">DV No.</th>
-            <th data-col="12">Cheque No.</th>
-            <th data-col="13">Status</th>
+            <th data-col="1">Fund Source</th>
+            <th data-col="2">Payee</th>
+            <th data-col="3">Particulars</th>
+            <th data-col="4" class="col-r">Payment</th>
+            <th data-col="5">Cheque No.</th>
+            <th data-col="6">Cheque Status</th>
             <th>Actions</th>
           </tr>
         </thead>
 
         <tbody id="tableBody">
           {% for record in records %}
-          <tr data-status="{% if record.cheque_status == 'Cleared' %}cleared{% elif record.cheque_status == 'Pending' %}pending{% else %}bounced{% endif %}">
-            <td>{{ record.division }}</td>
-            <td>{{ record.fund_source }}</td>
-            <td>{{ record.mooe }}</td>
-            <td>{{ record.nc }}</td>
+          <!-- Main Row (Expandable) -->
+          <tr class="expandable-row" data-id="{{ record.pk }}" data-status="{% if record.cheque_status == 'Cleared' %}cleared{% elif record.cheque_status == 'Pending' %}pending{% else %}bounced{% endif %}">
             <td>
-              {% if record.date %}
-              <div class="date-main">{{ record.date|date:"M d, Y" }}</div>
-              <div class="date-sub">{{ record.date|date:"l" }}</div>
-              {% else %}
-              <div class="date-main">—</div>
-              {% endif %}
+              <span class="expand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+              <div>
+                {% if record.date %}
+                <div class="date-main">{{ record.date|date:"M d, Y" }}</div>
+                <div class="date-sub">{{ record.date|date:"l" }}</div>
+                {% else %}
+                <div class="date-main">—</div>
+                {% endif %}
+              </div>
             </td>
+            <td>{{ record.fund_source }}</td>
             <td class="desc-cell">
               <div class="desc-main">{{ record.payee }}</div>
-              <div class="desc-cat">Payee</div>
-            </td>
-            <td class="desc-cell">
-              <div class="desc-main">{{ record.particulars|truncatewords:5 }}</div>
             </td>
             <td>
-              <span class="mono">{{ record.tin|default:"—" }}</span>
+              <span class="desc-main desc-wrap">{{ record.particulars }}</span>
             </td>
-            <td>{{ record.tax_type|default:"—" }}</td>
-            <td>{{ record.purchase_type|default:"—" }}</td>
             <td class="col-r">
               <span class="amount {% if record.payments %}debit{% else %}empty{% endif %}">
                 {% if record.payments and record.payments > 0 %}₱ {{ record.payments|floatformat:2 }}{% else %}—{% endif %}
               </span>
             </td>
-            <td><span class="mono">{{ record.dv_number|default:"—" }}</span></td>
             <td><span class="mono">{{ record.cheque_number|default:"—" }}</span></td>
             <td>
               {% if record.cheque_status == 'Cleared' %}
@@ -146,7 +132,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  {{ record.cheque_status }}
+                  Cleared
                 </span>
               {% elif record.cheque_status == 'Pending' %}
                 <span class="badge badge-process">
@@ -154,7 +140,7 @@
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  {{ record.cheque_status }}
+                  Pending
                 </span>
               {% else %}
                 <span class="badge badge-failed">
@@ -163,7 +149,7 @@
                     <line x1="15" y1="9" x2="9" y2="15"/>
                     <line x1="9"  y1="9" x2="15" y2="15"/>
                   </svg>
-                  {{ record.cheque_status }}
+                  Bounced
                 </span>
               {% endif %}
             </td>
@@ -186,17 +172,196 @@
               </div>
             </td>
           </tr>
+
+          <!-- Detail Row (Hidden by default) -->
+          <tr class="detail-row" data-id="{{ record.pk }}">
+            <td colspan="8">
+              <div class="detail-inner">
+                <div class="detail-content">
+
+                  <!-- Transaction Details Section -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-receipt"></i> Transaction Details</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">Division</div>
+                        <div class="detail-value {% if not record.division %}empty{% endif %}">
+                          {{ record.division|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">MOOE</div>
+                        <div class="detail-value {% if not record.mooe %}empty{% endif %}">
+                          {{ record.mooe|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Negosyo Center</div>
+                        <div class="detail-value {% if not record.nc %}empty{% endif %}">
+                          {{ record.nc|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Classification</div>
+                        <div class="detail-value {% if not record.expense_classification %}empty{% endif %}">
+                          {{ record.expense_classification|default:"—" }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tax Information Section -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-percent"></i> Tax Information</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">TIN</div>
+                        <div class="detail-value {% if not record.tin %}empty{% endif %}">
+                          {{ record.tin|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Tax Type</div>
+                        <div class="detail-value {% if not record.tax_type %}empty{% endif %}">
+                          {{ record.tax_type|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Purchase Type</div>
+                        <div class="detail-value {% if not record.purchase_type %}empty{% endif %}">
+                          {{ record.purchase_type|default:"—" }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Account & Staff Section -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-person-circle"></i> Account & Responsible</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">Account Title</div>
+                        <div class="detail-value {% if not record.account_title %}empty{% endif %}">
+                          {{ record.account_title|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Responsible Staff</div>
+                        <div class="detail-value {% if not record.staff %}empty{% endif %}">
+                          {% if record.staff %}{{ record.staff.first_name }} {{ record.staff.last_name }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tax Breakdown Section (First Set) -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-graph-up"></i> Tax Breakdown (Set 1)</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">Goods 5%</div>
+                        <div class="detail-value currency {% if not record.goods_5_percent %}empty{% endif %}">
+                          {% if record.goods_5_percent and record.goods_5_percent > 0 %}₱ {{ record.goods_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Services 5%</div>
+                        <div class="detail-value currency {% if not record.services_5_percent %}empty{% endif %}">
+                          {% if record.services_5_percent and record.services_5_percent > 0 %}₱ {{ record.services_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Goods/Services 3%</div>
+                        <div class="detail-value currency {% if not record.goods_services_3_percent %}empty{% endif %}">
+                          {% if record.goods_services_3_percent and record.goods_services_3_percent > 0 %}₱ {{ record.goods_services_3_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Goods 1%</div>
+                        <div class="detail-value currency {% if not record.goods_1_percent %}empty{% endif %}">
+                          {% if record.goods_1_percent and record.goods_1_percent > 0 %}₱ {{ record.goods_1_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Services 2%</div>
+                        <div class="detail-value currency {% if not record.services_2_percent %}empty{% endif %}">
+                          {% if record.services_2_percent and record.services_2_percent > 0 %}₱ {{ record.services_2_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Rental 5%</div>
+                        <div class="detail-value currency {% if not record.rental_5_percent %}empty{% endif %}">
+                          {% if record.rental_5_percent and record.rental_5_percent > 0 %}₱ {{ record.rental_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Prof. Fee 10%</div>
+                        <div class="detail-value currency {% if not record.prof_fee_10_percent %}empty{% endif %}">
+                          {% if record.prof_fee_10_percent and record.prof_fee_10_percent > 0 %}₱ {{ record.prof_fee_10_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tax Breakdown Section (Second Set) -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-graph-down"></i> Tax Breakdown (Set 2)</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">Goods 5% (2)</div>
+                        <div class="detail-value currency {% if not record.goods_5_percent_2 %}empty{% endif %}">
+                          {% if record.goods_5_percent_2 and record.goods_5_percent_2 > 0 %}₱ {{ record.goods_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Services 5% (2)</div>
+                        <div class="detail-value currency {% if not record.services_5_percent_2 %}empty{% endif %}">
+                          {% if record.services_5_percent_2 and record.services_5_percent_2 > 0 %}₱ {{ record.services_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Goods/Services 1%</div>
+                        <div class="detail-value currency {% if not record.goods_services_1_percent %}empty{% endif %}">
+                          {% if record.goods_services_1_percent and record.goods_services_1_percent > 0 %}₱ {{ record.goods_services_1_percent|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Goods 1% (2)</div>
+                        <div class="detail-value currency {% if not record.goods_1_percent_2 %}empty{% endif %}">
+                          {% if record.goods_1_percent_2 and record.goods_1_percent_2 > 0 %}₱ {{ record.goods_1_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Services 2% (2)</div>
+                        <div class="detail-value currency {% if not record.services_2_percent_2 %}empty{% endif %}">
+                          {% if record.services_2_percent_2 and record.services_2_percent_2 > 0 %}₱ {{ record.services_2_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Rental 5% (2)</div>
+                        <div class="detail-value currency {% if not record.rental_5_percent_2 %}empty{% endif %}">
+                          {% if record.rental_5_percent_2 and record.rental_5_percent_2 > 0 %}₱ {{ record.rental_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </td>
+          </tr>
+
           {% empty %}
           <tr>
-            <td colspan="15" style="text-align:center; padding: 32px; color: var(--text-3);">No fund monitoring records available.</td>
+            <td colspan="8" style="text-align:center; padding: 32px; color: var(--text-3);">No fund monitoring records available.</td>
           </tr>
           {% endfor %}
 
         <tfoot>
           <tr>
-            <td colspan="10">Totals ({{ record_count }} records)</td>
+            <td colspan="4">Totals ({{ record_count }} records)</td>
             <td class="col-r"><span class="amount debit">₱ {{ total_payments|default:"0.00"|floatformat:2 }}</span></td>
-            <td colspan="4"></td>
+            <td colspan="3"></td>
           </tr>
         </tfoot>
       </table>

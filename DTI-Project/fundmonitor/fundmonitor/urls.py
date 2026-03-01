@@ -37,6 +37,10 @@ urlpatterns = [
     path('fund_sources/add/', views.fund_source_create, name='fund_source_add'),
     path('fund_sources/edit/<int:pk>/', views.fund_source_update, name='fund_source_edit'),
     path('fund_sources/delete/<int:pk>/', views.fund_source_delete, name='fund_source_delete'),
+    path('fund_sources/<int:pk>/', views.fund_source_detail, name='fund_source_detail'),
+    path('fund_sources/<int:fund_id>/breakdown/add/', views.fund_source_breakdown_add, name='fund_source_breakdown_add'),
+    path('fund_sources/breakdown/<int:pk>/edit/', views.fund_source_breakdown_edit, name='fund_source_breakdown_edit'),
+    path('fund_sources/breakdown/<int:pk>/delete/', views.fund_source_breakdown_delete, name='fund_source_breakdown_delete'),
     
     path('master_fund_monitoring/', views.master_fund_monitoring_list, name='master_fund_monitoring_list'),
     path('master_fund_monitoring/add/', views.master_fund_monitoring_create, name='master_fund_monitoring_add'),

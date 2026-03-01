@@ -23,18 +23,18 @@
   ══════════════════════════════════ -->
   <div class="summary-row">
     <div class="summary-card">
-      <div class="summary-card-label">Total Debits</div>
-      <div class="summary-card-value debit">₱ {% load humanize %}{{ total_debits|default:"0.00"|floatformat:2 }}</div>
-      <div class="summary-card-sub">{{ statement_count }} transaction{{ statement_count|pluralize }}</div>
+      <div class="summary-card-label">Current Debit</div>
+      <div class="summary-card-value debit">₱ {{ current_debit|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-sub">Latest transaction</div>
     </div>
     <div class="summary-card">
-      <div class="summary-card-label">Total Credits</div>
-      <div class="summary-card-value credit">₱ {{ total_credits|default:"0.00"|floatformat:2 }}</div>
-      <div class="summary-card-sub">{{ statement_count }} transaction{{ statement_count|pluralize }}</div>
+      <div class="summary-card-label">Current Credit</div>
+      <div class="summary-card-value credit">₱ {{ current_credit|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-sub">Latest transaction</div>
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Current Balance</div>
-      <div class="summary-card-value balance">₱ {% if statements %}{{ statements.0.balance|floatformat:2 }}{% else %}0.00{% endif %}</div>
+      <div class="summary-card-value balance">₱ {{ current_balance|default:"0.00"|floatformat:2 }}</div>
       <div class="summary-card-sub">As of today</div>
     </div>
   </div>

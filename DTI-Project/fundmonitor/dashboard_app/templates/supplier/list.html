@@ -121,21 +121,11 @@
             <td>
               <span class="badge {% if supplier.vat_status == 'V' %}badge-cleared{% elif supplier.vat_status == 'NV' %}badge-process{% else %}badge-failed{% endif %}">
                 {% if supplier.vat_status == 'V' %}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
+                  
                 {% elif supplier.vat_status == 'NV' %}
 
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                  </svg>
                 {% else %}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9"  y1="9" x2="15" y2="15"/>
-                  </svg>
+
                 {% endif %}
                 {{ supplier.vat_status|default:"Unknown" }}
               </span>

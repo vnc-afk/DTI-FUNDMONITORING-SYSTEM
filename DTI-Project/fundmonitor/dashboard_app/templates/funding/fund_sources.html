@@ -76,10 +76,10 @@
       <table id="fundTable">
         <thead>
           <tr>
-            <th data-col="0" class="sorted-asc">
+            <th data-col="0" class="sorted-asc" >
               Fund Source <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
             </th>
-            <th data-col="1" class="col-r">
+            <th data-col="1" class="col-r" >
               Annual Budget <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
             </th>
             <th>Actions</th>
@@ -97,13 +97,22 @@
             </td>
             <td>
               <div class="actions">
-                <a href="{% url 'fund_source_edit' fund.id %}" class="act-btn act-edit">
+                {% if "MOOE" in fund.name or "mooe" in fund.name|lower %}
+                <a href="{% url 'fund_source_detail' fund.id %}" class="act-btn act-breakdown" title="View breakdown">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3h18v18H3z"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 3v18"/>
+                  </svg>
+                </a>
+                {% endif %}
+                <a href="{% url 'fund_source_edit' fund.id %}" class="act-btn act-edit" title="Edit">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </a>
-                <a href="{% url 'fund_source_delete' fund.id %}" class="act-btn act-delete">
+                <a href="{% url 'fund_source_delete' fund.id %}" class="act-btn act-delete" title="Delete">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
@@ -157,6 +166,55 @@
 
 </div><!-- /.container -->
 </div><!-- /.table-namespace -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .act-breakdown {
+    color: var(--primary);
+  }
+
+  .act-breakdown:hover {
+    background: rgba(52, 152, 219, 0.1);
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .act-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .act-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .act-edit {
+    color: var(--warning, #f39c12);
+  }
+
+  .act-edit:hover {
+    background: rgba(243, 156, 18, 0.1);
+  }
+
+  .act-delete {
+    color: var(--danger);
+  }
+
+  .act-delete:hover {
+    background: rgba(231, 76, 60, 0.1);
+  }
+</style>
 {% endblock %}
 
 {% block scripts %}

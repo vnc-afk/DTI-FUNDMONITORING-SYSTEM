@@ -46,6 +46,45 @@ document.addEventListener('DOMContentLoaded', () => {
   if (statusFilter) statusFilter.addEventListener('change', filterTable);
   if (vatFilter) vatFilter.addEventListener('change', filterTable);
 
+  /* ── Expandable Rows ── */
+  const expandableRows = document.querySelectorAll('tr.expandable-row');
+  
+  expandableRows.forEach(expandRow => {
+    expandRow.addEventListener('click', function(e) {
+      // Don't expand if clicking action buttons
+      if (e.target.closest('.actions') || e.target.closest('.act-btn')) {
+        return;
+      }
+
+      const recordId = this.dataset.id;
+      const detailRow = document.querySelector(`tr.detail-row[data-id="${recordId}"]`);
+      
+      if (!detailRow) return;
+
+      const isOpen = detailRow.classList.contains('open');
+      
+      // Close all other detail rows
+      document.querySelectorAll('tr.detail-row.open').forEach(row => {
+        if (row.dataset.id !== recordId) {
+          row.classList.remove('open');
+          const correspondingExpandRow = document.querySelector(`tr.expandable-row[data-id="${row.dataset.id}"]`);
+          if (correspondingExpandRow) {
+            correspondingExpandRow.classList.remove('expanded');
+          }
+        }
+      });
+      
+      // Toggle current detail row
+      if (isOpen) {
+        detailRow.classList.remove('open');
+        this.classList.remove('expanded');
+      } else {
+        detailRow.classList.add('open');
+        this.classList.add('expanded');
+      }
+    });
+  });
+
   /* ── Column Sort ── */
   document.querySelectorAll('thead th[data-col]').forEach(th => {
     th.addEventListener('click', () => {

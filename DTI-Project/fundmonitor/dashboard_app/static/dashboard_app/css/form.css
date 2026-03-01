@@ -123,6 +123,18 @@ body {
     padding-right: 36px; cursor: pointer;
 }
 
+/* Animation for error appearance */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Input prefix */
 .form-namespace .input-group-custom { position: relative; }
 .form-namespace .has-prefix      { padding-left: 36px !important; }
@@ -146,16 +158,102 @@ body {
     font-size: 0.72rem; color: var(--text-secondary);
     margin-top: 5px; display: flex; align-items: center; gap: 4px;
 }
+
+/* Invalid field styling */
+.form-namespace .errorlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.form-namespace .errorlist li {
+    font-size: 0.78rem;
+    color: #991b1b;
+    padding: 8px 12px;
+    margin-top: 6px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fef0f0 100%);
+    border-left: 3px solid #dc2626;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(220,38,38,0.1);
+    animation: slideInLeft 0.25s ease-out;
+}
+
+.form-namespace .errorlist li::before {
+    content: '⚠';
+    font-weight: bold;
+    color: #ef4444;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 .form-namespace .form-error {
-    font-size: 0.72rem; color: #ef4444;
-    margin-top: 5px; display: flex; align-items: center; gap: 4px;
+    font-size: 0.85rem; 
+    margin-bottom: 16px; 
+    padding: 12px 16px; 
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1.5px solid #fca5a5;
+    color: #991b1b;
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.15);
+    animation: slideDown 0.3s ease-out;
+}
+
+.form-namespace .form-error i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Field error messages */
+.form-namespace .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0 0;
+}
+
+.form-namespace .errorlist li {
+    font-size: 0.8rem;
+    color: #991b1b;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: #fef2f2;
+    border-left: 3px solid #ef4444;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.form-namespace .errorlist li::before {
+    content: '⚠';
+    font-weight: bold;
+    color: #dc2626;
+    flex-shrink: 0;
 }
 
 /* Validation */
 .form-namespace .form-control.is-valid   { border-color: #16a34a; }
-.form-namespace .form-control.is-invalid { border-color: #ef4444; }
+.form-namespace .form-control.is-invalid { border-color: #ef4444; background-color: #fff5f5; }
 .form-namespace .form-control.is-valid:focus   { box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
-.form-namespace .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+.form-namespace .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
 
 /* ── Buttons ── */
 .form-namespace .btn {
@@ -177,4 +275,176 @@ body {
 }
 .form-namespace .btn-outline-secondary:hover {
     background: var(--bg); border-color: #d1d5db; color: var(--text);
-}   
+}
+
+/* ── Tom-Select (Searchable Dropdowns) ── */
+.form-namespace .ts-wrapper {
+    width: 100%;
+}
+
+.form-namespace .ts-control {
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.875rem !important;
+    background: var(--surface) !important;
+    box-shadow: none !important;
+    transition: all var(--transition);
+    min-height: 38px !important;
+}
+
+.form-namespace .ts-control:hover {
+    border-color: #d1d5db !important;
+    background: var(--surface) !important;
+}
+
+.form-namespace .ts-control.focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important;
+    background: #fafcff !important;
+}
+
+.form-namespace .ts-dropdown {
+    border: 1.5px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    margin-top: 0 !important;
+    z-index: 1050 !important;
+    background: var(--surface);
+    top: 100% !important;
+    position: absolute !important;
+}
+
+.form-namespace .ts-dropdown.single {
+    border-radius: 0 0 8px 8px;
+}
+
+.form-namespace .ts-dropdown-content {
+    padding: 8px 0;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.form-namespace .ts-dropdown-content .ts-option {
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: normal;
+}
+
+.form-namespace .ts-dropdown-content .ts-option:hover {
+    background: #f3f4f6;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.form-namespace .ts-dropdown-content .ts-option.selected {
+    background: #dbeafe;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.form-namespace .ts-dropdown-content .ts-option.active {
+    background: #dbeafe;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.form-namespace .ts-dropdown-content .ts-optgroup-header {
+    padding: 10px 14px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f9fafb;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: default;
+}
+
+.form-namespace .ts-input {
+    color: var(--text) !important;
+    font-size: 0.875rem !important;
+    border: none !important;
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    flex: 1 !important;
+}
+
+.form-namespace .ts-input::placeholder {
+    color: #c4c9d4 !important;
+}
+
+.form-namespace .ts-input:focus {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.form-namespace .ts-control > .ts-input {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.form-namespace .ts-item {
+    padding: 4px 8px;
+    margin: 2px 4px 2px 0;
+    background: #dbeafe;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.form-namespace .ts-item.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.form-namespace .ts-item .ts-item-remove {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--transition);
+    padding: 0 4px;
+}
+
+.form-namespace .ts-item .ts-item-remove:hover {
+    opacity: 1;
+}
+
+/* Disabled state */
+.form-namespace .ts-control.disabled {
+    opacity: 0.6;
+    background: #f3f4f6 !important;
+    cursor: not-allowed;
+}
+
+/* Empty state */
+.form-namespace .ts-control.empty .ts-input {
+    color: #c4c9d4 !important;
+}
+
+/* Scrollbar styling */
+.form-namespace .ts-dropdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-namespace .ts-dropdown-content::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+.form-namespace .ts-dropdown-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.form-namespace .ts-dropdown-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

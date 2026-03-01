@@ -32,19 +32,11 @@ class FundSource(models.Model):
         return f"{self.name} ({self.year})"
 
 
-class ExpenseObject(models.Model):
-    code = models.CharField(max_length=50)
-    description = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.code} - {self.description}"
-
 
 class Transaction(models.Model):
     division = models.CharField(max_length=100)
 
     fund_source = models.ForeignKey(FundSource, on_delete=models.CASCADE)
-    expense_object = models.ForeignKey(ExpenseObject, on_delete=models.SET_NULL, null=True)
 
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
     staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True)
