@@ -3,7 +3,7 @@ from dashboard_app.models import District, NegosyoCenter
 
 
 class Command(BaseCommand):
-    help = 'Load Negosyo Centers and Districts from hardcoded data'
+    help = 'Load Negosyo Centers and Districts'
 
     def handle(self, *args, **options):
         """Populate Districts and Negosyo Centers"""

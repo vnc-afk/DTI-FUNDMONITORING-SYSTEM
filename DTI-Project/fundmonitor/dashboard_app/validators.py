@@ -203,9 +203,23 @@ def validate_transaction_amount(value):
 
 
 def validate_string_length(min_length=0, max_length=None):
-    """Factory function for string length validation"""
+    """Factory function for string length validation.
+
+    Skips validation if the value is blank/None; this allows fields that
+    permit empty values (blank=True) to avoid raising errors when left
+    empty, while still enforcing length constraints on non-empty input.
+
+    The returned function is given a descriptive name so that migrations
+    can correctly reference it instead of using the generic ``validator``
+    name which would later cause import errors.
+    """
     def validator(value):
+        if value is None:
+            return
         str_value = str(value).strip()
+        # ignore empty strings to allow blank values through
+        if str_value == "":
+            return
         if len(str_value) < min_length:
             raise ValidationError(
                 f"This field must be at least {min_length} characters long.",
@@ -216,7 +230,29 @@ def validate_string_length(min_length=0, max_length=None):
                 f"This field must be at most {max_length} characters long.",
                 code="max_length"
             )
+    # assign explicit name to avoid collision during migration serialization
+    validator.__name__ = f"validate_string_length_{min_length}_{max_length}"
+    # also register it in the module namespace so Django's serializer
+    # can import it by name when writing migrations
+    globals()[validator.__name__] = validator
     return validator
+
+
+# compatibility shim for migrations
+# some historical migrations serialized the inner function returned by
+# `validate_string_length` and named it ``validator``. When those
+# migrations are executed Django will try to import
+# ``dashboard_app.validators.validator``. Without a top-level symbol
+# this import fails with the ValueError mentioned in the issue.
+#
+# The function below is never used by application logic; it simply
+# exists so that the import succeeds. The real validator applied to
+# fields is created by calling `validate_string_length(...)` during
+# model initialization.
+def validator(value):
+    """Placeholder function for migration compatibility."""
+    # no-op: migrations already contain the serialized validation code
+    return
 
 
 # ============================================================================
@@ -399,7 +435,14 @@ def validate_unique_expense_category(value, exclude_id=None):
 # ============================================================================
 
 def validate_mooe_format(value):
-    """Validates MOOE category format"""
+    """Validates MOOE category format.
+
+    Empty or None values are permitted when the field is optional; other
+    values must match the prescribed pattern.
+    """
+    if value in (None, ''):
+        return
+
     if not re.match(r'^[A-Z0-9\-\.]+$', str(value)):
         raise ValidationError(
             "MOOE code must contain only uppercase letters (A-Z), numbers (0-9), hyphens, and periods. Lowercase letters are not allowed.",

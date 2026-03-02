@@ -261,13 +261,17 @@ class MasterFundMonitoring(models.Model):
         Division,
         on_delete=models.PROTECT,
         related_name='monitoring_records',
-        help_text="Budget division"
+        help_text="Budget division",
+        null=True,
+        blank=True,
     )
     fund_source = models.ForeignKey(
         FundSource,
         on_delete=models.CASCADE,
         related_name='monitoring_records',
-        help_text="Fund source for transaction"
+        help_text="Fund source for transaction",
+        null=True,
+        blank=True,
     )
     mooe = models.CharField(
         max_length=100,
@@ -275,7 +279,9 @@ class MasterFundMonitoring(models.Model):
             validate_string_length(min_length=2, max_length=100),
             validate_mooe_format,
         ],
-        help_text="MOOE category code"
+        help_text="MOOE category code",
+        null=True,
+        blank=True,
     )
     nc = models.ForeignKey(
         'NegosyoCenter',
@@ -692,29 +698,83 @@ class BreakdownCategory(models.Model):
         verbose_name = "Breakdown Category"
         verbose_name_plural = "Breakdown Categories"
 
+
+class TaxTable(models.Model):
+    """Entries for the tax lookup table used throughout the system."""
+
+    purchase_type = models.ForeignKey(
+        'PurchaseType',
+        on_delete=models.CASCADE,
+        related_name='tax_entries',
+        help_text="Purchase type for this tax entry",
+        null=True,
+        blank=False
+    )
+
+    # VAT sub‑categories
+    vat_goods_5 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT goods (5%)"
+    )
+    vat_services_5 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT services (5%)"
+    )
+    vat_goods_services_3 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT goods & services (3%)"
+    )
+    vat_goods_1 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT goods (1%)"
+    )
+    vat_services_2 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT services (2%)"
+    )
+    vat_rental_5 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT rental (5%)"
+    )
+    vat_prof_fee_10 = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Code/description for VAT professional fee (10%)"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['purchase_type__name']
+        verbose_name = "Tax Table Entry"
+        verbose_name_plural = "Tax Table Entries"
+        unique_together = ('purchase_type',)
+
     def __str__(self):
-        return f"({self.code}) {self.name}"
-    
+        return self.purchase_type.name
+
     def clean(self):
-        """Validate breakdown category data"""
-        self.code = self.code.upper().strip()
-        self.name = sanitize_string_input(self.name)
-        validate_no_script_content(self.name)
+        """Validate tax table entry"""
+        from dashboard_app.validators import validate_no_script_content
         
-        if not self.code or len(self.code.strip()) < 1:
-            raise ValidationError({'code': 'Code is required.'})
+        if not self.purchase_type:
+            raise ValidationError({'purchase_type': 'Purchase type is required.'})
         
-        if not self.name or len(self.name.strip()) < 2:
-            raise ValidationError({'name': 'Name must be at least 2 characters.'})
-        
-        # Check uniqueness on update
-        if self.id:
-            duplicate = BreakdownCategory.objects.filter(
-                code__iexact=self.code
-            ).exclude(id=self.id).exists()
-            if duplicate:
-                raise ValidationError({'code': 'A category with this code already exists.'})
-    
+        validate_no_script_content(self.vat_goods_5 or '')
+        validate_no_script_content(self.vat_services_5 or '')
+        validate_no_script_content(self.vat_goods_services_3 or '')
+        validate_no_script_content(self.vat_goods_1 or '')
+        validate_no_script_content(self.vat_services_2 or '')
+        validate_no_script_content(self.vat_rental_5 or '')
+        validate_no_script_content(self.vat_prof_fee_10 or '')
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -829,6 +889,52 @@ class NegosyoCenter(models.Model):
             ).exclude(id=self.id).exists()
             if duplicate:
                 raise ValidationError({'code': 'A NC with this code already exists.'})
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class PurchaseType(models.Model):
+    """Purchase Types for procurement categorization"""
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Purchase type name"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Is this purchase type active?"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Purchase Type"
+        verbose_name_plural = "Purchase Types"
+
+    def __str__(self):
+        return self.name
+    
+    def clean(self):
+        """Validate purchase type data"""
+        self.name = sanitize_string_input(self.name)
+        validate_no_script_content(self.name)
+        
+        if not self.name or len(self.name.strip()) < 2:
+            raise ValidationError({'name': 'Name must be at least 2 characters.'})
+        
+        if len(self.name) > 100:
+            raise ValidationError({'name': 'Name cannot exceed 100 characters.'})
+        
+        # Check uniqueness on update
+        if self.id:
+            duplicate = PurchaseType.objects.filter(
+                name__iexact=self.name
+            ).exclude(id=self.id).exists()
+            if duplicate:
+                raise ValidationError({'name': 'A purchase type with this name already exists.'})
     
     def save(self, *args, **kwargs):
         self.full_clean()

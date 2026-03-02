@@ -42,6 +42,12 @@ urlpatterns = [
     path('fund_sources/breakdown/<int:pk>/edit/', views.fund_source_breakdown_edit, name='fund_source_breakdown_edit'),
     path('fund_sources/breakdown/<int:pk>/delete/', views.fund_source_breakdown_delete, name='fund_source_breakdown_delete'),
     
+    # Tax table CRUD
+    path('tax_table/', views.tax_table_list, name='tax_table'),
+    path('tax_table/add/', views.tax_table_create, name='tax_table_add'),
+    path('tax_table/edit/<int:pk>/', views.tax_table_update, name='tax_table_edit'),
+    path('tax_table/delete/<int:pk>/', views.tax_table_delete, name='tax_table_delete'),
+    
     path('master_fund_monitoring/', views.master_fund_monitoring_list, name='master_fund_monitoring_list'),
     path('master_fund_monitoring/add/', views.master_fund_monitoring_create, name='master_fund_monitoring_add'),
     path('master_fund_monitoring/edit/<int:pk>/', views.master_fund_monitoring_update, name='master_fund_monitoring_edit'),

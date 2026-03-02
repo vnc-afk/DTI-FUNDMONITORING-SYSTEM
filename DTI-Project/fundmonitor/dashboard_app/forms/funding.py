@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
-from dashboard_app.models import FundSource, BankStatement, MasterFundMonitoring, Supplier, ExpenseObject, ExpenseCategory, Staff, Division, FundSourceBreakdown, NegosyoCenter, BreakdownCategory
+from dashboard_app.models import FundSource, BankStatement, MasterFundMonitoring, Supplier, ExpenseObject, ExpenseCategory, Staff, Division, FundSourceBreakdown, NegosyoCenter, BreakdownCategory, TaxTable, PurchaseType
 from dashboard_app.validators import (
     validate_transaction_amount,
     validate_budget_amount,
@@ -31,48 +31,53 @@ class FundSourceForm(forms.ModelForm):
                 'min': '0'
             }),
         }
+
+
+class TaxTableForm(forms.ModelForm):
+    purchase_type = forms.ModelChoiceField(
+        queryset=PurchaseType.objects.filter(is_active=True),
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'required': True
+        }),
+        help_text="Select a purchase type"
+    )
     
-    def clean_name(self):
-        """Validate fund source name"""
-        name = self.cleaned_data.get('name', '').strip()
+    class Meta:
+        model = TaxTable
+        fields = ['purchase_type', 'vat_goods_5', 'vat_services_5', 'vat_goods_services_3', 
+                  'vat_goods_1', 'vat_services_2', 'vat_rental_5', 'vat_prof_fee_10']
+        widgets = {
+            'purchase_type': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'vat_goods_5': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_services_5': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_goods_services_3': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_goods_1': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_services_2': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_rental_5': forms.TextInput(attrs={'class': 'form-control'}),
+            'vat_prof_fee_10': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_purchase_type(self):
+        """Validate purchase type selection"""
+        purchase_type = self.cleaned_data.get('purchase_type')
         
-        if not name:
-            raise ValidationError('Fund source name is required. Please provide a name.', code='required')
-        
-        if len(name) < 2:
-            raise ValidationError('Name must be at least 2 characters. Please enter a longer name.', code='min_length')
-        
-        if len(name) > 100:
-            raise ValidationError('Name cannot exceed 100 characters. Please shorten the name.', code='max_length')
-        
-        try:
-            validate_no_script_content(name)
-        except ValidationError:
-            raise ValidationError('Name contains invalid content. Please remove any special tags or scripts.', code='script_injection')
+        if not purchase_type:
+            raise ValidationError('Purchase type is required.', code='required')
         
         # Check uniqueness
-        queryset = FundSource.objects.filter(name__iexact=name)
+        queryset = TaxTable.objects.filter(purchase_type=purchase_type)
         if self.instance.pk:
             queryset = queryset.exclude(pk=self.instance.pk)
         
         if queryset.exists():
-            raise ValidationError('A fund source with this name already exists. Please use a different name.', code='unique')
+            raise ValidationError('A tax entry for this purchase type already exists.', code='unique')
         
-        return sanitize_string_input(name)
-    
-    def clean_annual_budget(self):
-        """Validate annual budget"""
-        budget = self.cleaned_data.get('annual_budget')
-        
-        if budget is None:
-            raise ValidationError('Annual budget is required. Please enter a valid amount.', code='required')
-        
-        try:
-            validate_budget_amount(budget)
-        except ValidationError as e:
-            raise e
-        
-        return budget
+        return purchase_type
+
 
 
 class BankStatementForm(forms.ModelForm):
@@ -278,43 +283,43 @@ class MasterFundMonitoringForm(forms.ModelForm):
         label='Payee'
     )
     
-    # Make fund_source a dropdown of fund sources
+    # Make fund_source a dropdown of fund sources (optional)
     fund_source = forms.ModelChoiceField(
         queryset=FundSource.objects.all(),
         widget=forms.Select(attrs={
-            'class': 'form-select',
-            'required': True
+            'class': 'form-select'
         }),
-        label='Fund Source'
+        label='Fund Source',
+        required=False
     )
     
-    # Make mooe a dropdown of breakdown categories
+    # Make mooe a dropdown of breakdown categories (optional)
     mooe = forms.ModelChoiceField(
         queryset=BreakdownCategory.objects.filter(is_active=True),
         widget=forms.Select(attrs={
-            'class': 'form-select',
-            'required': True
+            'class': 'form-select'
         }),
         label='MOOE',
-        help_text='Maintenance and Other Operating Expenses'
+        help_text='Maintenance and Other Operating Expenses',
+        required=False
     )
     
-    # Make division a dropdown of divisions
+    # Make division a dropdown of divisions (optional)
     division = forms.ModelChoiceField(
         queryset=Division.objects.filter(is_active=True),
         widget=forms.Select(attrs={
-            'class': 'form-select',
-            'required': True
+            'class': 'form-select'
         }),
-        label='Division'
+        label='Division',
+        required=False
     )
     
-    # Make nc a dropdown of Negosyo Centers
+    # Make nc a dropdown of Negosyo Centers (optional)
     nc = forms.ModelChoiceField(
         queryset=NegosyoCenter.objects.filter(is_active=True).select_related('district'),
-        widget=forms.Select(attrs={'class': 'form-select', 'required': True}),
+        widget=forms.Select(attrs={'class': 'form-select'}),
         label='NC',
-        required=True
+        required=False
     )
     
     # Make account_title a dropdown of expense objects
@@ -376,7 +381,8 @@ class MasterFundMonitoringForm(forms.ModelForm):
             'payments': forms.NumberInput(attrs={
                 'class': 'form-control has-prefix-text',
                 'step': '0.01',
-                'min': '0'
+                'min': '0',
+                'required': True
             }),
             'cheque_number': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -464,11 +470,15 @@ class MasterFundMonitoringForm(forms.ModelForm):
         }
     
     def clean_mooe(self):
-        """Validate and convert MOOE from BreakdownCategory to code"""
+        """Validate and convert MOOE from BreakdownCategory to code
+
+        The field is now optional; return an empty string when missing.
+        """
         mooe = self.cleaned_data.get('mooe')
         
         if not mooe:
-            raise ValidationError('MOOE is required.', code='required')
+            # leave blank/NULL value (model allows null)
+            return None
         
         # If mooe is a BreakdownCategory object, extract its code
         if hasattr(mooe, 'code'):
@@ -511,11 +521,12 @@ class MasterFundMonitoringForm(forms.ModelForm):
         return sanitize_string_input(particulars)
     
     def clean_payments(self):
-        """Validate payments amount"""
+        """Validate payments amount; field is now required and must be positive."""
         payments = self.cleaned_data.get('payments')
         
-        if payments is None or payments == 0 or payments == '':
-            return payments
+        # Required check
+        if payments in (None, ''):
+            raise ValidationError('Payments amount is required.', code='required')
         
         try:
             validate_transaction_amount(payments)
@@ -543,7 +554,11 @@ class MasterFundMonitoringForm(forms.ModelForm):
     
     def clean_cheque_number(self):
         """Validate cheque number"""
-        cheque_number = self.cleaned_data.get('cheque_number', '').strip()
+        cheque_number = self.cleaned_data.get('cheque_number')
+        # normalize None to empty string
+        if not cheque_number:
+            return ''
+        cheque_number = str(cheque_number).strip()
         
         if not cheque_number:
             return ''

@@ -65,6 +65,10 @@
                 <i class="bi bi-wallet2"></i>
                 Fund Sources
             </a>
+            <a href="{% url 'tax_table' %}" class="{% if request.resolver_match.url_name == 'tax_table' or request.resolver_match.url_name == 'tax_table_add' or request.resolver_match.url_name == 'tax_table_edit' %}active{% endif %}">
+                <i class="bi bi-percent"></i>
+                Tax Table
+            </a>
             <a href="{% url 'staff' %}" class="{% if request.resolver_match.url_name == 'staff' %}active{% endif %}">
                 <i class="bi bi-people"></i>
                 Staff List

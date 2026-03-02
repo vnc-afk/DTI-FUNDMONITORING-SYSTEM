@@ -34,12 +34,16 @@ class Supplier(models.Model):
         validators=[
             validate_tin_format,
         ],
-        help_text="Tax Identification Number (###-###-###-###)"
+        help_text="Tax Identification Number (###-###-###-###)",
+        blank=True,
+        null=True,
     )
     vat_status = models.CharField(
         max_length=2,
         choices=CATEGORY_CHOICES,
-        help_text="VAT Registration Status"
+        help_text="VAT Registration Status",
+        blank=True,
+        null=True,
     )
     philgeps_registration = models.CharField(
         max_length=100,
@@ -49,7 +53,9 @@ class Supplier(models.Model):
     )
     address = models.TextField(
         validators=[validate_string_length(min_length=5, max_length=500)],
-        help_text="Complete business address"
+        help_text="Complete business address",
+        blank=True,
+        null=True,
     )
     propprietor = models.CharField(
         max_length=200,
@@ -57,12 +63,16 @@ class Supplier(models.Model):
             validate_string_length(min_length=2, max_length=200),
             validate_alphanumeric_with_spaces,
         ],
-        help_text="Proprietor/Owner name"
+        help_text="Proprietor/Owner name",
+        blank=True,
+        null=True,
     )
     contact_number = models.CharField(
         max_length=20,
         validators=[validate_phone_number],
-        help_text="Philippine phone number format"
+        help_text="Philippine phone number format",
+        blank=True,
+        null=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

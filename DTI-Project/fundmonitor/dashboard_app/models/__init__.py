@@ -1,6 +1,6 @@
 from .staff import Staff, Division
 from .supplier import Supplier
-from .funding import FundSource, BankStatement, MasterFundMonitoring, ExpenseObject, ExpenseCategory, FundSourceBreakdown, District, NegosyoCenter, BreakdownCategory
+from .funding import FundSource, BankStatement, MasterFundMonitoring, ExpenseObject, ExpenseCategory, FundSourceBreakdown, District, NegosyoCenter, BreakdownCategory, TaxTable, PurchaseType
 
 __all__ = [
     'Staff',
@@ -15,4 +15,6 @@ __all__ = [
     'District',
     'NegosyoCenter',
     'BreakdownCategory',
+    'TaxTable',
+    'PurchaseType',
 ]

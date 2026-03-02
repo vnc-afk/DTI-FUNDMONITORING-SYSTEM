@@ -6,7 +6,9 @@ from .funding import (
     fund_source_breakdown_add, fund_source_breakdown_edit, fund_source_breakdown_delete,
     bank_statement_list, bank_statement_create, bank_statement_update, bank_statement_delete,
     master_fund_monitoring_list, master_fund_monitoring_create, master_fund_monitoring_update, master_fund_monitoring_delete,
-    get_supplier_data
+    get_supplier_data,
+    # tax table views
+    tax_table_list, tax_table_create, tax_table_update, tax_table_delete
 )
 from .reports import expense_report, mooe_report, nc_report, fund_report, download_mooe, tin
 
@@ -20,5 +22,7 @@ __all__ = [
     'master_fund_monitoring_list', 'master_fund_monitoring_create', 'master_fund_monitoring_update', 'master_fund_monitoring_delete',
 
     'get_supplier_data',
+    # tax table
+    'tax_table_list', 'tax_table_create', 'tax_table_update', 'tax_table_delete',
     'expense_report', 'mooe_report', 'nc_report', 'fund_report', 'download_mooe', 'tin',
 ]

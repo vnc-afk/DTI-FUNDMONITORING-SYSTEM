@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Staff, Supplier, FundSource, FundSourceBreakdown, BankStatement, MasterFundMonitoring, ExpenseObject, ExpenseCategory, Division, District, NegosyoCenter, BreakdownCategory
+from .models import Staff, Supplier, FundSource, FundSourceBreakdown, BankStatement, MasterFundMonitoring, ExpenseObject, ExpenseCategory, Division, District, NegosyoCenter, BreakdownCategory, TaxTable, PurchaseType
 
 # Register your models here.
 
@@ -28,3 +28,7 @@ admin.site.register(ExpenseCategory)
 # Negosyo Center Management
 admin.site.register(District)
 admin.site.register(NegosyoCenter)
+
+# Purchase Type & Tax Table Management
+admin.site.register(PurchaseType)
+admin.site.register(TaxTable)

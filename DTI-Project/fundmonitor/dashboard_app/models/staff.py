@@ -79,7 +79,9 @@ class Staff(models.Model):
         Division,
         on_delete=models.PROTECT,
         related_name='staff_members',
-        help_text="Select staff division"
+        help_text="Select staff division",
+        null=True,
+        blank=True 
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,6 +1,6 @@
 from .staff import StaffForm
 from .supplier import SupplierForm
-from .funding import FundSourceForm, FundSourceBreakdownForm, BankStatementForm, MasterFundMonitoringForm
+from .funding import FundSourceForm, FundSourceBreakdownForm, BankStatementForm, MasterFundMonitoringForm, TaxTableForm
 
 __all__ = [
     'StaffForm',
@@ -9,4 +9,5 @@ __all__ = [
     'FundSourceBreakdownForm',
     'BankStatementForm',
     'MasterFundMonitoringForm',
+    'TaxTableForm',
 ]

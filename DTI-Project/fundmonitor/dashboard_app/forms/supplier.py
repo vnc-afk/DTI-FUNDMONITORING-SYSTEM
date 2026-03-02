@@ -23,12 +23,10 @@ class SupplierForm(forms.ModelForm):
             'tin': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '###-###-###-###',
-                'required': True,
                 'maxlength': '50'
             }),
             'vat_status': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
+                'class': 'form-select'
             }),
             'philgeps_registration': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -37,18 +35,15 @@ class SupplierForm(forms.ModelForm):
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Complete business address',
-                'required': True
+                'placeholder': 'Complete business address'
             }),
             'propprietor': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Proprietor/Owner name',
-                'required': True
+                'placeholder': 'Proprietor/Owner name'
             }),
             'contact_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Philippine phone number',
-                'required': True,
                 'maxlength': '20'
             }),
         }
@@ -91,10 +86,14 @@ class SupplierForm(forms.ModelForm):
     
     def clean_tin(self):
         """Validate TIN format"""
-        tin = self.cleaned_data.get('tin', '').strip()
+        tin = self.cleaned_data.get('tin')
+        if not tin:
+            # optional now
+            return ''
+        tin = str(tin).strip()
         
         if not tin:
-            raise ValidationError('TIN is required.', code='required')
+            return ''
         
         try:
             validate_tin_format(tin)
@@ -119,7 +118,7 @@ class SupplierForm(forms.ModelForm):
         vat_status = self.cleaned_data.get('vat_status')
         
         if not vat_status:
-            raise ValidationError('VAT status is required.', code='required')
+            return ''
         
         valid_choices = [choice[0] for choice in Supplier.CATEGORY_CHOICES]
         if vat_status not in valid_choices:
@@ -149,10 +148,12 @@ class SupplierForm(forms.ModelForm):
     
     def clean_address(self):
         """Validate address"""
-        address = self.cleaned_data.get('address', '').strip()
-        
+        address = self.cleaned_data.get('address')
         if not address:
-            raise ValidationError('Address is required.', code='required')
+            return ''
+        address = str(address).strip()
+        if not address:
+            return ''
         
         if len(address) < 5:
             raise ValidationError('Address must be at least 5 characters long.', code='min_length')
@@ -169,10 +170,12 @@ class SupplierForm(forms.ModelForm):
     
     def clean_propprietor(self):
         """Validate proprietor name"""
-        proprietor = self.cleaned_data.get('propprietor', '').strip()
-        
+        proprietor = self.cleaned_data.get('propprietor')
         if not proprietor:
-            raise ValidationError('Proprietor/Owner name is required.', code='required')
+            return ''
+        proprietor = str(proprietor).strip()
+        if not proprietor:
+            return ''
         
         if len(proprietor) < 2:
             raise ValidationError('Proprietor name must be at least 2 characters long.', code='min_length')
@@ -197,10 +200,12 @@ class SupplierForm(forms.ModelForm):
     
     def clean_contact_number(self):
         """Validate contact number"""
-        contact = self.cleaned_data.get('contact_number', '').strip()
-        
+        contact = self.cleaned_data.get('contact_number')
         if not contact:
-            raise ValidationError('Contact number is required.', code='required')
+            return ''
+        contact = str(contact).strip()
+        if not contact:
+            return ''
         
         try:
             validate_phone_number(contact)

@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.http import JsonResponse
-from dashboard_app.models import FundSource, BankStatement, MasterFundMonitoring, Supplier, FundSourceBreakdown
-from dashboard_app.forms import FundSourceForm, BankStatementForm, MasterFundMonitoringForm, FundSourceBreakdownForm
+from dashboard_app.models import FundSource, BankStatement, MasterFundMonitoring, Supplier, FundSourceBreakdown, TaxTable
+from dashboard_app.forms import FundSourceForm, BankStatementForm, MasterFundMonitoringForm, FundSourceBreakdownForm, TaxTableForm
 
 
 # Fund Source Views
@@ -23,6 +23,51 @@ def fund_sources_view(request):
         'average_budget': average_budget,
     }
     return render(request, 'funding/fund_sources.html', context)
+
+
+# Tax Table Views
+
+def tax_table_list(request):
+    """List all tax table entries"""
+    entries = TaxTable.objects.all()
+    count = entries.count()
+    context = {
+        'entries': entries,
+        'entry_count': count,
+    }
+    return render(request, 'funding/tax_table.html', context)
+
+
+def tax_table_create(request):
+    """Create new tax table entry"""
+    if request.method == 'POST':
+        form = TaxTableForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tax_table')
+    else:
+        form = TaxTableForm()
+    return render(request, 'funding/tax_form.html', {'form': form})
+
+
+def tax_table_update(request, pk):
+    entry = get_object_or_404(TaxTable, pk=pk)
+    if request.method == 'POST':
+        form = TaxTableForm(request.POST, instance=entry)
+        if form.is_valid():
+            form.save()
+            return redirect('tax_table')
+    else:
+        form = TaxTableForm(instance=entry)
+    return render(request, 'funding/tax_form.html', {'form': form})
+
+
+def tax_table_delete(request, pk):
+    entry = get_object_or_404(TaxTable, pk=pk)
+    if request.method == 'POST':
+        entry.delete()
+        return redirect('tax_table')
+    return render(request, 'funding/tax_confirm_delete.html', {'entry': entry})
 
 
 def fund_source_create(request):
