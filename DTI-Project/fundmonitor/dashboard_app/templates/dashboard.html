@@ -1,60 +1,423 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>Dashboard Overview</h2>
-<div class="row mt-3">
-    <div class="col-md-4">
-        <div class="card bg-primary text-white p-3 mb-3">
-            <h5>Total Annual Budget</h5>
-            <h3>₱ 22,072,979.73</h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-success text-white p-3 mb-3">
-            <h5>Total Disbursement</h5>
-            <h3>₱ 312,316.39</h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-warning text-white p-3 mb-3">
-            <h5>Current Balance</h5>
-            <h3>₱ 21,760,663.34</h3>
-        </div>
-    </div>
-</div>
+{% load static %}
 
-<h4 class="mt-4">Fund Status</h4>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Fund</th>
-            <th>Annual Budget</th>
-            <th>Total Disbursement</th>
-            <th>Current Balance</th>
-            <th>BUR (%)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>MOOE</td>
-            <td>₱ 2,456,570.00</td>
-            <td>₱ 224,423.62</td>
-            <td>₱ 2,232,146.38</td>
-            <td>9.14%</td>
-        </tr>
-        <tr>
-            <td>Negosyo Center</td>
-            <td>₱ 1,480,700.00</td>
-            <td>₱ 29,484.46</td>
-            <td>₱ 1,451,215.54</td>
-            <td>1.99%</td>
-        </tr>
-        <tr>
-            <td>LSP-NSB</td>
-            <td>₱ 2,535,630.00</td>
-            <td>₱ 0.00</td>
-            <td>₱ 2,535,630.00</td>
-            <td>0.00%</td>
-        </tr>
-    </tbody>
-</table>
+{% block title %}Dashboard — DTI Fund Monitoring{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'dashboard_app/css/dashboard.css' %}" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         HEADER
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="dashboard-header">
+        <div>
+            <div class="header-eyebrow">DTI Fund Monitoring System</div>
+            <h1>Financial Dashboard</h1>
+            <p>Analytics overview for fiscal year {{ current_year }}</p>
+        </div>
+        <div class="header-controls">
+            <div class="live-badge">
+                <span class="dot"></span>
+                Live data
+            </div>
+            <button class="btn-print" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         EXECUTIVE SUMMARY
+         ══════════════════════════════════════════════════════════════════ -->
+    <section class="summary-section">
+        <h2 class="section-title">Executive Summary</h2>
+        <div class="metrics-grid">
+
+            <div class="metric-card primary">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-cash-coin"></i></div>
+                    <span class="metric-trend">FY {{ current_year }}</span>
+                </div>
+                <p class="metric-label">Total Payments</p>
+                <h3 class="metric-value">₱{{ total_payments|floatformat:0 }}</h3>
+                <span class="metric-footer">Disbursed this year</span>
+            </div>
+
+            <div class="metric-card success">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+                <p class="metric-label">Cleared Transactions</p>
+                <h3 class="metric-value">₱{{ total_downloads|floatformat:0 }}</h3>
+                <span class="metric-footer">Successfully processed</span>
+            </div>
+
+            <div class="metric-card info">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-receipt"></i></div>
+                </div>
+                <p class="metric-label">Total Transactions</p>
+                <h3 class="metric-value">{{ total_transactions }}</h3>
+                <span class="metric-footer">Records on file</span>
+            </div>
+
+            <div class="metric-card warning">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-safe-fill"></i></div>
+                </div>
+                <p class="metric-label">Fund Sources</p>
+                <h3 class="metric-value">{{ fund_sources_count }}</h3>
+                <span class="metric-footer">Active allocations</span>
+            </div>
+
+            <div class="metric-card secondary">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-shop"></i></div>
+                </div>
+                <p class="metric-label">Suppliers</p>
+                <h3 class="metric-value">{{ suppliers_count }}</h3>
+                <span class="metric-footer">Registered vendors</span>
+            </div>
+
+            <div class="metric-card tertiary">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-people-fill"></i></div>
+                </div>
+                <p class="metric-label">Staff Members</p>
+                <h3 class="metric-value">{{ staff_count }}</h3>
+                <span class="metric-footer">Team personnel</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         FINANCIAL ANALYSIS — CHARTS
+         ══════════════════════════════════════════════════════════════════ -->
+    <section class="charts-section">
+        <h2 class="section-title">Financial Analysis</h2>
+
+        <!-- Monthly Trend — Full width -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <div class="chart-header-text">
+                    <h3>Payment Trend</h3>
+                    <p>Monthly disbursement pattern and cash flow</p>
+                </div>
+                <span class="chart-badge">Jan – Dec {{ current_year }}</span>
+            </div>
+            <div id="monthlyChart" class="chart-plot"></div>
+        </div>
+
+        <!-- Fund & Expense — 2 col -->
+        <div class="charts-grid two-col">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <h3>Fund Allocation</h3>
+                        <p>Distribution across fund sources</p>
+                    </div>
+                </div>
+                <div id="fundChart" class="chart-plot"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <h3>Expense Categories</h3>
+                        <p>Top 10 expense objects</p>
+                    </div>
+                    <span class="chart-badge">Top 10</span>
+                </div>
+                <div id="expenseChart" class="chart-plot"></div>
+            </div>
+        </div>
+
+        <!-- Suppliers, Purchase, Cheque — 3 col -->
+        <div class="charts-grid three-col">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <h3>Top Suppliers</h3>
+                        <p>Highest payment recipients</p>
+                    </div>
+                    <span class="chart-badge">Top 10</span>
+                </div>
+                <div id="supplierChart" class="chart-plot"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <h3>Purchase Types</h3>
+                        <p>Procurement breakdown</p>
+                    </div>
+                </div>
+                <div id="purchaseChart" class="chart-plot"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <h3>Transaction Status</h3>
+                        <p>Cheque and payment status</p>
+                    </div>
+                </div>
+                <div id="chequeChart" class="chart-plot"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         FINANCIAL REPORT
+         ══════════════════════════════════════════════════════════════════ -->
+    <section class="report-section">
+        <h2 class="section-title">Financial Summary Report</h2>
+
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-header-left">
+                    <div class="report-eyebrow">Annual Performance Overview</div>
+                    <h3>Fund Monitoring Summary — FY {{ current_year }}</h3>
+                </div>
+                <span class="report-date">Generated {{ "now"|date:"F d, Y" }}</span>
+            </div>
+
+            <div class="report-content">
+                <div class="report-item">
+                    <label>Total Annual Disbursement</label>
+                    <span class="report-value">₱{{ total_payments|floatformat:2 }}</span>
+                </div>
+                <div class="report-item">
+                    <label>Cleared Amount</label>
+                    <span class="report-value">₱{{ total_downloads|floatformat:2 }}</span>
+                </div>
+                <div class="report-item">
+                    <label>Transaction Count</label>
+                    <span class="report-value">{{ total_transactions }}</span>
+                </div>
+                <div class="report-item">
+                    <label>Active Fund Sources</label>
+                    <span class="report-value">{{ fund_sources_count }}</span>
+                </div>
+                <div class="report-item">
+                    <label>Avg. Transaction Value</label>
+                    {% if total_transactions > 0 %}
+                        <span class="report-value">₱{% widthratio total_payments 1 total_transactions %}</span>
+                    {% else %}
+                        <span class="report-value">₱0.00</span>
+                    {% endif %}
+                </div>
+                <div class="report-item">
+                    <label>Supplier Network</label>
+                    <span class="report-value">{{ suppliers_count }} vendors</span>
+                </div>
+                <div class="report-item">
+                    <label>Staff Involved</label>
+                    <span class="report-value">{{ staff_count }} personnel</span>
+                </div>
+            </div>
+
+            <div class="report-footer">
+                <div class="report-footer-item">
+                    <div class="footer-label">Report Scope</div>
+                    <p>Comprehensive overview of fund monitoring activities for fiscal year {{ current_year }}.</p>
+                </div>
+                <div class="report-footer-item">
+                    <div class="footer-label">Data Quality</div>
+                    <p>All figures are based on verified transaction records in the Fund Monitoring System.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div><!-- /.dashboard-wrapper -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// CHART CONFIGURATION — DARK THEME
+// ══════════════════════════════════════════════════════════════════════════
+
+const C = {
+    teal:    '#3b82f6',
+    blue:    '#3b82f6',
+    amber:   '#f59e0b',
+    rose:    '#f43f5e',
+    violet:  '#8b5cf6',
+    sky:     '#38bdf8',
+    lime:    '#a3e635',
+    orange:  '#fb923c',
+    bg:      'rgba(0,0,0,0)',
+    plotBg:  'rgba(255,255,255,0.02)',
+    grid:    'rgba(255,255,255,0.05)',
+    text:    '#8b90a8',
+    textPri: '#f0f2f8',
+};
+
+const palette = [C.teal, C.blue, C.amber, C.rose, C.violet, C.sky, C.lime, C.orange];
+
+const baseLayout = {
+    paper_bgcolor: C.bg,
+    plot_bgcolor:  C.plotBg,
+    font: {
+        family: '"DM Sans", -apple-system, sans-serif',
+        size: 11,
+        color: C.text,
+    },
+    hovermode: 'closest',
+    margin: { l: 50, r: 20, t: 16, b: 40 },
+    showlegend: false,
+};
+
+const axisStyle = {
+    gridcolor:     C.grid,
+    zerolinecolor: C.grid,
+    tickfont:      { size: 10, color: C.text },
+    showline:      false,
+};
+
+const config = { responsive: true, displayModeBar: false };
+
+// ── 1. Monthly Trend ────────────────────────────────────────────────────
+const monthlyData = {{ monthly_data|safe }};
+const mLabels = Object.keys(monthlyData);
+const mValues = Object.values(monthlyData);
+
+Plotly.newPlot('monthlyChart', [{
+    x: mLabels,
+    y: mValues,
+    type: 'scatter',
+    mode: 'lines+markers',
+    name: 'Monthly Payments',
+    line: { color: C.teal, width: 2.5, shape: 'spline' },
+    marker: { size: 5, color: C.teal, line: { color: '#07080f', width: 1.5 } },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(0,212,170,0.08)',
+    hovertemplate: '<b>%{x}</b><br>₱%{y:,.0f}<extra></extra>',
+}], {
+    ...baseLayout,
+    margin: { l: 60, r: 20, t: 16, b: 40 },
+    xaxis: { ...axisStyle, showgrid: false },
+    yaxis: { ...axisStyle },
+}, config);
+
+// ── 2. Fund Allocation — Donut ──────────────────────────────────────────
+const fundLabels = {{ fund_labels|safe }};
+const fundValues = {{ fund_values|safe }};
+
+Plotly.newPlot('fundChart', [{
+    labels: fundLabels,
+    values: fundValues,
+    type: 'pie',
+    hole: 0.48,
+    marker: { colors: palette, line: { color: '#12141e', width: 2 } },
+    textposition: 'inside',
+    textinfo: 'percent',
+    hovertemplate: '<b>%{label}</b><br>₱%{value:,.0f}<br>%{percent}<extra></extra>',
+}], {
+    ...baseLayout,
+    showlegend: true,
+    legend: {
+        orientation: 'v',
+        x: 1.02, y: 0.5,
+        bgcolor: 'rgba(0,0,0,0)',
+        font: { size: 10, color: C.text },
+    },
+    margin: { l: 10, r: 140, t: 16, b: 16 },
+}, config);
+
+// ── 3. Expense Categories — Horizontal Bar ──────────────────────────────
+const expenseLabels = {{ expense_labels|safe }};
+const expenseValues = {{ expense_values|safe }};
+const expenseColors = {{ expense_colors|safe }};
+
+Plotly.newPlot('expenseChart', [{
+    x: expenseValues,
+    y: expenseLabels,
+    type: 'bar',
+    orientation: 'h',
+    marker: {
+        color: expenseColors.length > 0 ? expenseColors : C.blue,
+        opacity: 0.85,
+    },
+    hovertemplate: '<b>%{y}</b><br>₱%{x:,.0f}<extra></extra>',
+}], {
+    ...baseLayout,
+    margin: { l: 170, r: 20, t: 16, b: 40 },
+    xaxis: { ...axisStyle },
+    yaxis: { ...axisStyle, automargin: true },
+}, config);
+
+// ── 4. Top Suppliers — Horizontal Bar ──────────────────────────────────
+const supplierLabels = {{ supplier_labels|safe }};
+const supplierValues = {{ supplier_values|safe }};
+
+Plotly.newPlot('supplierChart', [{
+    x: supplierValues,
+    y: supplierLabels,
+    type: 'bar',
+    orientation: 'h',
+    marker: { color: C.blue, opacity: 0.85 },
+    hovertemplate: '<b>%{y}</b><br>₱%{x:,.0f}<extra></extra>',
+}], {
+    ...baseLayout,
+    margin: { l: 170, r: 20, t: 16, b: 40 },
+    xaxis: { ...axisStyle },
+    yaxis: { ...axisStyle, automargin: true },
+}, config);
+
+// ── 5. Purchase Types — Pie ─────────────────────────────────────────────
+const purchaseLabels = {{ purchase_labels|safe }};
+const purchaseValues = {{ purchase_values|safe }};
+
+Plotly.newPlot('purchaseChart', [{
+    labels: purchaseLabels,
+    values: purchaseValues,
+    type: 'pie',
+    marker: { colors: palette, line: { color: '#12141e', width: 2 } },
+    textposition: 'inside',
+    textinfo: 'percent',
+    hovertemplate: '<b>%{label}</b><br>₱%{value:,.0f}<extra></extra>',
+}], {
+    ...baseLayout,
+    showlegend: true,
+    legend: {
+        orientation: 'v',
+        x: 1.02, y: 0.5,
+        bgcolor: 'rgba(0,0,0,0)',
+        font: { size: 10, color: C.text },
+    },
+    margin: { l: 10, r: 120, t: 16, b: 16 },
+}, config);
+
+// ── 6. Cheque Status — Bar ──────────────────────────────────────────────
+const chequeLabels = {{ cheque_labels|safe }};
+const chequeCounts = {{ cheque_counts|safe }};
+
+Plotly.newPlot('chequeChart', [{
+    x: chequeLabels,
+    y: chequeCounts,
+    type: 'bar',
+    marker: {
+        color: palette.slice(0, chequeLabels.length),
+        opacity: 0.85,
+    },
+    hovertemplate: '<b>%{x}</b><br>%{y} transactions<extra></extra>',
+}], {
+    ...baseLayout,
+    margin: { l: 50, r: 20, t: 16, b: 50 },
+    xaxis: { ...axisStyle, showgrid: false, automargin: true },
+    yaxis: { ...axisStyle },
+}, config);
+
+// ── Responsive resize ───────────────────────────────────────────────────
+const chartIds = ['monthlyChart','fundChart','expenseChart','supplierChart','purchaseChart','chequeChart'];
+window.addEventListener('resize', () => {
+    chartIds.forEach(id => { try { Plotly.Plots.resize(id); } catch(e) {} });
+});
+</script>
 {% endblock %}

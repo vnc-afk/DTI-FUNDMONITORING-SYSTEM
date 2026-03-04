@@ -1,28 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 :root {
-    /* Colors */
-    --primary: rgb(15, 8, 83);
-    --primary-light: rgb(9, 29, 145);
-    --primary-muted: rgba(40, 54, 255, 0.15);
-    --secondary: rgb(200, 200, 200);
-    --secondary-muted: rgba(235, 235, 235, 0.8);
-    --accent: rgb(0, 102, 255);   
-    --input-focus: rgb(234, 242, 255);
+    /* Modern Dark Theme Colors */
+    --primary: #3b82f6;
+    --primary-light: #60a5fa;
+    --primary-muted: rgba(59, 130, 246, 0.15);
+    --secondary: #8b90a8;
+    --secondary-muted: rgba(139, 144, 168, 0.8);
+    --accent: #3b82f6;   
+    --input-focus: #1c1f2e;
     
-    --text-primary: rgb(40, 40, 40);
-    --text-secondary: rgb(70, 70, 70);
-    --text-muted: rgb(150, 150, 150);
-    --text-light: rgb(170, 170, 170);
-    --text-disabled: rgb(180, 180, 180);
-    --text-lighter: rgb(190, 190, 190);
-    --text-lightest: rgb(210, 210, 210);
-    --required-color: rgb(192, 16, 16);
-    --success-color: rgb(28, 168, 28);
-    --border-color: rgba(200, 200, 200, 0.5);
-    --border-solid: rgba(200, 200, 200, 1);
-    --background-white: white;
-    --background-muted: rgb(188, 193, 197);
+    --text-primary: #f0f2f8;
+    --text-secondary: #8b90a8;
+    --text-muted: #50546a;
+    --text-light: #8b90a8;
+    --text-disabled: #50546a;
+    --text-lighter: #50546a;
+    --text-lightest: #50546a;
+    --required-color: #f43f5e;
+    --success-color: #3b82f6;
+    --border-color: rgba(255, 255, 255, 0.07);
+    --border-solid: rgba(255, 255, 255, 0.13);
+    --background-white: #12141e;
+    --background-muted: #0e1018;
 
     /* Spacing */
     --space-xs: 0.25rem;

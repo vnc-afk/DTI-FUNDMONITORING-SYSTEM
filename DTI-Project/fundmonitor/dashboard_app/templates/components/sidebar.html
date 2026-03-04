@@ -1,0 +1,75 @@
+<!-- SIDEBAR COMPONENT -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+        <div class="badge-dti">
+            <i class="bi bi-building"></i> DTI
+        </div>
+        <h4>Fund Monitoring<br>System</h4>
+        <p>Administrative Operations</p>
+    </div>
+
+    <div class="sidebar-section-label">Main Menu</div>
+    <nav>
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-grid-1x2"></i>
+            Dashboard
+        </a>
+        <a href="{% url 'master_fund_monitoring_list' %}" class="{% if request.resolver_match.url_name == 'master_fund_monitoring_list' %}active{% endif %}">
+            <i class="bi bi-table"></i>
+            Master Fund Monitoring
+        </a>
+        <a href="{% url 'bank_statement_list' %}" class="{% if request.resolver_match.url_name == 'bank_statement_list' %}active{% endif %}">
+            <i class="bi bi-bank"></i>
+            Bank Statements
+        </a>
+    </nav>
+
+    <div class="sidebar-section-label">Data Management</div>
+    <nav>
+        <a href="{% url 'supplier_list' %}" class="{% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
+            <i class="bi bi-person-vcard"></i>
+            TIN / Suppliers
+        </a>
+        <a href="{% url 'fund_sources' %}" class="{% if request.resolver_match.url_name == 'fund_sources' %}active{% endif %}">
+            <i class="bi bi-wallet2"></i>
+            Fund Sources
+        </a>
+        <a href="{% url 'tax_table' %}" class="{% if request.resolver_match.url_name == 'tax_table' or request.resolver_match.url_name == 'tax_table_add' or request.resolver_match.url_name == 'tax_table_edit' %}active{% endif %}">
+            <i class="bi bi-percent"></i>
+            Tax Table
+        </a>
+        <a href="{% url 'staff' %}" class="{% if request.resolver_match.url_name == 'staff' %}active{% endif %}">
+            <i class="bi bi-people"></i>
+            Staff List
+        </a>
+    </nav>
+
+    <div class="sidebar-section-label">Reports</div>
+    <nav>
+        <a href="{% url 'fund_report' %}" class="{% if request.resolver_match.url_name == 'fund_report' %}active{% endif %}">
+            <i class="bi bi-bar-chart-line"></i>
+            Fund Report
+        </a>
+        <a href="{% url 'mooe_report' %}" class="{% if request.resolver_match.url_name == 'mooe_report' %}active{% endif %}">
+            <i class="bi bi-receipt"></i>
+            MOOE Report
+        </a>
+        <a href="{% url 'nc_report' %}" class="{% if request.resolver_match.url_name == 'nc_report' %}active{% endif %}">
+            <i class="bi bi-shop"></i>
+            NC Report
+        </a>
+        <a href="{% url 'expense_report' %}" class="{% if request.resolver_match.url_name == 'expense_report' %}active{% endif %}">
+            <i class="bi bi-file-earmark-text"></i>
+            Expenses Report
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme">
+            <i class="bi bi-sun"></i>
+        </button>
+        <div class="version">v1.0.0</div>
+    </div>
+
+</aside>

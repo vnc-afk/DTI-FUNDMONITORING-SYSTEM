@@ -1,0 +1,149 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   DTI FUND MONITORING — LIGHT THEME
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root[data-theme="light"] {
+    /* Background Palette - Light */
+    --bg-base:          #f2f4f8;
+    --bg-surface:       #eaedf4;
+    --bg-card:          #e3e7f0;
+    --bg-card-hover:    #dce0eb;
+    --bg-elevated:      #e0e4ee;
+
+    /* Border - Light */
+    --border:           rgba(15, 23, 42, 0.08);
+    --border-strong:    rgba(15, 23, 42, 0.15);
+
+    /* Accent — Blue */
+    --accent:           #3b82f6;
+    --accent-dim:       rgba(59, 130, 246, 0.12);
+    --accent-glow:      rgba(59, 130, 246, 0.25);
+
+    /* Text - Light */
+    --text-primary:     #0f172a;
+    --text-secondary:   #475569;
+    --text-muted:       #94a3b8;
+    --text-accent:      #3b82f6;
+
+    /* Semantic Colors */
+    --success:          #3b82f6;
+    --warning:          #f59e0b;
+    --danger:           #ef4444;
+    --info:             #38bdf8;
+
+    /* Typography */
+    --font-body:        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono:        'DM Mono', monospace;
+
+    /* Shape */
+    --radius:           12px;
+    --radius-sm:        8px;
+    --radius-lg:        16px;
+
+    /* Shadows */
+    --shadow-sm:        0 1px 3px rgba(15, 23, 42, 0.08);
+    --shadow-md:        0 4px 12px rgba(15, 23, 42, 0.1);
+    --shadow-lg:        0 8px 24px rgba(15, 23, 42, 0.12);
+    --shadow-xl:        0 12px 32px rgba(15, 23, 42, 0.15);
+
+    /* Transitions */
+    --transition:       all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme specific component styles */
+:root[data-theme="light"] {
+    /* Table namespace colors - Light */
+    --table-bg: var(--bg-base);
+    --table-surface: var(--bg-card);
+    --table-surface-2: var(--bg-elevated);
+    --table-border: var(--border);
+    --table-border-strong: var(--border-strong);
+    --table-text: var(--text-primary);
+    --table-text-2: var(--text-secondary);
+    --table-text-3: var(--text-muted);
+    --table-accent: var(--accent);
+    --table-accent-soft: var(--accent-dim);
+    --table-accent-mid: var(--accent-glow);
+    --table-debit: #ef4444;
+    --table-debit-soft: rgba(239, 68, 68, 0.1);
+    --table-credit: #3b82f6;
+    --table-credit-soft: rgba(59, 130, 246, 0.1);
+    --table-warning: #f59e0b;
+    --table-warning-soft: rgba(245, 158, 11, 0.1);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   LIGHT THEME GLOBAL STYLES
+   ──────────────────────────────────────────────────────────────────────────── */
+
+body[data-theme="light"] {
+    background: var(--bg-base);
+    color: var(--text-primary);
+}
+
+/* Scrollbar - Light theme */
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.5);
+}
+
+/* Light theme badge styles */
+:root[data-theme="light"] .badge-success {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+}
+
+:root[data-theme="light"] .badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+:root[data-theme="light"] .badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+:root[data-theme="light"] .badge-info {
+    background: #dbeafe;
+    color: #0c4a6e;
+    border-color: #bae6fd;
+}
+
+:root[data-theme="light"] .badge-cleared {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+}
+
+:root[data-theme="light"] .badge-process {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+:root[data-theme="light"] .badge-failed {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* Light theme button styles */
+:root[data-theme="light"] .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+:root[data-theme="light"] .btn-primary:hover {
+    background: #60a5fa;
+    border-color: #60a5fa;
+    box-shadow: 0 0 20px var(--accent-glow);
+}

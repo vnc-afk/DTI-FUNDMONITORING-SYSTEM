@@ -21,6 +21,7 @@ from dashboard_app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('api/dashboard-data/', views.get_dashboard_data, name='get_dashboard_data'),
     path('tin/', views.tin, name='tin'),
     path('fund/', views.fund_report, name='fund_report'),
     path('mooe/', views.mooe_report, name='mooe_report'),
@@ -53,6 +54,7 @@ urlpatterns = [
     path('master_fund_monitoring/edit/<int:pk>/', views.master_fund_monitoring_update, name='master_fund_monitoring_edit'),
     path('master_fund_monitoring/delete/<int:pk>/', views.master_fund_monitoring_delete, name='master_fund_monitoring_delete'),
     path('api/supplier/<int:supplier_id>/', views.get_supplier_data, name='get_supplier_data'),
+    path('api/tax_rates/<int:purchase_type_id>/', views.get_tax_rates, name='get_tax_rates'),
     
     path('mooe/download/<str:report_type>/', views.download_mooe, name='download_mooe'),
 # Staff CRUD

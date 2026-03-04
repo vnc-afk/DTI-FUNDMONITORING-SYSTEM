@@ -1,10 +1,12 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTI — Fund Monitoring</title>
+    <title>{% block title %}DTI — Fund Monitoring{% endblock %}</title>
+
+    {% block extra_head %}{% endblock %}
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,87 +17,26 @@
     <!-- Tom-Select CSS (Searchable Dropdowns) -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
-    <!-- Custom Stylesheet -->
-    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <!-- Select2 CSS for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Custom Stylesheets -->
+    <link href="{% static 'dashboard_app/css/modern-theme.css' %}" rel="stylesheet">
     <link href="{% static 'dashboard_app/css/sidebar.css' %}" rel="stylesheet">
     <link href="{% static 'dashboard_app/css/table.css' %}" rel="stylesheet">
     <link href="{% static 'dashboard_app/css/form.css' %}" rel="stylesheet">
     <link href="{% static 'dashboard_app/css/report.css' %}" rel="stylesheet">
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+    {% block body %}
+
     <!-- ══════════════════════════════
          SIDEBAR
     ══════════════════════════════ -->
-    <aside class="sidebar" id="sidebar">
-
-        <div class="sidebar-brand">
-            <div class="badge-dti">
-                <i class="bi bi-building"></i> DTI
-            </div>
-            <h4>Fund Monitoring<br>System</h4>
-            <p>Administrative Operations</p>
-        </div>
-
-        <div class="sidebar-section-label">Main Menu</div>
-        <nav>
-            <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                <i class="bi bi-grid-1x2"></i>
-                Dashboard
-            </a>
-            <a href="{% url 'master_fund_monitoring_list' %}" class="{% if request.resolver_match.url_name == 'master_fund_monitoring_list' %}active{% endif %}">
-                <i class="bi bi-table"></i>
-                Master Fund Monitoring
-            </a>
-            <a href="{% url 'bank_statement_list' %}" class="{% if request.resolver_match.url_name == 'bank_statement_list' %}active{% endif %}">
-                <i class="bi bi-bank"></i>
-                Bank Statements
-            </a>
-
-        </nav>
-
-        <div class="sidebar-section-label">Data Management</div>
-        <nav>
-            <a href="{% url 'supplier_list' %}" class="{% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
-                <i class="bi bi-person-vcard"></i>
-                TIN / Suppliers
-            </a>
-            <a href="{% url 'fund_sources' %}" class="{% if request.resolver_match.url_name == 'fund_sources' %}active{% endif %}">
-                <i class="bi bi-wallet2"></i>
-                Fund Sources
-            </a>
-            <a href="{% url 'tax_table' %}" class="{% if request.resolver_match.url_name == 'tax_table' or request.resolver_match.url_name == 'tax_table_add' or request.resolver_match.url_name == 'tax_table_edit' %}active{% endif %}">
-                <i class="bi bi-percent"></i>
-                Tax Table
-            </a>
-            <a href="{% url 'staff' %}" class="{% if request.resolver_match.url_name == 'staff' %}active{% endif %}">
-                <i class="bi bi-people"></i>
-                Staff List
-            </a>
-        </nav>
-
-        <div class="sidebar-section-label">Reports</div>
-        <nav>
-            <a href="{% url 'fund_report' %}" class="{% if request.resolver_match.url_name == 'fund_report' %}active{% endif %}">
-                <i class="bi bi-bar-chart-line"></i>
-                Fund Report
-            </a>
-            <a href="{% url 'mooe_report' %}" class="{% if request.resolver_match.url_name == 'mooe_report' %}active{% endif %}">
-                <i class="bi bi-receipt"></i>
-                MOOE Report
-            </a>
-            <a href="{% url 'nc_report' %}" class="{% if request.resolver_match.url_name == 'nc_report' %}active{% endif %}">
-                <i class="bi bi-shop"></i>
-                NC Report
-            </a>
-            <a href="{% url 'expense_report' %}" class="{% if request.resolver_match.url_name == 'expense_report' %}active{% endif %}">
-                <i class="bi bi-file-earmark-text"></i>
-                Expenses Report
-            </a>
-        </nav>
-
-    </aside>
+    {% include 'components/sidebar.html' %}
 
     <!-- ══════════════════════════════
          MAIN WRAPPER
@@ -103,30 +44,7 @@
     <div class="main-wrapper">
 
         <!-- TOPBAR -->
-        <header class="topbar">
-            <div class="topbar-left">
-                <!-- Mobile toggle -->
-                <button class="topbar-btn d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')">
-                    <i class="bi bi-list"></i>
-                </button>
-                <!-- Breadcrumb -->
-                <div class="breadcrumb-custom">
-                    <span>DTI APO</span>
-                    <i class="bi bi-chevron-right" style="font-size: 0.6rem;"></i>
-                    <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
-                </div>
-            </div>
-            <div class="topbar-right">
-                <button class="topbar-btn">
-                    <i class="bi bi-search"></i>
-                </button>
-                <button class="topbar-btn">
-                    <i class="bi bi-bell"></i>
-                    <span class="notif-dot"></span>
-                </button>
-                <div class="avatar" title="Account">AD</div>
-            </div>
-        </header>
+        {% include 'components/topbar.html' %}
 
         <!-- PAGE CONTENT -->
         <main class="page-content">
@@ -135,48 +53,26 @@
 
     </div><!-- /.main-wrapper -->
 
+    {% endblock %}
+
+    <!-- ══════════════════════════════
+         SCRIPTS
+    ══════════════════════════════ -->
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Tom-Select JS (Searchable Dropdowns) -->
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-    <!-- application scripts -->
-    <script src="{% static 'dashboard_app/js/app.js' %}"></script>
+    <!-- Select2 JS for searchable dropdown -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <!-- Initialize Searchable Dropdowns -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Tom-Select for all select elements with form-select class
-            const selects = document.querySelectorAll('.form-select');
-            selects.forEach(function(select) {
-                new TomSelect(select, {
-                    create: false,
-                    placeholder: 'Search and select...',
-                    allowEmptyOption: false,
-                    hideSelected: true,
-                    maxOptions: null,
-                    plugins: {
-                        remove_button: {
-                            title: 'Remove'
-                        }
-                    },
-                    render: {
-                        option: function(data, escape) {
-                            // Filter out empty or divider options
-                            if (!data.text || data.text.match(/^-+$/)) {
-                                return '';
-                            }
-                            return '<div>' + escape(data.text) + '</div>';
-                        },
-                        item: function(data, escape) {
-                            return '<div>' + escape(data.text) + '</div>';
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- Application Scripts -->
+    <script src="{% static 'dashboard_app/js/theme-toggle.js' %}"></script>
+    <script src="{% static 'dashboard_app/js/table.js' %}"></script>
+    <script src="{% static 'dashboard_app/js/calculations.js' %}"></script>
+    <script src="{% static 'dashboard_app/js/expenses.js' %}"></script>
+    <script src="{% static 'dashboard_app/js/app.js' %}"></script>
 
     {% block scripts %}{% endblock %}
 

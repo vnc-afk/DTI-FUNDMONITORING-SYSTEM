@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from dashboard_app.models import Staff
 from dashboard_app.forms import StaffForm
 
@@ -18,7 +19,7 @@ def staff_list(request):
         'divisions_count': divisions_count,
         'divisions': sorted(divisions),
     }
-    return render(request, 'staff/list.html', context)
+    return render(request, 'staff/staff_list.html', context)
 
 
 def staff_add(request):
@@ -30,7 +31,7 @@ def staff_add(request):
             return redirect('staff')
     else:
         form = StaffForm()
-    return render(request, 'staff/form.html', {'form': form})
+    return render(request, 'staff/staff_form.html', {'form': form})
 
 
 def staff_edit(request, pk):
@@ -43,13 +44,25 @@ def staff_edit(request, pk):
             return redirect('staff')
     else:
         form = StaffForm(instance=staff)
-    return render(request, 'staff/form.html', {'form': form})
+    return render(request, 'staff/staff_form.html', {'form': form})
 
 
 def staff_delete(request, pk):
-    """Delete staff member"""
     staff = get_object_or_404(Staff, pk=pk)
+    
     if request.method == 'POST':
         staff.delete()
         return redirect('staff')
-    return render(request, 'staff/confirm_delete.html', {'staff': staff})
+    
+    object_details = {
+        'Name': f"{staff.first_name} {staff.last_name}",
+        'Division': staff.division.name if staff.division else 'N/A',
+    }
+    
+    context = {
+        'object_type': 'Staff',
+        'back_url': reverse('staff'),
+        'object_details': object_details,
+    }
+    
+    return render(request, 'components/confirm_delete.html', context)
