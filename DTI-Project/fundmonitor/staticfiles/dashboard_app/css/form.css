@@ -253,7 +253,6 @@ body {
 .form-namespace .form-card-footer {
     padding: 16px 28px;
     border-top: 1px solid #f3f4f6;
-    background: #fafbfc;
     display: flex; align-items: center;
     justify-content: space-between; gap: 10px; flex-wrap: wrap;
 }
@@ -598,6 +597,131 @@ body {
     opacity: 0.6;
     background: var(--bg-surface) !important;
     cursor: not-allowed;
+}
+
+/* ── Status Radio Buttons (Segmented Control) ── */
+.form-namespace .status-radio-group {
+    display: inline-flex;
+    gap: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+}
+
+.form-namespace .status-radio-item {
+    flex: 0 1 auto;
+    position: relative;
+}
+
+.form-namespace .status-radio-item input[type="radio"] {
+    display: none;
+}
+
+.form-namespace .status-radio-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px 24px;
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.875rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-right: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.form-namespace .status-radio-item:first-child .status-radio-label {
+    border-radius: 6px 0 0 6px;
+}
+
+.form-namespace .status-radio-item:last-child .status-radio-label {
+    border-right: 1px solid var(--border);
+    border-radius: 0 6px 6px 0;
+}
+
+.form-namespace .status-radio-label:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-glow);
+    color: var(--text-primary);
+}
+
+.form-namespace .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: inherit;
+}
+
+.form-namespace .status-radio-item input[type="radio"]:checked + .status-radio-label {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.form-namespace .status-radio-item input[type="radio"]:checked + .status-radio-label .status-badge.cleared,
+.form-namespace .status-radio-item input[type="radio"]:checked + .status-radio-label .status-badge.on-process {
+    color: #fff;
+}
+
+/* ── Transaction Type Radio Buttons (Segmented Control) ── */
+.form-namespace .transaction-type-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.form-namespace .transaction-type-check {
+    flex: 0 1 auto;
+    margin: 0;
+    margin-right: 0;
+}
+
+.form-namespace .transaction-type-check input[type="radio"] {
+    display: none;
+}
+
+.form-namespace .transaction-type-check .form-check-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px 24px;
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.875rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.form-namespace .transaction-type-check .form-check-label:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-glow);
+    color: var(--text-primary);
+}
+
+.form-namespace .transaction-type-check input[type="radio"]:checked + .form-check-label {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.form-namespace .transaction-type-check .form-check-label i {
+    font-size: 1rem;
+    margin-right: 4px;
 }
 
 /* Empty state */

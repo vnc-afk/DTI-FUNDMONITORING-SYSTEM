@@ -63,104 +63,6 @@
   </div>
 
 
-  <!-- Budget Breakdown Table -->
-  <div class="table-wrap" style="overflow-x:auto;">
-    <table>
-      <thead>
-        <tr>
-          <th>Annual Status</th>
-          <th>MOOE</th>
-          <th>Negosyo</th>
-          <th>LSP-NSB</th>
-          <th>LSP-PPG</th>
-          <th>CARP</th>
-          <th>Bamboo</th>
-          <th>Coconut</th>
-          <th>SB Corp</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="report-row-budget">
-          <td>Annual Budget</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-disburse">
-          <td>Total Downloads</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-disburse">
-          <td>Total Disbursement</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-balance">
-          <td>Current Balance</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-bur">
-          <td>BUR (Current)</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-balance">
-          <td>Annual Balance</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-        <tr class="report-row-bur">
-          <td>BUR (Annual)</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-          <td>—</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
   <!-- ── DISTRICT ALLOCATION ── -->
   <div class="section-title">District Allocation</div>
 
@@ -178,7 +80,28 @@
         </div>
       </div>    
       <div class="acc-body">
-        {% include "reports/allocations/nc_district1_table.html" %}
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Sto. Domingo</th>
+              <th>Bacacay</th>
+              <th>Malilipot</th>
+              <th>Tabaco City</th>
+              <th>Tiwi</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month in months %}
+            <tr>
+              <td>{{ month }}</td>
+              <td>-</td><td>-</td><td>-</td>
+              <td>-</td><td>-</td><td>0.00</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -193,7 +116,28 @@
         </div>
       </div>
       <div class="acc-body">
-        {% include "reports/allocations/nc_district2_table.html" %}
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Daraga</th>
+              <th>Camalig</th>
+              <th>Guinobatan</th>
+              <th>Ligao City</th>
+              <th>Polangui</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month in months %}
+            <tr>
+              <td>{{ month }}</td>
+              <td>-</td><td>-</td><td>-</td>
+              <td>-</td><td>-</td><td>0.00</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -208,7 +152,28 @@
         </div>
       </div>
       <div class="acc-body">
-        {% include "reports/allocations/nc_district3_table.html" %}
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Albay City</th>
+              <th>Manito</th>
+              <th>Rapu-Rapu</th>
+              <th>San Teodoro</th>
+              <th>Malinao</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month in months %}
+            <tr>
+              <td>{{ month }}</td>
+              <td>-</td><td>-</td><td>-</td>
+              <td>-</td><td>-</td><td>0.00</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 

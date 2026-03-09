@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% load static %}
+{% load format_filters %}
 
 {% block content %}
 <div class="table-namespace">
@@ -24,17 +25,17 @@
   <div class="summary-row">
     <div class="summary-card">
       <div class="summary-card-label">Current Debit</div>
-      <div class="summary-card-value debit">₱ {{ current_debit|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-value debit">₱ {{ current_debit|default:"0.00"|currency:2 }}</div>
       <div class="summary-card-sub">Latest transaction</div>
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Current Credit</div>
-      <div class="summary-card-value credit">₱ {{ current_credit|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-value credit">₱ {{ current_credit|default:"0.00"|currency:2 }}</div>
       <div class="summary-card-sub">Latest transaction</div>
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Current Balance</div>
-      <div class="summary-card-value balance">₱ {{ current_balance|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-value balance">₱ {{ current_balance|default:"0.00"|currency:2 }}</div>
       <div class="summary-card-sub">As of today</div>
     </div>
   </div>
@@ -127,17 +128,17 @@
             <td><span class="mono">{{ statement.check_number|default:"—" }}</span></td>
             <td class="col-r">
               <span class="amount {% if statement.debit %}debit{% else %}empty{% endif %}">
-                {% if statement.debit and statement.debit > 0 %}₱ {{ statement.debit|floatformat:2 }}{% else %}—{% endif %}
+                {% if statement.debit and statement.debit > 0 %}₱ {{ statement.debit|currency:2 }}{% else %}—{% endif %}
               </span>
             </td>
             <td class="col-r">
               <span class="amount {% if statement.credit %}credit{% else %}empty{% endif %}">
-                {% if statement.credit and statement.credit > 0 %}₱ {{ statement.credit|floatformat:2 }}{% else %}—{% endif %}
+                {% if statement.credit and statement.credit > 0 %}₱ {{ statement.credit|currency:2 }}{% else %}—{% endif %}
               </span>
             </td>
             <td class="col-r">
               <div class="balance-wrap">
-                <span class="amount balance">₱ {{ statement.balance|floatformat:2 }}</span>
+                <span class="amount balance">₱ {{ statement.balance|currency:2 }}</span>
                 <div class="balance-bar" style="width: 64px;"></div>
               </div>
             </td>
@@ -196,9 +197,9 @@
         <tfoot>
           <tr>
             <td colspan="3">Totals ({{ statement_count }} transaction{{ statement_count|pluralize }})</td>
-            <td class="col-r"><span class="amount debit">₱ {{ total_debits|default:"0.00"|floatformat:2 }}</span></td>
-            <td class="col-r"><span class="amount credit">₱ {{ total_credits|default:"0.00"|floatformat:2 }}</span></td>
-            <td class="col-r"><span class="amount balance">₱ {% if statements %}{{ statements.0.balance|floatformat:2 }}{% else %}0.00{% endif %}</span></td>
+            <td class="col-r"><span class="amount debit">₱ {{ total_debits|default:"0.00"|currency:2 }}</span></td>
+            <td class="col-r"><span class="amount credit">₱ {{ total_credits|default:"0.00"|currency:2 }}</span></td>
+            <td class="col-r"><span class="amount balance">₱ {% if statements %}{{ statements.0.balance|currency:2 }}{% else %}0.00{% endif %}</span></td>
             <td colspan="2"></td>
           </tr>
         </tfoot>

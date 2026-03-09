@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% load static %}
+{% load format_filters %}
 
 {% block page_title %}Fund Sources{% endblock %}
 
@@ -31,7 +32,7 @@
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Total Annual Budget</div>
-      <div class="summary-card-value">₱ {{ total_budget|default:"0.00"|floatformat:2 }}</div>
+      <div class="summary-card-value">₱ {{ total_budget|default:"0.00"|currency:2 }}</div>
       <div class="summary-card-sub">All funds combined</div>
     </div>
   </div>
@@ -93,7 +94,7 @@
               <div class="desc-main">{{ fund.name }}</div>
             </td>
             <td class="col-r">
-              <span class="amount">₱ {{ fund.annual_budget|floatformat:2 }}</span>
+              <span class="amount">₱ {{ fund.annual_budget|currency:2 }}</span>
             </td>
             <td>
               <div class="actions">
@@ -133,7 +134,7 @@
         <tfoot>
           <tr>
             <td>Totals ({{ fund_count }} fund{{ fund_count|pluralize }})</td>
-            <td class="col-r"><span class="amount">₱ {{ total_budget|default:"0.00"|floatformat:2 }}</span></td>
+            <td class="col-r"><span class="amount">₱ {{ total_budget|default:"0.00"|currency:2 }}</span></td>
             <td></td>
           </tr>
         </tfoot>

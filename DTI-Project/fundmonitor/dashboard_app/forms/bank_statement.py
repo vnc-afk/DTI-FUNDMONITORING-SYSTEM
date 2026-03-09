@@ -33,7 +33,8 @@ class BankStatementForm(forms.ModelForm):
             }),
             'check_number': forms.TextInput(attrs={
                 'class': 'form-control has-prefix',
-                'placeholder': 'Check/Reference number (optional)'
+                'placeholder': 'Check/Reference number',
+                'required': True
             }),
             'debit': forms.NumberInput(attrs={
                 'class': 'form-control has-prefix-text',
@@ -50,12 +51,15 @@ class BankStatementForm(forms.ModelForm):
                 'step': '0.01',
                 'min': '0',
             }),
-            'status': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'status': forms.RadioSelect(attrs={'class': 'form-check-input'}),
         }
     
     def __init__(self, *args, is_first_transaction=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_first_transaction = is_first_transaction
+        
+        # Make status field not required
+        self.fields['status'].required = False
         
         # Make balance readonly for subsequent transactions
         if not is_first_transaction:
@@ -160,8 +164,9 @@ class BankStatementForm(forms.ModelForm):
         """Validate status"""
         status = self.cleaned_data.get('status')
         
-        if not status:
-            raise ValidationError('Status is required. Please select a status.', code='required')
+        # Status is optional - return empty string/None as is
+        if status == '' or status is None:
+            return None
         
         valid_choices = [choice[0] for choice in BankStatement.CATEGORY_CHOICES]
         if status not in valid_choices:

@@ -11,8 +11,9 @@ def master_fund_monitoring_list(request):
     """List all master fund monitoring records with statistics"""
     records = MasterFundMonitoring.objects.all().order_by('-date')
     
-    # Calculate totals
-    total_payments = records.aggregate(total=Sum('payments'))['total'] or 0
+    # Calculate totals - ensure it's always a numeric value
+    total_result = records.aggregate(total=Sum('payments'))['total']
+    total_payments = float(total_result) if total_result is not None else 0.0
     
     context = {
         'records': records,

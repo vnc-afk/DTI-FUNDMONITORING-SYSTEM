@@ -25,6 +25,14 @@ body {
     color: var(--text-primary);
 }
 
+.dti-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 8px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
 /* ══════════════════════════════
    SIDEBAR
 ══════════════════════════════ */

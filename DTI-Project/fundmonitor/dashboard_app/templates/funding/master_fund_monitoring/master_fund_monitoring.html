@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% load static %}
+{% load format_filters %}
 
 {% block content %}
 <div class="table-namespace">
@@ -34,7 +35,7 @@
           </svg>
           Fund Monitoring Records
         </div>
-        <span class="toolbar-count" id="entryCount">{{ record_count }} entries</span>
+        <span class="toolbar-count" id="entryCount">{{ record_count|intcomma_format }} entries</span>
       </div>
       <div class="toolbar-right">
         <div class="search-wrap">
@@ -73,8 +74,9 @@
             <th data-col="2">Payee</th>
             <th data-col="3">Particulars</th>
             <th data-col="4" class="col-r">Payment</th>
-            <th data-col="5">Cheque No.</th>
-            <th data-col="6">Cheque Status</th>
+            <th data-col="5">Downloads</th>
+            <th data-col="6">Cheque No.</th>
+            <th data-col="7">Cheque Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -83,7 +85,7 @@
           {% for record in records %}
           <!-- Main Row (Expandable) -->
           <tr class="expandable-row" data-id="{{ record.pk }}" data-status="{% if record.cheque_status == 'Cleared' %}cleared{% elif record.cheque_status == 'Pending' %}pending{% else %}bounced{% endif %}">
-            <td>
+            <td style="white-space: nowrap;">
               <span class="expand-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -98,20 +100,25 @@
                 {% endif %}
               </div>
             </td>
-            <td>{{ record.fund_source }}</td>
+            <td style="white-space: nowrap;">{{ record.fund_source }}</td>
             <td class="desc-cell">
-              <div class="desc-main">{{ record.payee }}</div>
+              <div class="desc-main" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ record.payee }}</div>
             </td>
             <td>
               <span class="desc-main desc-wrap">{{ record.particulars }}</span>
             </td>
-            <td class="col-r">
+            <td class="col-r" style="white-space: nowrap;">
               <span class="amount {% if record.payments %}debit{% else %}empty{% endif %}">
-                {% if record.payments and record.payments > 0 %}₱ {{ record.payments|floatformat:2 }}{% else %}—{% endif %}
+                {% if record.payments and record.payments > 0 %}₱ {{ record.payments|currency:2 }}{% else %}—{% endif %}
               </span>
             </td>
-            <td><span class="mono">{{ record.cheque_number|default:"—" }}</span></td>
-            <td>
+            <td class="col-r" style="white-space: nowrap;">
+              <span class="amount {% if record.downloads %}debit{% else %}empty{% endif %}">
+                {% if record.downloads and record.downloads > 0 %}₱ {{ record.downloads|currency:2 }}{% else %}—{% endif %}
+              </span>
+            </td>
+            <td><span class="mono" style="white-space: nowrap;">{{ record.cheque_number|default:"—" }}</span></td>
+            <td style="white-space: nowrap;">
               {% if record.cheque_status == 'Cleared' %}
                 <span class="badge badge-cleared">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -160,7 +167,7 @@
 
           <!-- Detail Row (Hidden by default) -->
           <tr class="detail-row" data-id="{{ record.pk }}">
-            <td colspan="8">
+            <td colspan="9">
               <div class="detail-inner">
                 <div class="detail-content">
 
@@ -195,6 +202,44 @@
                     </div>
                   </div>
 
+                    <!-- Cheque & Clearance Information Section -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-receipt"></i> DV No. & Clearance Information</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">DV No.</div>
+                        <div class="detail-value {% if not record.dv_number %}empty{% endif %}">
+                          {{ record.dv_number|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Cleared Date</div>
+                        <div class="detail-value {% if not record.cleared_date %}empty{% endif %}">
+                          {% if record.cleared_date %}{{ record.cleared_date|date:"M d, Y" }}{% else %}—{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Account & Staff Section -->
+                  <div class="detail-section">
+                    <h4><i class="bi bi-person-circle"></i> Account & Expense</h4>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <div class="detail-label">Account Title</div>
+                        <div class="detail-value {% if not record.account_title %}empty{% endif %}">
+                          {{ record.account_title|default:"—" }}
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <div class="detail-label">Classification</div>
+                        <div class="detail-value {% if not record.expense_classification %}empty{% endif %}">
+                          {{ record.expense_classification|default:"—" }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Tax Information Section -->
                   <div class="detail-section">
                     <h4><i class="bi bi-percent"></i> Tax Information</h4>
@@ -220,25 +265,6 @@
                     </div>
                   </div>
 
-                  <!-- Account & Staff Section -->
-                  <div class="detail-section">
-                    <h4><i class="bi bi-person-circle"></i> Account & Expense</h4>
-                    <div class="detail-grid">
-                      <div class="detail-item">
-                        <div class="detail-label">Account Title</div>
-                        <div class="detail-value {% if not record.account_title %}empty{% endif %}">
-                          {{ record.account_title|default:"—" }}
-                        </div>
-                      </div>
-                      <div class="detail-item">
-                        <div class="detail-label">Classification</div>
-                        <div class="detail-value {% if not record.expense_classification %}empty{% endif %}">
-                          {{ record.expense_classification|default:"—" }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <!-- Tax Breakdown Section (First Set) -->
                   <div class="detail-section">
                     <h4><i class="bi bi-graph-up"></i> Tax Breakdown ({{ record.purchase_type.name|default:"Purchase Type" }})</h4>
@@ -246,43 +272,43 @@
                       <div class="detail-item">
                         <div class="detail-label">Goods 5%</div>
                         <div class="detail-value currency {% if not record.goods_5_percent %}empty{% endif %}">
-                          {% if record.goods_5_percent and record.goods_5_percent > 0 %}₱ {{ record.goods_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_5_percent and record.goods_5_percent > 0 %}₱ {{ record.goods_5_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Services 5%</div>
                         <div class="detail-value currency {% if not record.services_5_percent %}empty{% endif %}">
-                          {% if record.services_5_percent and record.services_5_percent > 0 %}₱ {{ record.services_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.services_5_percent and record.services_5_percent > 0 %}₱ {{ record.services_5_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Goods/Services 3%</div>
                         <div class="detail-value currency {% if not record.goods_services_3_percent %}empty{% endif %}">
-                          {% if record.goods_services_3_percent and record.goods_services_3_percent > 0 %}₱ {{ record.goods_services_3_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_services_3_percent and record.goods_services_3_percent > 0 %}₱ {{ record.goods_services_3_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Goods 1%</div>
                         <div class="detail-value currency {% if not record.goods_1_percent %}empty{% endif %}">
-                          {% if record.goods_1_percent and record.goods_1_percent > 0 %}₱ {{ record.goods_1_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_1_percent and record.goods_1_percent > 0 %}₱ {{ record.goods_1_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Services 2%</div>
                         <div class="detail-value currency {% if not record.services_2_percent %}empty{% endif %}">
-                          {% if record.services_2_percent and record.services_2_percent > 0 %}₱ {{ record.services_2_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.services_2_percent and record.services_2_percent > 0 %}₱ {{ record.services_2_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Rental 5%</div>
                         <div class="detail-value currency {% if not record.rental_5_percent %}empty{% endif %}">
-                          {% if record.rental_5_percent and record.rental_5_percent > 0 %}₱ {{ record.rental_5_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.rental_5_percent and record.rental_5_percent > 0 %}₱ {{ record.rental_5_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Prof. Fee 10%</div>
                         <div class="detail-value currency {% if not record.prof_fee_10_percent %}empty{% endif %}">
-                          {% if record.prof_fee_10_percent and record.prof_fee_10_percent > 0 %}₱ {{ record.prof_fee_10_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.prof_fee_10_percent and record.prof_fee_10_percent > 0 %}₱ {{ record.prof_fee_10_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                     </div>
@@ -295,37 +321,37 @@
                       <div class="detail-item">
                         <div class="detail-label">Goods 5% (2)</div>
                         <div class="detail-value currency {% if not record.goods_5_percent_2 %}empty{% endif %}">
-                          {% if record.goods_5_percent_2 and record.goods_5_percent_2 > 0 %}₱ {{ record.goods_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_5_percent_2 and record.goods_5_percent_2 > 0 %}₱ {{ record.goods_5_percent_2|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Services 5% (2)</div>
                         <div class="detail-value currency {% if not record.services_5_percent_2 %}empty{% endif %}">
-                          {% if record.services_5_percent_2 and record.services_5_percent_2 > 0 %}₱ {{ record.services_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.services_5_percent_2 and record.services_5_percent_2 > 0 %}₱ {{ record.services_5_percent_2|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Goods/Services 1%</div>
                         <div class="detail-value currency {% if not record.goods_services_1_percent %}empty{% endif %}">
-                          {% if record.goods_services_1_percent and record.goods_services_1_percent > 0 %}₱ {{ record.goods_services_1_percent|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_services_1_percent and record.goods_services_1_percent > 0 %}₱ {{ record.goods_services_1_percent|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Goods 1% (2)</div>
                         <div class="detail-value currency {% if not record.goods_1_percent_2 %}empty{% endif %}">
-                          {% if record.goods_1_percent_2 and record.goods_1_percent_2 > 0 %}₱ {{ record.goods_1_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.goods_1_percent_2 and record.goods_1_percent_2 > 0 %}₱ {{ record.goods_1_percent_2|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Services 2% (2)</div>
                         <div class="detail-value currency {% if not record.services_2_percent_2 %}empty{% endif %}">
-                          {% if record.services_2_percent_2 and record.services_2_percent_2 > 0 %}₱ {{ record.services_2_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.services_2_percent_2 and record.services_2_percent_2 > 0 %}₱ {{ record.services_2_percent_2|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                       <div class="detail-item">
                         <div class="detail-label">Rental 5% (2)</div>
                         <div class="detail-value currency {% if not record.rental_5_percent_2 %}empty{% endif %}">
-                          {% if record.rental_5_percent_2 and record.rental_5_percent_2 > 0 %}₱ {{ record.rental_5_percent_2|floatformat:2 }}{% else %}—{% endif %}
+                          {% if record.rental_5_percent_2 and record.rental_5_percent_2 > 0 %}₱ {{ record.rental_5_percent_2|currency:2 }}{% else %}—{% endif %}
                         </div>
                       </div>
                     </div>
@@ -338,14 +364,14 @@
 
           {% empty %}
           <tr>
-            <td colspan="8" style="text-align:center; padding: 32px; color: var(--text-3);">No fund monitoring records available.</td>
+            <td colspan="9" style="text-align:center; padding: 32px; color: var(--text-3);">No fund monitoring records available.</td>
           </tr>
           {% endfor %}
 
         <tfoot>
           <tr>
             <td colspan="4">Totals ({{ record_count }} records)</td>
-            <td class="col-r"><span class="amount debit">₱ {{ total_payments|default:"0.00"|floatformat:2 }}</span></td>
+            <td class="col-r"><span class="amount debit">₱ {{ total_payments|default:"0.00"|currency:2 }}</span></td>
             <td colspan="3"></td>
           </tr>
         </tfoot>

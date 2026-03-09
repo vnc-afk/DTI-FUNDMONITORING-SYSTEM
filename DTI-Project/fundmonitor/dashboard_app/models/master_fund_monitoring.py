@@ -67,6 +67,16 @@ class MasterFundMonitoring(models.Model):
         validators=[validate_string_length(min_length=5, max_length=500)],
         help_text="Transaction details"
     )
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('Disbursement', 'Disbursement'),
+            ('Refund', 'Refund'),
+            ('Adjustment', 'Adjustment'),
+        ],
+        default='Disbursement',
+        help_text="Type of transaction"
+    )
     
     # TIN and Tax Information
     tin = models.CharField(
@@ -100,12 +110,27 @@ class MasterFundMonitoring(models.Model):
         validators=[validate_transaction_amount],
         help_text="Payment amount"
     )
+    dv_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="Disbursement Voucher number"
+    )
+    downloads = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        default=0,
+        validators=[validate_transaction_amount],
+        help_text="Downloads amount"
+    )
     cheque_number = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         validators=[validate_check_number_format],
-        help_text="Check number (optional)"
+        help_text="Check number"
     )
     cleared_date = models.DateField(
         blank=True,

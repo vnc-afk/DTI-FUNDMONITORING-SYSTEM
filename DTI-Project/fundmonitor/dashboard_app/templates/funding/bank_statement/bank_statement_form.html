@@ -68,14 +68,14 @@
                         <div class="col-md-6">
                             <label class="form-label">
                                 <i class="bi bi-upc"></i>
-                                Check No.
+                                Check No. <span class="required">*</span>
                             </label>
                             <div class="input-group-custom">
                                 <i class="input-prefix-icon bi bi-upc"></i>
                                 {{ form.check_number }}
                             </div>
                             {{ form.check_number.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Leave blank if not applicable</div>
+                            <div class="form-hint"><i class="bi bi-info-circle"></i> Enter the check or reference number</div>
                         </div>
 
                         <div class="col-12">
@@ -155,15 +155,34 @@
                         <div class="col-md-6">
                             <label class="form-label">
                                 <i class="bi bi-flag"></i>
-                                Status <span class="required">*</span>
+                                Status
                             </label>
-                            {{ form.status }}
-                            {{ form.status.errors }}
-                            <div class="form-hint">
-                                <i class="bi bi-info-circle"></i>
-                                <span style="color:#16a34a; font-weight:500;">Cleared</span> = processed &nbsp;·&nbsp;
-                                <span style="color:#ca8a04; font-weight:500;">On Process</span> = in review &nbsp;·&nbsp;
+                            <div class="status-radio-group">
+                                {% for value, label in form.status.field.choices %}
+                                    {% if value %}
+                                    <div class="status-radio-item">
+                                        <input 
+                                            type="radio" 
+                                            id="id_{{ form.status.name }}_{{ forloop.counter0 }}" 
+                                            name="{{ form.status.name }}" 
+                                            value="{{ value }}"
+                                            {% if form.status.value == value %}checked{% endif %}
+                                            class="form-check-input"
+                                        >
+                                        <label for="id_{{ form.status.name }}_{{ forloop.counter0 }}" class="status-radio-label">
+                                            {% if value == 'Cleared' %}
+                                                <span class="status-badge cleared"><i class="bi bi-check-circle-fill"></i> Cleared</span>
+                                            {% elif value == 'On Process' %}
+                                                <span class="status-badge on-process"><i class="bi bi-hourglass-split"></i> On Process</span>
+                                            {% else %}
+                                                <span>{{ label }}</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
+                            {{ form.status.errors }}
                         </div>
                     </div>
                 </div>
@@ -190,4 +209,31 @@
         </form>
     </div>
     </div><!-- /.form-namespace -->
+
+    <script>
+        // Radio button toggle functionality - click to select, click again to deselect
+        document.addEventListener('DOMContentLoaded', function() {
+            const labels = document.querySelectorAll('.status-radio-label');
+            
+            labels.forEach(label => {
+                label.addEventListener('click', function(e) {
+                    // Get the radio input that comes before this label
+                    const radio = this.previousElementSibling;
+                    
+                    // Toggle the radio state
+                    if (radio && radio.type === 'radio') {
+                        e.preventDefault();
+                        
+                        if (radio.checked) {
+                            // If already checked, uncheck it
+                            radio.checked = false;
+                        } else {
+                            // If not checked, check it
+                            radio.checked = true;
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

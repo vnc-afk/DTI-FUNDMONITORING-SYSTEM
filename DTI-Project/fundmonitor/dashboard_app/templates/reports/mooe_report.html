@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load format_filters %}
 {% block page_title %}MOOE Report{% endblock %}
 
 {% block extra_css %}
@@ -27,24 +28,24 @@
 
   <!-- ── SUMMARY CARDS ── -->
   <div class="summary-cards">
-    <div class="scard">
+    <div class="scard report-row-budget"class="scard">
       <div class="scard-label">Annual Budget</div>
-      <div class="scard-amount">—</div>
-      <div class="scard-pct">All Output Objectives</div>
+      <div class="scard-amount">₱ {{ grand_total_budget|currency:2 }}</div>
+      <div class="scard-pct">All Funds</div>
     </div>
-    <div class="scard">
+    <div class="scard report-row-disburse">
       <div class="scard-label">Total Disbursed</div>
-      <div class="scard-amount">—</div>
-      <div class="scard-pct">—</div>
+      <div class="scard-amount">₱ {{ grand_total_disbursed|currency:2 }}</div>
+      <div class="scard-pct"></div>
     </div>
-    <div class="scard">
+    <div class="scard report-row-balance">
       <div class="scard-label">Current Balance</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">₱ {{ grand_balance|currency:2 }}</div>
       <div class="scard-pct">Remaining Budget</div>
     </div>
-    <div class="scard">
+    <div class="scard report-row-bur">
       <div class="scard-label">Budget Utilization Rate</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">{{ grand_bur|floatformat:1 }}%</div>
       <div class="scard-pct">Current Period</div>
     </div>
   </div>
@@ -52,92 +53,69 @@
   <!-- ── BUDGET SUMMARY ── -->
   <div class="section-title">Budget Summary</div>
   <div class="table-wrap" style="overflow-x:auto;">
-    <table>
+    <table class="budget-summary">
             <thead>
                 <tr>
                     <th>MOOE Status</th>
-                    <th>OO1</th>
-                    <th>OO2</th>
-                    <th>OO3</th>
-                    <th>4.1A</th>
-                    <th>4.1B</th>
-                    <th>4.2</th>
+                    {% for code in category_codes %}
+                    <th>{{ code }}</th>
+                    {% endfor %}
                     <th class="col-total">Total</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Annual Budget Row -->
                 <tr class="report-row-budget">
                     <td>Annual Budget</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td class="col-total">—</td>
+                    {% for code in category_codes %}
+                    <td>
+                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"annual_budget"|currency:2 }}{% else %}—{% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="col-total">₱ {{ grand_total_budget|currency:2 }}</td>
                 </tr>
+                
+                <!-- Total Disbursement Row -->
                 <tr class="report-row-disburse">
                     <td>Total Disbursement</td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td><span style="color:#d1d5db;">—</span></td>
-                    <td class="col-total">—</td>
+                    {% for code in category_codes %}
+                    <td>
+                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"total_disbursed"|currency:2 }}{% else %}—{% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="col-total">₱ {{ grand_total_disbursed|currency:2 }}</td>
                 </tr>
+                
+                <!-- Current Balance Row -->
                 <tr class="report-row-balance">
                     <td>Current Balance</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td class="col-total">—</td>
+                    {% for code in category_codes %}
+                    <td>
+                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"current_balance"|currency:2 }}{% else %}—{% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="col-total">₱ {{ grand_balance|currency:2 }}</td>
                 </tr>
+                
+                <!-- BUR (%) Row -->
                 <tr class="report-row-bur">
                     <td>BUR (%)</td>
+                    {% for code in category_codes %}
                     <td>
                         <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
+                            <div class="bur-bar">
+                                <div class="bur-bar-fill" style="width:{% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"bur" }}{% else %}0{% endif %}%;"></div>
+                            </div>
+                            {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"bur"|floatformat:2 }}{% else %}0.00{% endif %}%
                         </div>
                     </td>
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
-                        </div>
-                    </td>
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
-                        </div>
-                    </td>
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
-                        </div>
-                    </td>
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
-                        </div>
-                    </td>
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
-                        </div>
-                    </td>
+                    {% endfor %}
                     <td class="col-total">
                         <div class="bur-cell">
-                            <div class="bur-bar"><div class="bur-bar-fill" style="width:0%;"></div></div>
-                            0.00%
+                            <div class="bur-bar">
+                                <div class="bur-bar-fill" style="width:{{ grand_bur }}%;"></div>
+                            </div>
+                            {{ grand_bur|floatformat:2 }}%
                         </div>
                     </td>
                 </tr>
@@ -161,7 +139,37 @@
   <!-- Disbursement Panel -->
   <div id="tab-disbursement" class="tab-panel">
     <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      {% include "reports/allocations/disbursement_table.html" %}
+      <table class="table table-bordered table-sm table-report">
+        <thead>
+          <tr>
+            <th>Disbursement</th>
+            <th>OO1</th>
+            <th>OO2</th>
+            <th>OO3</th>
+            <th>4.1A</th>
+            <th>4.1B</th>
+            <th>4.2</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in disbursement_breakdown %}
+          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
+            <td>{{ row.name }}</td>
+            {% for code in category_codes %}
+            <td>
+              {% if row.data|dict_key:code %}
+                ₱ {{ row.data|dict_key:code|currency:2 }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            {% endfor %}
+            <td style="font-weight: bold;">₱ {{ row.total|currency:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     <div class="tab-download-bar">
       <span><i class="bi bi-info-circle me-1"></i>Monthly disbursement data across all output objectives</span>
@@ -179,7 +187,37 @@
   <!-- Downloads Panel -->
   <div id="tab-downloads" class="tab-panel" style="display:none;">
     <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      {% include "reports/allocations/downloads_table.html" %}
+      <table class="table table-bordered table-sm table-report">
+        <thead>
+          <tr>
+            <th>Downloads</th>
+            <th>OO1</th>
+            <th>OO2</th>
+            <th>OO3</th>
+            <th>4.1A</th>
+            <th>4.1B</th>
+            <th>4.2</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in downloads_breakdown %}
+          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
+            <td>{{ row.name }}</td>
+            {% for code in category_codes %}
+            <td>
+              {% if row.data|dict_key:code %}
+                ₱ {{ row.data|dict_key:code|currency:2 }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            {% endfor %}
+            <td style="font-weight: bold;">₱ {{ row.total|currency:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     <div class="tab-download-bar">
       <span><i class="bi bi-info-circle me-1"></i>Available report files for download</span>

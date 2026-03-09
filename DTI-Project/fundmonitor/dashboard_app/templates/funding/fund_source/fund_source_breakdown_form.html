@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load format_filters %}
 
 {% block page_title %}
   {% if form.instance.id %}
@@ -33,11 +34,11 @@
       </div>
       <div class="info-item">
         <span class="info-label">Annual Budget</span>
-        <span class="info-value">₱ {{ fund.annual_budget|floatformat:2 }}</span>
+        <span class="info-value">₱ {{ fund.annual_budget|currency:2 }}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Remaining Available</span>
-        <span class="info-value">₱ {{ remaining_budget|floatformat:2 }}</span>
+        <span class="info-value">₱ {{ remaining_budget|currency:2 }}</span>
       </div>
     </div>
   </div>

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% load static %}
+{% load format_filters %}
 
 {% block page_title %}{{ fund.name }} - Breakdown{% endblock %}
 
@@ -26,17 +27,17 @@
   <div class="summary-row">
     <div class="summary-card">
       <div class="summary-card-label">Annual Budget</div>
-      <div class="summary-card-value">₱ {{ fund.annual_budget|floatformat:2 }}</div>
+      <div class="summary-card-value">₱ {{ fund.annual_budget|currency:2 }}</div>
       <div class="summary-card-sub">Total allocation</div>
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Allocated</div>
-      <div class="summary-card-value">₱ {{ total_breakdown|floatformat:2 }}</div>
+      <div class="summary-card-value">₱ {{ total_breakdown|currency:2 }}</div>
       <div class="summary-card-sub">{{ breakdowns.count }} categor{{ breakdowns.count|pluralize:"y,ies" }}</div>
     </div>
     <div class="summary-card">
       <div class="summary-card-label">Remaining</div>
-      <div class="summary-card-value">₱ {{ remaining_budget|floatformat:2 }}</div>
+      <div class="summary-card-value">₱ {{ remaining_budget|currency:2 }}</div>
       <div class="summary-card-sub">
         {% if remaining_budget < 0 %}
           <span style="color: var(--danger);">Over budget</span>
@@ -90,7 +91,7 @@
               <div class="desc-main">{{ breakdown.category }}</div>
             </td>
             <td class="col-r">
-              <span class="amount">₱ {{ breakdown.budget_amount|floatformat:2 }}</span>
+              <span class="amount">₱ {{ breakdown.budget_amount|currency:2 }}</span>
             </td>
             <td class="col-r">
               {% if fund.annual_budget > 0 %}
@@ -122,15 +123,13 @@
           <tr>
             <td colspan="4" style="text-align:center; padding: 32px; color: var(--text-3);">
               No breakdowns configured yet.
-              <a href="{% url 'fund_source_breakdown_add' fund.id %}" style="display: inline-block; margin-top: 8px; color: var(--primary);">Add the first breakdown →</a>
-            </td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr>
             <td><strong>Total</strong></td>
-            <td class="col-r"><strong>₱ {{ total_breakdown|floatformat:2 }}</strong></td>
+            <td class="col-r"><strong>₱ {{ total_breakdown|currency:2 }}</strong></td>
             <td class="col-r">
               {% if fund.annual_budget > 0 %}
                 <strong>{% widthratio total_breakdown fund.annual_budget 100 %}%</strong>
@@ -155,9 +154,9 @@
         </div>
         <div class="progress-text">
           {% if progress > 100 %}
-            <span style="color: var(--danger);">Over budget by ₱{{ over_budget_amount|floatformat:2 }}</span>
+            <span style="color: var(--danger);">Over budget by ₱{{ over_budget_amount|currency:2 }}</span>
           {% else %}
-            <span>{{ progress }}% used, ₱{{ remaining_budget|floatformat:2 }} remaining</span>
+            <span>{{ progress }}% used, ₱{{ remaining_budget|currency:2 }} remaining</span>
           {% endif %}
         </div>
       </div>

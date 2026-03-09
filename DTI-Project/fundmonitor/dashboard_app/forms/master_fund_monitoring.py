@@ -30,14 +30,18 @@ class MasterFundMonitoringForm(forms.ModelForm):
         label='Payee'
     )
     
-    # Make fund_source a dropdown of fund sources (optional)
+    # Make fund_source a dropdown of fund sources (required)
     fund_source = forms.ModelChoiceField(
         queryset=FundSource.objects.all(),
         widget=forms.Select(attrs={
-            'class': 'form-select'
+            'class': 'form-select',
+            'required': True
         }),
         label='Fund Source',
-        required=False
+        required=True,
+        error_messages={
+            'required': 'Please select a Fund Source.'
+        }
     )
     
     # Make mooe a dropdown of breakdown categories (optional)
@@ -104,6 +108,22 @@ class MasterFundMonitoringForm(forms.ModelForm):
         required=False
     )
     
+    # Transaction Type - Disbursement, Refund, or Adjustment
+    transaction_type = forms.ChoiceField(
+        choices=[
+            ('Disbursement', 'Disbursement'),
+            ('Refund', 'Refund'),
+            ('Adjustment', 'Adjustment'),
+        ],
+        widget=forms.RadioSelect(attrs={
+            'class': 'transaction-type-radio',
+            'id': 'transactionTypeRadio'
+        }),
+        label='Transaction Type',
+        initial='Disbursement',
+        help_text='Select whether this is a disbursement, refund, or adjustment'
+    )
+    
     class Meta:
         model = MasterFundMonitoring
         exclude = ['cheque_status']  # cheque_status is auto-synced from BankStatement, not user-editable
@@ -119,6 +139,9 @@ class MasterFundMonitoringForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Transaction details',
                 'required': True
+            }),
+            'transaction_type': forms.RadioSelect(attrs={
+                'class': 'transaction-type-radio'
             }),
             
             # TIN and Tax Information
@@ -137,6 +160,16 @@ class MasterFundMonitoringForm(forms.ModelForm):
                 'step': '0.01',
                 'min': '0',
                 'required': True
+            }),
+            'dv_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'DV number (optional)',
+                'maxlength': '50'
+            }),
+            'downloads': forms.NumberInput(attrs={
+                'class': 'form-control has-prefix-text',
+                'step': '0.01',
+                'min': '0'
             }),
             'cheque_number': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -267,7 +300,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
     
     def clean_particulars(self):
         """Validate particulars"""
-        particulars = self.cleaned_data.get('particulars', '').strip()
+        particulars = (self.cleaned_data.get('particulars') or '').strip()
         
         if not particulars:
             raise ValidationError('Particulars is required.', code='required')
@@ -302,7 +335,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
     
     def clean_dv_number(self):
         """Validate DV number"""
-        dv_number = self.cleaned_data.get('dv_number', '').strip()
+        dv_number = (self.cleaned_data.get('dv_number') or '').strip()
         
         if not dv_number:
             return ''
@@ -316,6 +349,20 @@ class MasterFundMonitoringForm(forms.ModelForm):
             )
         
         return dv_number
+    
+    def clean_downloads(self):
+        """Validate downloads amount"""
+        downloads = self.cleaned_data.get('downloads')
+        
+        if downloads in (None, ''):
+            return 0
+        
+        try:
+            validate_transaction_amount(downloads)
+        except ValidationError:
+            raise ValidationError('Downloads amount must be a positive number.', code='invalid_amount')
+        
+        return downloads
     
     def clean_cheque_number(self):
         """Validate cheque number"""
