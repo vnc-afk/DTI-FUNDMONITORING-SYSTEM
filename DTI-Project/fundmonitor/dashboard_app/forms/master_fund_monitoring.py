@@ -31,8 +31,9 @@ class MasterFundMonitoringForm(forms.ModelForm):
     )
     
     # Make fund_source a dropdown of fund sources (required)
+    # Only show active fund sources (budget > 0)
     fund_source = forms.ModelChoiceField(
-        queryset=FundSource.objects.all(),
+        queryset=FundSource.objects.filter(annual_budget__gt=0),
         widget=forms.Select(attrs={
             'class': 'form-select',
             'required': True
@@ -163,7 +164,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
             }),
             'dv_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'DV number (optional)',
+                'placeholder': 'DV number',
                 'maxlength': '50'
             }),
             'downloads': forms.NumberInput(attrs={
@@ -173,7 +174,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
             }),
             'cheque_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Check number (optional)',
+                'placeholder': 'Check number',
                 'maxlength': '50'
             }),
             'cleared_date': forms.DateInput(attrs={
@@ -404,11 +405,83 @@ class MasterFundMonitoringForm(forms.ModelForm):
         cleaned_data = super().clean()
         date = cleaned_data.get('date')
         cleared_date = cleaned_data.get('cleared_date')
+        fund_source = cleaned_data.get('fund_source')
+        payments = cleaned_data.get('payments')
+        transaction_type = cleaned_data.get('transaction_type')
         
         # Validate cleared_date is after transaction date
         if date and cleared_date and cleared_date < date:
             raise ValidationError({
                 'cleared_date': 'Cleared date must be on or after the transaction date.'
             })
+        
+        # Validate budget for Disbursement transactions
+        if fund_source and payments and transaction_type == 'Disbursement':
+            from decimal import Decimal
+            
+            # Get the fund source budget
+            fund_budget = Decimal(str(fund_source.annual_budget or 0))
+            
+            # Calculate total disbursements for this fund source (excluding current record if editing)
+            from django.db.models import Sum
+            total_disbursed = MasterFundMonitoring.objects.filter(
+                fund_source=fund_source,
+                transaction_type='Disbursement'
+            ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+            
+            # If editing, exclude the current record's payment from total
+            if self.instance.pk:
+                total_disbursed -= Decimal(str(self.instance.payments or 0))
+            
+            # Calculate available budget
+            available_budget = fund_budget - total_disbursed
+            new_payment = Decimal(str(payments))
+            
+            # Check if payment exceeds available budget
+            if new_payment > available_budget:
+                remaining = available_budget
+                raise ValidationError({
+                    'payments': f'Payment exceeds available budget. Fund budget: ₱{fund_budget:,.2f}, '
+                                f'Already disbursed: ₱{total_disbursed:,.2f}, '
+                                f'Available: ₱{remaining:,.2f}. '
+                                f'You are trying to disburse ₱{new_payment:,.2f}.'
+                })
+        
+        # Validate MOOE budget for Disbursement transactions
+        mooe = cleaned_data.get('mooe')
+        if mooe and payments and transaction_type == 'Disbursement':
+            from decimal import Decimal
+            from dashboard_app.models import FundSourceBreakdown
+            
+            # Get the MOOE code (mooe can be a BreakdownCategory or a code string)
+            mooe_code = mooe.code if hasattr(mooe, 'code') else str(mooe)
+            
+            # Calculate annual budget for this MOOE category (sum of all fund source breakdowns)
+            mooe_budget = FundSourceBreakdown.objects.filter(
+                category__code=mooe_code
+            ).aggregate(total=Sum('budget_amount'))['total'] or Decimal(0)
+            
+            # Calculate total disbursements for this MOOE category (excluding current record if editing)
+            mooe_disbursed = MasterFundMonitoring.objects.filter(
+                mooe=mooe_code,
+                transaction_type='Disbursement'
+            ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+            
+            # If editing, exclude the current record's payment from total
+            if self.instance.pk:
+                mooe_disbursed -= Decimal(str(self.instance.payments or 0))
+            
+            # Calculate available MOOE budget
+            mooe_available = mooe_budget - mooe_disbursed
+            new_payment_decimal = Decimal(str(payments))
+            
+            # Check if payment exceeds available MOOE budget
+            if new_payment_decimal > mooe_available:
+                raise ValidationError({
+                    'payments': f'Payment exceeds MOOE budget. MOOE budget: ₱{mooe_budget:,.2f}, '
+                                f'Already disbursed: ₱{mooe_disbursed:,.2f}, '
+                                f'Available: ₱{mooe_available:,.2f}. '
+                                f'You are trying to disburse ₱{new_payment_decimal:,.2f}.'
+                })
         
         return cleaned_data

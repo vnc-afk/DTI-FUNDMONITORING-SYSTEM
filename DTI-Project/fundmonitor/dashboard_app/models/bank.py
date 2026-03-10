@@ -95,7 +95,7 @@ class BankStatement(models.Model):
         max_length=50,
         blank=True,
         default='',
-        help_text="Check/Reference number (optional)"
+        help_text="Check/Reference number"
     )
     debit = models.DecimalField(
         max_digits=15,

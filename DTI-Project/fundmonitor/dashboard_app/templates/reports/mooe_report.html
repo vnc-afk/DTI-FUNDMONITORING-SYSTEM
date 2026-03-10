@@ -3,10 +3,6 @@
 {% load format_filters %}
 {% block page_title %}MOOE Report{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard_app/css/report.css' %}">
-{% endblock %}
-
 {% block content %}
 <div class="report">
 
@@ -28,7 +24,7 @@
 
   <!-- ── SUMMARY CARDS ── -->
   <div class="summary-cards">
-    <div class="scard report-row-budget"class="scard">
+    <div class="scard report-row-budget">
       <div class="scard-label">Annual Budget</div>
       <div class="scard-amount">₱ {{ grand_total_budget|currency:2 }}</div>
       <div class="scard-pct">All Funds</div>
@@ -50,129 +46,32 @@
     </div>
   </div>
 
-  <!-- ── BUDGET SUMMARY ── -->
-  <div class="section-title">Budget Summary</div>
-  <div class="table-wrap" style="overflow-x:auto;">
-    <table class="budget-summary">
-            <thead>
-                <tr>
-                    <th>MOOE Status</th>
-                    {% for code in category_codes %}
-                    <th>{{ code }}</th>
-                    {% endfor %}
-                    <th class="col-total">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Annual Budget Row -->
-                <tr class="report-row-budget">
-                    <td>Annual Budget</td>
-                    {% for code in category_codes %}
-                    <td>
-                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"annual_budget"|currency:2 }}{% else %}—{% endif %}
-                    </td>
-                    {% endfor %}
-                    <td class="col-total">₱ {{ grand_total_budget|currency:2 }}</td>
-                </tr>
-                
-                <!-- Total Disbursement Row -->
-                <tr class="report-row-disburse">
-                    <td>Total Disbursement</td>
-                    {% for code in category_codes %}
-                    <td>
-                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"total_disbursed"|currency:2 }}{% else %}—{% endif %}
-                    </td>
-                    {% endfor %}
-                    <td class="col-total">₱ {{ grand_total_disbursed|currency:2 }}</td>
-                </tr>
-                
-                <!-- Current Balance Row -->
-                <tr class="report-row-balance">
-                    <td>Current Balance</td>
-                    {% for code in category_codes %}
-                    <td>
-                      ₱ {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"current_balance"|currency:2 }}{% else %}—{% endif %}
-                    </td>
-                    {% endfor %}
-                    <td class="col-total">₱ {{ grand_balance|currency:2 }}</td>
-                </tr>
-                
-                <!-- BUR (%) Row -->
-                <tr class="report-row-bur">
-                    <td>BUR (%)</td>
-                    {% for code in category_codes %}
-                    <td>
-                        <div class="bur-cell">
-                            <div class="bur-bar">
-                                <div class="bur-bar-fill" style="width:{% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"bur" }}{% else %}0{% endif %}%;"></div>
-                            </div>
-                            {% if budget_data|dict_key:code %}{{ budget_data|dict_key:code|dict_key:"bur"|floatformat:2 }}{% else %}0.00{% endif %}%
-                        </div>
-                    </td>
-                    {% endfor %}
-                    <td class="col-total">
-                        <div class="bur-cell">
-                            <div class="bur-bar">
-                                <div class="bur-bar-fill" style="width:{{ grand_bur }}%;"></div>
-                            </div>
-                            {{ grand_bur|floatformat:2 }}%
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-  </div>
-
   <!-- ── DETAILED BREAKDOWN TABS ── -->
   <div class="section-title">Detailed Breakdown</div>
 
   <!-- Tab Buttons -->
-  <div class="filter-bar" style="margin-bottom: 0; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0;">
+  <div class="filter-bar">
     <button class="filter-btn active" data-tab="disbursement">
       <i class="bi bi-receipt"></i> Disbursement
     </button>
     <button class="filter-btn" data-tab="downloads">
       <i class="bi bi-download"></i> Downloads
     </button>
+    <div style="margin-left: auto; display: flex; gap: 8px;">
+      <button class="filter-btn" id="open-all-btn">
+        <i class="bi bi-arrows-expand"></i> Open All
+      </button>
+      <button class="filter-btn" id="close-all-btn">
+        <i class="bi bi-arrows-collapse"></i> Close All
+      </button>
+    </div>
   </div>
 
   <!-- Disbursement Panel -->
   <div id="tab-disbursement" class="tab-panel">
-    <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      <table class="table table-bordered table-sm table-report">
-        <thead>
-          <tr>
-            <th>Disbursement</th>
-            <th>OO1</th>
-            <th>OO2</th>
-            <th>OO3</th>
-            <th>4.1A</th>
-            <th>4.1B</th>
-            <th>4.2</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in disbursement_breakdown %}
-          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
-            <td>{{ row.name }}</td>
-            {% for code in category_codes %}
-            <td>
-              {% if row.data|dict_key:code %}
-                ₱ {{ row.data|dict_key:code|currency:2 }}
-              {% else %}
-                —
-              {% endif %}
-            </td>
-            {% endfor %}
-            <td style="font-weight: bold;">₱ {{ row.total|currency:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="accordion quarterly-acc" data-breakdown="disbursement"></div>
     <div class="tab-download-bar">
-      <span><i class="bi bi-info-circle me-1"></i>Monthly disbursement data across all output objectives</span>
+      <span><i class="bi bi-info-circle me-1"></i>Quarterly MOOE breakdown by month</span>
       <div style="display:flex; gap:8px;">
         <a href="{% url 'download_mooe' 'disbursement' %}" class="btn btn-outline">
           <i class="bi bi-file-earmark-excel"></i> Excel
@@ -186,41 +85,9 @@
 
   <!-- Downloads Panel -->
   <div id="tab-downloads" class="tab-panel" style="display:none;">
-    <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      <table class="table table-bordered table-sm table-report">
-        <thead>
-          <tr>
-            <th>Downloads</th>
-            <th>OO1</th>
-            <th>OO2</th>
-            <th>OO3</th>
-            <th>4.1A</th>
-            <th>4.1B</th>
-            <th>4.2</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in downloads_breakdown %}
-          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
-            <td>{{ row.name }}</td>
-            {% for code in category_codes %}
-            <td>
-              {% if row.data|dict_key:code %}
-                ₱ {{ row.data|dict_key:code|currency:2 }}
-              {% else %}
-                —
-              {% endif %}
-            </td>
-            {% endfor %}
-            <td style="font-weight: bold;">₱ {{ row.total|currency:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="accordion quarterly-acc" data-breakdown="downloads"></div>
     <div class="tab-download-bar">
-      <span><i class="bi bi-info-circle me-1"></i>Available report files for download</span>
+      <span><i class="bi bi-info-circle me-1"></i>Quarterly MOOE breakdown by month</span>
       <div style="display:flex; gap:8px;">
         <a href="{% url 'download_mooe' 'downloads' %}" class="btn btn-outline">
           <i class="bi bi-file-earmark-excel"></i> Excel
@@ -233,18 +100,8 @@
   </div>
 
 </div><!-- /.report -->
-{% endblock %}
 
-{% block scripts %}
 <script>
-  // Tab switching
-  document.querySelectorAll('.filter-btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-tab]').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
-    });
-  });
+  const MOOE_REPORT_DATA = JSON.parse('{{ mooe_report_json|escapejs }}');
 </script>
 {% endblock %}

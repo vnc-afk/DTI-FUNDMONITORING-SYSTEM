@@ -5,103 +5,33 @@
 {% block title %}Dashboard — DTI Fund Monitoring{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'dashboard_app/css/dashboard.css' %}" rel="stylesheet">
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<style>
-.filter-section {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    border: 1px solid rgba(255,255,255,0.1);
-}
 
-.filter-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
-    align-items: flex-end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-group label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #8b90a8;
-    margin-bottom: 5px;
-}
-
-.filter-group select {
-    padding: 8px 12px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #f0f2f8;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.filter-group select option {
-    background-color: #1e293b;
-    color: #f0f2f8;
-    padding: 8px;
-}
-
-.filter-group select option:hover {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.filter-group select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.1);
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.btn-apply, .btn-reset {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-apply {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.btn-apply:hover {
-    background-color: #2563eb;
-}
-
-.btn-reset {
-    background-color: rgba(255,255,255,0.1);
-    color: #8b90a8;
-}
-
-.btn-reset:hover {
-    background-color: rgba(255,255,255,0.15);
-    color: #f0f2f8;
-}
-</style>
+<script>
+// Dashboard data from Django context - Load FIRST before any other scripts
+window.dashboardData = {
+    monthlyData:           {{ monthly_data|safe }},
+    fundLabels:            {{ fund_labels|safe }},
+    fundValues:            {{ fund_values|safe }},
+    budgetLabels:          {{ budget_labels|safe }},
+    budgetAmounts:         {{ budget_amounts|safe }},
+    disburseAmounts:       {{ disburse_amounts|safe }},
+    expenseLabels:         {{ expense_labels|safe }},
+    expenseValues:         {{ expense_values|safe }},
+    supplierLabels:        {{ supplier_labels|safe }},
+    supplierValues:        {{ supplier_values|safe }},
+    taxLabels:             {{ tax_labels|safe }},
+    taxValues:             {{ tax_values|safe }},
+    chequeLabels:          {{ cheque_labels|safe }},
+    chequeCounts:          {{ cheque_counts|safe }},
+    districtLabels:        {{ district_labels|safe }},
+    districtValues:        {{ district_values|safe }},
+    bankDates:             {{ bank_dates|safe }},
+    bankDebits:            {{ bank_debits|safe }},
+    bankCredits:           {{ bank_credits|safe }},
+    bankBalances:          {{ bank_balances|safe }},
+};
+</script>
 {% endblock %}
 
 {% block content %}
@@ -128,8 +58,34 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════
+         QUICK LINKS
+         ══════════════════════════════════════════════════════════════════ -->
+    <section class="quick-links-section">
+        <h3 class="quick-links-title">Quick Links Reports</h3>
+        <div class="quick-links-grid">
+            <a href="{% url 'fund_report' %}" class="quick-link-btn">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Fund Report</span>
+            </a>
+            <a href="{% url 'mooe_report' %}" class="quick-link-btn">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>MOOE Report</span>
+            </a>
+            <a href="{% url 'nc_report' %}" class="quick-link-btn">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>NC Report</span>
+            </a>
+            <a href="{% url 'expense_report' %}" class="quick-link-btn">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Expense Report</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
          FILTER SECTION
          ══════════════════════════════════════════════════════════════════ -->
+    <h3 class="quick-links-title">Filters</h3>
     <section class="filter-section">
         <form method="GET" id="filterForm">
             <div class="filter-grid">
@@ -158,27 +114,7 @@
                     <select id="divisionFilter" name="division">
                         <option value="">All Divisions</option>
                         {% for div in divisions %}
-                            <option value="{{ div.id }}" {% if selected_division|stringformat:"s" == div.id|stringformat:"s" %}selected{% endif %}>{{ div.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="districtFilter">District</label>
-                    <select id="districtFilter" name="district">
-                        <option value="">All Districts</option>
-                        {% for dist in districts %}
-                            <option value="{{ dist.id }}" {% if selected_district|stringformat:"s" == dist.id|stringformat:"s" %}selected{% endif %}>{{ dist.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="expenseFilter">Account Title / Expense Objects</label>
-                    <select id="expenseFilter" name="expense_class">
-                        <option value="">All Classifications</option>
-                        {% for ec in expense_classifications %}
-                            <option value="{{ ec.id }}" {% if selected_expense_class|stringformat:"s" == ec.id|stringformat:"s" %}selected{% endif %}>{{ ec.name }}</option>
+                            <option value="{{ div }}" {% if selected_division == div %}selected{% endif %}>{{ div }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -206,7 +142,7 @@
                     <button type="submit" class="btn-apply">
                         <i class="bi bi-funnel"></i> Apply Filters
                     </button>
-                    <a href="{% url 'dashboard' %}" class="btn-reset">Reset</a>
+                    <a href="{% url 'dashboard' %}" class="btn-reset"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
                 </div>
             </div>
         </form>
@@ -228,9 +164,18 @@
                 <span class="metric-footer">Allocated funds</span>
             </div>
 
+            <div class="metric-card accent">
+                <div class="metric-card-top">
+                    <div class="metric-icon"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+                <p class="metric-label">Active Pooling Funds</p>
+                <h3 class="metric-value">{{ active_fund_count }}<span style="font-size: 0.6em; color: var(--text-2);">/ total</span></h3>
+                <span class="metric-footer">₱{{ active_total_budget|currency:0 }}</span>
+            </div>
+
             <div class="metric-card success">
                 <div class="metric-card-top">
-                    <div class="metric-icon"><i class="bi bi-cash-flow"></i></div>
+                    <div class="metric-icon"><i class="bi bi-coin"></i></div>
                 </div>
                 <p class="metric-label">Total Disbursement</p>
                 <h3 class="metric-value">₱{{ total_disbursement|currency:0 }}</h3>
@@ -392,290 +337,4 @@
     </section>
 
 </div><!-- /.dashboard-wrapper -->
-{% endblock %}
-
-{% block scripts %}
-<script>
-// ══════════════════════════════════════════════════════════════════════════
-// CHART CONFIGURATION — DARK THEME
-// ══════════════════════════════════════════════════════════════════════════
-
-const C = {
-    teal:    '#3b82f6',
-    blue:    '#3b82f6',
-    amber:   '#f59e0b',
-    rose:    '#f43f5e',
-    violet:  '#8b5cf6',
-    sky:     '#38bdf8',
-    lime:    '#a3e635',
-    orange:  '#fb923c',
-    green:   '#10b981',
-    pink:    '#ec4899',
-    bg:      'rgba(0,0,0,0)',
-    plotBg:  'rgba(255,255,255,0.02)',
-    grid:    'rgba(255,255,255,0.05)',
-    text:    '#8b90a8',
-    textPri: '#f0f2f8',
-};
-
-const palette = [C.teal, C.blue, C.amber, C.rose, C.violet, C.sky, C.lime, C.orange, C.green, C.pink];
-
-const baseLayout = {
-    paper_bgcolor: C.bg,
-    plot_bgcolor:  C.plotBg,
-    font: {
-        family: '"DM Sans", -apple-system, sans-serif',
-        size: 11,
-        color: C.text,
-    },
-    hovermode: 'closest',
-    margin: { l: 50, r: 20, t: 16, b: 40 },
-    showlegend: false,
-};
-
-const axisStyle = {
-    gridcolor:     C.grid,
-    zerolinecolor: C.grid,
-    tickfont:      { size: 10, color: C.text },
-    showline:      false,
-};
-
-const config = { responsive: true, displayModeBar: false };
-
-// ── 1. Monthly Disbursement Trend ───────────────────────────────────────
-const monthlyData = {{ monthly_data|safe }};
-const mLabels = Object.keys(monthlyData);
-const mValues = Object.values(monthlyData);
-
-Plotly.newPlot('monthlyChart', [{
-    x: mLabels,
-    y: mValues,
-    type: 'scatter',
-    mode: 'lines+markers',
-    name: 'Monthly Disbursement',
-    line: { color: C.teal, width: 2.5, shape: 'spline' },
-    marker: { size: 5, color: C.teal, line: { color: '#07080f', width: 1.5 } },
-    fill: 'tozeroy',
-    fillcolor: 'rgba(59, 130, 246, 0.1)',
-    hovertemplate: '<b>%{x}</b><br>₱%{y:,.0f}<extra></extra>',
-}], {
-    ...baseLayout,
-    margin: { l: 60, r: 20, t: 16, b: 40 },
-    xaxis: { ...axisStyle, showgrid: false },
-    yaxis: { ...axisStyle },
-}, config);
-
-// ── 2. Disbursement by Fund Source — Donut ─────────────────────────────
-const fundLabels = {{ fund_labels|safe }};
-const fundValues = {{ fund_values|safe }};
-
-Plotly.newPlot('fundChart', [{
-    labels: fundLabels,
-    values: fundValues,
-    type: 'pie',
-    hole: 0.48,
-    marker: { colors: palette, line: { color: '#12141e', width: 2 } },
-    textposition: 'inside',
-    textinfo: 'percent',
-    hovertemplate: '<b>%{label}</b><br>₱%{value:,.0f}<br>%{percent}<extra></extra>',
-}], {
-    ...baseLayout,
-    showlegend: true,
-    legend: {
-        orientation: 'v',
-        x: 1.02, y: 0.5,
-        bgcolor: 'rgba(0,0,0,0)',
-        font: { size: 9, color: C.text },
-    },
-    margin: { l: 10, r: 140, t: 16, b: 16 },
-}, config);
-
-// ── 3. Budget vs Disbursement — Grouped Bar ───────────────────────────
-const budgetLabels = {{ budget_labels|safe }};
-const budgetAmounts = {{ budget_amounts|safe }};
-const disburseAmounts = {{ disburse_amounts|safe }};
-
-Plotly.newPlot('budgetChart', [
-    {
-        x: budgetLabels,
-        y: budgetAmounts,
-        type: 'bar',
-        name: 'Budget',
-        marker: { color: C.violet, opacity: 0.8 },
-        hovertemplate: '<b>%{x}</b><br>Budget: ₱%{y:,.0f}<extra></extra>',
-    },
-    {
-        x: budgetLabels,
-        y: disburseAmounts,
-        type: 'bar',
-        name: 'Disbursed',
-        marker: { color: C.sky, opacity: 0.8 },
-        hovertemplate: '<b>%{x}</b><br>Disbursed: ₱%{y:,.0f}<extra></extra>',
-    }
-], {
-    ...baseLayout,
-    margin: { l: 60, r: 20, t: 16, b: 80 },
-    xaxis: { ...axisStyle, showgrid: false, automargin: true },
-    yaxis: { ...axisStyle },
-    barmode: 'group',
-    showlegend: true,
-    legend: { orientation: 'h', x: 0, y: 1.1, bgcolor: 'rgba(0,0,0,0)' },
-}, config);
-
-// ── 4. Account Title / Expense Objects — Horizontal Bar ─────────────────
-const expenseLabels = {{ expense_labels|safe }};
-const expenseValues = {{ expense_values|safe }};
-
-Plotly.newPlot('expenseChart', [{
-    x: expenseValues,
-    y: expenseLabels,
-    type: 'bar',
-    orientation: 'h',
-    marker: { color: C.blue, opacity: 0.85 },
-    hovertemplate: '<b>%{y}</b><br>₱%{x:,.0f}<extra></extra>',
-}], {
-    ...baseLayout,
-    margin: { l: 200, r: 20, t: 16, b: 40 },
-    xaxis: { ...axisStyle },
-    yaxis: { ...axisStyle, automargin: true },
-}, config);
-
-// ── 5. Top Suppliers — Bar ──────────────────────────────────────────────
-const supplierLabels = {{ supplier_labels|safe }};
-const supplierValues = {{ supplier_values|safe }};
-
-Plotly.newPlot('supplierChart', [{
-    x: supplierLabels,
-    y: supplierValues,
-    type: 'bar',
-    marker: { color: C.amber, opacity: 0.85 },
-    hovertemplate: '<b>%{x}</b><br>₱%{y:,.0f}<extra></extra>',
-}], {
-    ...baseLayout,
-    margin: { l: 50, r: 20, t: 16, b: 100 },
-    xaxis: { ...axisStyle, showgrid: false, automargin: true },
-    yaxis: { ...axisStyle },
-}, config);
-
-// ── 6. Tax Withholding Summary — Stacked Bar ────────────────────────────
-const taxLabels = {{ tax_labels|safe }};
-const taxValues = {{ tax_values|safe }};
-
-Plotly.newPlot('taxChart', [{
-    x: taxLabels,
-    y: taxValues,
-    type: 'bar',
-    marker: { color: palette },
-    hovertemplate: '<b>%{x}</b><br>₱%{y:,.0f}<extra></extra>',
-}], {
-    ...baseLayout,
-    margin: { l: 50, r: 20, t: 16, b: 100 },
-    xaxis: { ...axisStyle, showgrid: false, automargin: true },
-    yaxis: { ...axisStyle },
-}, config);
-
-// ── 7. Cheque Monitoring — Donut ──────────────────────────────────────
-const chequeLabels = {{ cheque_labels|safe }};
-const chequeCounts = {{ cheque_counts|safe }};
-
-Plotly.newPlot('chequeChart', [{
-    labels: chequeLabels,
-    values: chequeCounts,
-    type: 'pie',
-    hole: 0.48,
-    marker: { colors: palette, line: { color: '#12141e', width: 2 } },
-    textposition: 'inside',
-    textinfo: 'percent',
-    hovertemplate: '<b>%{label}</b><br>%{value} transactions<br>%{percent}<extra></extra>',
-}], {
-    ...baseLayout,
-    showlegend: true,
-    legend: {
-        orientation: 'v',
-        x: 1.02, y: 0.5,
-        bgcolor: 'rgba(0,0,0,0)',
-        font: { size: 9, color: C.text },
-    },
-    margin: { l: 10, r: 140, t: 16, b: 16 },
-}, config);
-
-// ── 8. District Spending — Stacked Column ───────────────────────────────
-const districtLabels = {{ district_labels|safe }};
-const districtValues = {{ district_values|safe }};
-
-Plotly.newPlot('districtChart', [{
-    x: districtLabels,
-    y: districtValues,
-    type: 'bar',
-    marker: { color: C.green, opacity: 0.85 },
-    hovertemplate: '<b>%{x}</b><br>₱%{y:,.0f}<extra></extra>',
-}], {
-    ...baseLayout,
-    margin: { l: 60, r: 20, t: 16, b: 80 },
-    xaxis: { ...axisStyle, showgrid: false, automargin: true },
-    yaxis: { ...axisStyle },
-}, config);
-
-// ── 9. Bank Balance Trend — Area ────────────────────────────────────────
-const bankDates = {{ bank_dates|safe }};
-const bankDebits = {{ bank_debits|safe }};
-const bankCredits = {{ bank_credits|safe }};
-const bankBalances = {{ bank_balances|safe }};
-
-Plotly.newPlot('bankChart', [
-    {
-        x: bankDates,
-        y: bankCredits,
-        type: 'scatter',
-        mode: 'lines',
-        name: 'Credit',
-        line: { color: C.green, width: 1 },
-        fill: 'tozeroy',
-        fillcolor: 'rgba(16, 185, 129, 0.1)',
-        hovertemplate: '<b>Credit</b><br>₱%{y:,.0f}<extra></extra>',
-    },
-    {
-        x: bankDates,
-        y: bankDebits,
-        type: 'scatter',
-        mode: 'lines',
-        name: 'Debit',
-        line: { color: C.rose, width: 1 },
-        fill: 'tozeroy',
-        fillcolor: 'rgba(244, 63, 94, 0.1)',
-        hovertemplate: '<b>Debit</b><br>₱%{y:,.0f}<extra></extra>',
-    },
-    {
-        x: bankDates,
-        y: bankBalances,
-        type: 'scatter',
-        mode: 'lines',
-        name: 'Balance',
-        line: { color: C.teal, width: 2.5 },
-        hovertemplate: '<b>Balance</b><br>₱%{y:,.0f}<extra></extra>',
-    }
-], {
-    ...baseLayout,
-    margin: { l: 60, r: 20, t: 16, b: 40 },
-    xaxis: { ...axisStyle, showgrid: false },
-    yaxis: { ...axisStyle },
-    showlegend: true,
-    legend: { orientation: 'h', x: 0, y: 1.1, bgcolor: 'rgba(0,0,0,0)' },
-}, config);
-
-// ── Responsive resize ───────────────────────────────────────────────────
-const chartIds = [
-    'monthlyChart','fundChart','budgetChart','expenseChart','supplierChart',
-    'taxChart','chequeChart','districtChart','bankChart'
-];
-window.addEventListener('resize', () => {
-    chartIds.forEach(id => { try { Plotly.Plots.resize(id); } catch(e) {} });
-});
-
-// Apply filters on form submission
-document.getElementById('filterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    this.submit();
-});
-</script>
 {% endblock %}

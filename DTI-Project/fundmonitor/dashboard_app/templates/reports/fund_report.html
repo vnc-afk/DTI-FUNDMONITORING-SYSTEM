@@ -1,10 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load format_filters %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard_app/css/report.css' %}">
-{% endblock %}
+{% block page_title %}Fund Report{% endblock %}
 
 {% block content %}
 <div class="report">
@@ -58,100 +55,32 @@
     </div>
   </div>
 
-  <!-- Budget Breakdown Table -->
-  <div class="table-wrap" style="overflow-x:auto;">
-    <table class="budget-summary">
-      <thead>
-        <tr>
-          <th>Annual Status</th>
-          {% for fund in fund_sources %}
-          <th>{{ fund.name }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="report-row-budget">
-          <td>Annual Budget</td>
-          {% for fund in fund_sources %}
-          <td>₱ {{ budget_data|dict_key:fund.id|dict_key:"annual_budget"|currency:2 }}</td>
-          {% endfor %}
-        </tr>
-        <tr class="report-row-disburse">
-          <td>Total Downloads</td>
-          {% for fund in fund_sources %}
-          <td>₱ {{ budget_data|dict_key:fund.id|dict_key:"total_downloads"|currency:2 }}</td>
-          {% endfor %}
-        </tr>
-        <tr class="report-row-disburse">
-          <td>Total Disbursement</td>
-          {% for fund in fund_sources %}
-          <td>₱ {{ budget_data|dict_key:fund.id|dict_key:"total_disbursed"|currency:2 }}</td>
-          {% endfor %}
-        </tr>
-        <tr class="report-row-balance">
-          <td>Current Balance</td>
-          {% for fund in fund_sources %}
-          <td>₱ {{ budget_data|dict_key:fund.id|dict_key:"current_balance"|currency:2 }}</td>
-          {% endfor %}
-        </tr>
-        <tr class="report-row-bur">
-            <td>BUR (%)</td>
-            {% for fund in fund_sources %}
-            <td>
-                <div class="bur-cell">
-                    <div class="bur-bar">
-                        <div class="bur-bar-fill" style="width:{% if budget_data|dict_key:fund.id %}{{ budget_data|dict_key:fund.id|dict_key:"bur_percent" }}{% else %}0{% endif %}%;"></div>
-                    </div>
-                    {% if budget_data|dict_key:fund.id %}{{ budget_data|dict_key:fund.id|dict_key:"bur_percent"|floatformat:2 }}{% else %}0.00{% endif %}%
-                </div>
-            </td>
-            {% endfor %}
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
   <!-- ── DETAILED BREAKDOWN TABS ── -->
   <div class="section-title">Detailed Breakdown</div>
 
   <!-- Tab Buttons -->
-  <div class="filter-bar" style="margin-bottom: 0; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0;">
+  <div class="filter-bar">
     <button class="filter-btn active" data-tab="disbursement">
       <i class="bi bi-receipt"></i> Disbursement
     </button>
     <button class="filter-btn" data-tab="downloads">
       <i class="bi bi-download"></i> Downloads
     </button>
+    <div style="margin-left: auto; display: flex; gap: 8px;">
+      <button class="filter-btn" id="open-all-btn">
+        <i class="bi bi-arrows-expand"></i> Open All
+      </button>
+      <button class="filter-btn" id="close-all-btn">
+        <i class="bi bi-arrows-collapse"></i> Close All
+      </button>
+    </div>
   </div>
 
   <!-- Disbursement Panel -->
   <div id="tab-disbursement" class="tab-panel">
-    <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      <table class="table table-bordered table-sm table-report">
-        <thead>
-          <tr>
-            <th>Disbursement</th>
-            {% for fund in fund_sources %}
-            <th>{{ fund.name }}</th>
-            {% endfor %}
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in disbursement_breakdown %}
-          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
-            <td>{{ row.month }}</td>
-            {% for fund in fund_sources %}
-            <td>{% if row.data|dict_key:fund.id %}₱ {{ row.data|dict_key:fund.id|currency:2 }}{% else %}—{% endif %}</td>
-            {% endfor %}
-            <td>₱ {{ row.total|currency:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="accordion quarterly-acc" data-breakdown="disbursement"></div>
     <div class="tab-download-bar">
-      <span><i class="bi bi-info-circle me-1"></i>Monthly disbursement data across all output objectives</span>
+      <span><i class="bi bi-info-circle me-1"></i>Quarterly disbursement breakdown by month</span>
       <div style="display:flex; gap:8px;">
         <a href="{% url 'download_mooe' 'disbursement' %}" class="btn btn-outline">
           <i class="bi bi-file-earmark-excel"></i> Excel
@@ -165,32 +94,9 @@
 
   <!-- Downloads Panel -->
   <div id="tab-downloads" class="tab-panel" style="display:none;">
-    <div class="table-wrap" style="border-radius: 0 0 8px 8px; margin-bottom: 0; overflow-x:auto;">
-      <table class="table table-bordered table-sm table-report">
-        <thead>
-          <tr>
-            <th>Downloads</th>
-            {% for fund in fund_sources %}
-            <th>{{ fund.name }}</th>
-            {% endfor %}
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in downloads_breakdown %}
-          <tr {% if row.quarter %}class="quarter-q{{ row.quarter }}"{% endif %}>
-            <td>{{ row.month }}</td>
-            {% for fund in fund_sources %}
-            <td>{% if row.data|dict_key:fund.id %}₱ {{ row.data|dict_key:fund.id|currency:2 }}{% else %}—{% endif %}</td>
-            {% endfor %}
-            <td>₱ {{ row.total|currency:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="accordion quarterly-acc" data-breakdown="downloads"></div>
     <div class="tab-download-bar">
-      <span><i class="bi bi-info-circle me-1"></i>Available report files for download</span>
+      <span><i class="bi bi-info-circle me-1"></i>Quarterly download breakdown by month</span>
       <div style="display:flex; gap:8px;">
         <a href="{% url 'download_mooe' 'downloads' %}" class="btn btn-outline">
           <i class="bi bi-file-earmark-excel"></i> Excel
@@ -203,18 +109,8 @@
   </div>
 
 </div><!-- /.report -->
-{% endblock %}
 
-{% block scripts %}
 <script>
-  // Tab switching
-  document.querySelectorAll('.filter-btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-tab]').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
-    });
-  });
+  const FUND_REPORT_DATA = JSON.parse('{{ fund_report_json|escapejs }}');
 </script>
 {% endblock %}

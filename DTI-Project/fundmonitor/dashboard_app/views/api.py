@@ -2,7 +2,8 @@
 
 import re
 from django.http import JsonResponse
-from dashboard_app.models import Supplier, TaxTable
+from django.db.models import Sum
+from dashboard_app.models import Supplier, TaxTable, FundSource, MasterFundMonitoring, BreakdownCategory, FundSourceBreakdown
 
 
 def get_supplier_data(request, supplier_id):
@@ -71,3 +72,65 @@ def get_tax_rates(request, purchase_type_id):
         return JsonResponse(data)
     except TaxTable.DoesNotExist:
         return JsonResponse({'error': 'Tax rates not found for this purchase type'}, status=404)
+
+
+def get_fund_budget(request):
+    """API endpoint to get budget information for a fund source"""
+    fund_id = request.GET.get('fund_id')
+    
+    if not fund_id:
+        return JsonResponse({'error': 'Fund ID is required'}, status=400)
+    
+    try:
+        fund = FundSource.objects.get(pk=fund_id)
+        
+        # Calculate total disbursements for this fund
+        total_disbursed = MasterFundMonitoring.objects.filter(
+            fund_source=fund,
+            transaction_type='Disbursement'
+        ).aggregate(total=Sum('payments'))['total'] or 0
+        
+        data = {
+            'id': fund.id,
+            'name': fund.name,
+            'annual_budget': float(fund.annual_budget or 0),
+            'total_disbursed': float(total_disbursed),
+            'available': float((fund.annual_budget or 0) - (total_disbursed or 0)),
+        }
+        return JsonResponse(data)
+    except FundSource.DoesNotExist:
+        return JsonResponse({'error': 'Fund source not found'}, status=404)
+
+
+def get_mooe_budget(request):
+    """API endpoint to get budget information for a MOOE category"""
+    mooe_id = request.GET.get('mooe_id')
+    
+    if not mooe_id:
+        return JsonResponse({'error': 'MOOE ID is required'}, status=400)
+    
+    try:
+        mooe = BreakdownCategory.objects.get(pk=mooe_id)
+        
+        # Calculate annual budget for this MOOE category (sum of all fund source breakdowns)
+        annual_budget = FundSourceBreakdown.objects.filter(
+            category=mooe
+        ).aggregate(total=Sum('budget_amount'))['total'] or 0
+        
+        # Calculate total disbursements for this MOOE category
+        total_disbursed = MasterFundMonitoring.objects.filter(
+            mooe=mooe.code,
+            transaction_type='Disbursement'
+        ).aggregate(total=Sum('payments'))['total'] or 0
+        
+        data = {
+            'id': mooe.id,
+            'code': mooe.code,
+            'name': mooe.name,
+            'annual_budget': float(annual_budget),
+            'total_disbursed': float(total_disbursed),
+            'available': float(annual_budget - total_disbursed),
+        }
+        return JsonResponse(data)
+    except BreakdownCategory.DoesNotExist:
+        return JsonResponse({'error': 'MOOE category not found'}, status=404)

@@ -65,7 +65,7 @@ class Staff(models.Model):
         max_length=5,
         blank=True,
         validators=[validate_letters_only],
-        help_text="Middle initial (optional, letters only)"
+        help_text="Middle initial (letters only)"
     )
     last_name = models.CharField(
         max_length=100,

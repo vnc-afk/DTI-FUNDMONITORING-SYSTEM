@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load format_filters %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard_app/css/report.css' %}">
-{% endblock %}
+{% block page_title %}Negosyo Center Report{% endblock %}
 
 {% block content %}
 <div class="report">
@@ -34,158 +33,45 @@
   <div class="summary-cards">
     <div class="scard report-row-budget">
       <div class="scard-label">Annual Budget</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">₱ {{ annual_budget|floatformat:2|intcomma_format }}</div>
     </div>
     <div class="scard report-row-disburse">
       <div class="scard-label">Total Downloads</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">₱ {{ total_downloads|floatformat:2|intcomma_format }}</div>
     </div>
     <div class="scard report-row-disburse">
       <div class="scard-label">Total Disbursement</div>
-      <div class="scard-amount">—</div>
-    </div>
-    <div class="scard report-row-balance">
-      <div class="scard-label">Current Balance</div>
-      <div class="scard-amount">—</div>
-    </div>
-    <div class="scard report-row-bur">
-      <div class="scard-label">BUR (Current)</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">₱ {{ total_disbursement|floatformat:2|intcomma_format }}</div>
     </div>
     <div class="scard report-row-balance">
       <div class="scard-label">Annual Balance</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">₱ {{ current_balance|floatformat:2|intcomma_format }}</div>
     </div>
     <div class="scard report-row-bur">
       <div class="scard-label">BUR (Annual)</div>
-      <div class="scard-amount">—</div>
+      <div class="scard-amount">{{ bur_rate|floatformat:1 }}%</div>
     </div>
   </div>
-
 
   <!-- ── DISTRICT ALLOCATION ── -->
   <div class="section-title">District Allocation</div>
 
+  <!-- Open/Close All Buttons -->
+  <div style="margin-bottom: 16px; display: flex; gap: 8px;">
+    <button id="open-all-btn" class="btn btn-outline">
+      <i class="bi bi-arrows-expand"></i> Open All
+    </button>
+    <button id="close-all-btn" class="btn btn-outline">
+      <i class="bi bi-arrows-collapse"></i> Close All
+    </button>
+  </div>
+
   <!-- Districts Accordion -->
-  <div class="accordion" id="districts-accordion">
-    
-    <!-- District 1 -->
-    <div class="acc-item open">
-      <div class="acc-header" onclick="toggleDistrict(this)">
-        <div class="acc-header-left">
-          <div class="acc-q-label">1st District</div>
-        </div>
-        <div class="acc-header-right">
-          <div class="acc-chevron">▼</div>
-        </div>
-      </div>    
-      <div class="acc-body">
-        <table class="table table-bordered table-sm">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Sto. Domingo</th>
-              <th>Bacacay</th>
-              <th>Malilipot</th>
-              <th>Tabaco City</th>
-              <th>Tiwi</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for month in months %}
-            <tr>
-              <td>{{ month }}</td>
-              <td>-</td><td>-</td><td>-</td>
-              <td>-</td><td>-</td><td>0.00</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- District 2 -->
-    <div class="acc-item">
-      <div class="acc-header" onclick="toggleDistrict(this)">
-        <div class="acc-header-left">
-          <div class="acc-q-label">2nd District</div>
-        </div>
-        <div class="acc-header-right">
-          <div class="acc-chevron">▼</div>
-        </div>
-      </div>
-      <div class="acc-body">
-        <table class="table table-bordered table-sm">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Daraga</th>
-              <th>Camalig</th>
-              <th>Guinobatan</th>
-              <th>Ligao City</th>
-              <th>Polangui</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for month in months %}
-            <tr>
-              <td>{{ month }}</td>
-              <td>-</td><td>-</td><td>-</td>
-              <td>-</td><td>-</td><td>0.00</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- District 3 -->
-    <div class="acc-item">
-      <div class="acc-header" onclick="toggleDistrict(this)">
-        <div class="acc-header-left">
-          <div class="acc-q-label">3rd District</div>
-        </div>
-        <div class="acc-header-right">
-          <div class="acc-chevron">▼</div>
-        </div>
-      </div>
-      <div class="acc-body">
-        <table class="table table-bordered table-sm">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Albay City</th>
-              <th>Manito</th>
-              <th>Rapu-Rapu</th>
-              <th>San Teodoro</th>
-              <th>Malinao</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for month in months %}
-            <tr>
-              <td>{{ month }}</td>
-              <td>-</td><td>-</td><td>-</td>
-              <td>-</td><td>-</td><td>0.00</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div><!-- /.accordion -->
+  <div class="accordion" id="districts-accordion"></div>
 
 </div><!-- /.report -->
 
 <script>
-function toggleDistrict(header) {
-  const item = header.closest('.acc-item');
-  item.classList.toggle('open');
-}
+  const NC_REPORT_DATA = JSON.parse('{{ nc_report_json|escapejs }}');
 </script>
-
 {% endblock %}

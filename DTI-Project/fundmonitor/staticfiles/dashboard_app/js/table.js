@@ -1,7 +1,7 @@
 /* table.js — Table filtering, sorting, and pagination */
 
-document.addEventListener('DOMContentLoaded', () => {
-
+// Initialize table functionality
+function initializeTableFunctionality() {
   /* ── Element References ── */
   const searchInput  = document.getElementById('searchInput');
   const statusFilter = document.getElementById('statusFilter');
@@ -123,5 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+}
 
-});
+// Initialize on page load and when AJAX loads new content
+document.addEventListener('DOMContentLoaded', initializeTableFunctionality);

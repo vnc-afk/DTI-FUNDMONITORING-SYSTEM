@@ -55,6 +55,8 @@ urlpatterns = [
     path('master_fund_monitoring/delete/<int:pk>/', views.master_fund_monitoring_delete, name='master_fund_monitoring_delete'),
     path('api/supplier/<int:supplier_id>/', views.get_supplier_data, name='get_supplier_data'),
     path('api/tax_rates/<int:purchase_type_id>/', views.get_tax_rates, name='get_tax_rates'),
+    path('api/fund-budget/', views.get_fund_budget, name='get_fund_budget'),
+    path('api/mooe-budget/', views.get_mooe_budget, name='get_mooe_budget'),
     
     path('mooe/download/<str:report_type>/', views.download_mooe, name='download_mooe'),
 # Staff CRUD

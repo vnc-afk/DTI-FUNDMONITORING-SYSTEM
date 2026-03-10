@@ -9,17 +9,27 @@ from dashboard_app.forms import FundSourceForm, FundSourceBreakdownForm
 
 def fund_sources_view(request):
     """List all fund sources with statistics"""
+    from django.db.models import Q
+    
     funds = FundSource.objects.all()
     
     # Calculate totals
     total_budget = funds.aggregate(total=Sum('annual_budget'))['total'] or 0
     fund_count = funds.count()
+    
+    # Calculate active funds (those with budget > 0)
+    active_funds = funds.filter(annual_budget__gt=0)
+    active_fund_count = active_funds.count()
+    active_total_budget = active_funds.aggregate(total=Sum('annual_budget'))['total'] or 0
+    
     average_budget = total_budget / fund_count if fund_count > 0 else 0
     
     context = {
         'funds': funds,
         'total_budget': total_budget,
         'fund_count': fund_count,
+        'active_fund_count': active_fund_count,
+        'active_total_budget': active_total_budget,
         'average_budget': average_budget,
     }
     return render(request, 'funding/fund_source/fund_sources.html', context)

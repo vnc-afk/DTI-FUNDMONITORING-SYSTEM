@@ -136,7 +136,7 @@ class MasterFundMonitoring(models.Model):
         blank=True,
         null=True,
         validators=[validate_date_not_in_future],
-        help_text="Date transaction was cleared (optional)"
+        help_text="Date transaction was cleared"
     )
     account_title = models.ForeignKey(
         'ExpenseObject',
@@ -191,7 +191,7 @@ class MasterFundMonitoring(models.Model):
         blank=True,
         null=True,
         related_name='monitoring_expenses',
-        help_text="Expense classification (optional)"
+        help_text="Expense classification"
     )
     cheque_status = models.CharField(
         max_length=20,
@@ -209,7 +209,7 @@ class MasterFundMonitoring(models.Model):
         blank=True,
         null=True,
         related_name='monitoring_records',
-        help_text="Responsible staff member (optional)"
+        help_text="Responsible staff member"
     )
     
     # Tax Breakdown (Second Set)

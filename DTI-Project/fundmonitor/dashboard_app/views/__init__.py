@@ -11,6 +11,7 @@ from .funding import (
     tax_table_list, tax_table_create, tax_table_update, tax_table_delete
 )
 from .reports import expense_report, mooe_report, nc_report, fund_report, download_mooe, tin
+from .api import get_fund_budget, get_mooe_budget
 
 __all__ = [
     'dashboard',
@@ -25,4 +26,5 @@ __all__ = [
     # tax table
     'tax_table_list', 'tax_table_create', 'tax_table_update', 'tax_table_delete',
     'expense_report', 'mooe_report', 'nc_report', 'fund_report', 'download_mooe', 'tin',
+    'get_fund_budget', 'get_mooe_budget',
 ]

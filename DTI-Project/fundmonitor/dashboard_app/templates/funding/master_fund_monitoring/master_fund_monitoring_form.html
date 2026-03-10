@@ -497,3 +497,194 @@
     </div><!-- /.form-namespace -->
 {% endblock %}
 
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fundSourceSelect = document.querySelector('select[name="fund_source"]');
+    const paymentsInput = document.querySelector('input[name="payments"]');
+    const transactionTypeRadios = document.querySelectorAll('input[name="transaction_type"]');
+    
+    // Create budget info element if not exists
+    let budgetInfoDiv = document.getElementById('budgetInfo');
+    if (!budgetInfoDiv) {
+        budgetInfoDiv = document.createElement('div');
+        budgetInfoDiv.id = 'budgetInfo';
+        budgetInfoDiv.style.cssText = `
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        `;
+        // Insert after Fund Source select
+        fundSourceSelect.closest('.col-md-6').parentElement.appendChild(budgetInfoDiv);
+    }
+    
+    // Get fund data from data attribute (will be populated by view)
+    const fundDataElement = document.getElementById('fundBudgetData');
+    const fundData = fundDataElement ? JSON.parse(fundDataElement.textContent) : {};
+    
+    async function updateBudgetInfo() {
+        const selectedFundId = fundSourceSelect.value;
+        const transactionType = Array.from(transactionTypeRadios).find(r => r.checked)?.value || 'Disbursement';
+        const paymentAmount = parseFloat(paymentsInput.value) || 0;
+        
+        if (!selectedFundId || transactionType !== 'Disbursement') {
+            budgetInfoDiv.style.display = 'none';
+            return;
+        }
+        
+        // Fetch budget info for selected fund
+        try {
+            const response = await fetch(`/api/fund-budget/?fund_id=${selectedFundId}`);
+            const data = await response.json();
+            
+            const annual_budget = parseFloat(data.annual_budget) || 0;
+            const total_disbursed = parseFloat(data.total_disbursed) || 0;
+            const available = annual_budget - total_disbursed;
+            
+            // Display budget info
+            budgetInfoDiv.style.display = 'block';
+            
+            const budgetPercentage = annual_budget > 0 ? (total_disbursed / annual_budget) * 100 : 0;
+            const statusColor = available >= 0 ? '#22c55e' : '#ef4444';
+            const barColor = budgetPercentage > 80 ? '#f59e0b' : (budgetPercentage > 95 ? '#ef4444' : '#3b82f6');
+            
+            budgetInfoDiv.innerHTML = `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600;">
+                        <span>Budget Status</span>
+                        <span style="color: ${statusColor};">₱${available.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${barColor}; height: 100%; width: ${Math.min(budgetPercentage, 100)}%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <span>Annual Budget: ₱${annual_budget.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span>Disbursed: ₱${total_disbursed.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${budgetPercentage.toFixed(1)}%)</span>
+                    </div>
+                </div>
+                ${paymentAmount > 0 ? `
+                    <div style="padding: 12px; border-radius: 6px; background: ${paymentAmount > available ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)'}; border-left: 4px solid ${paymentAmount > available ? '#ef4444' : '#22c55e'};">
+                        <div style="font-weight: 600; color: ${paymentAmount > available ? '#ef4444' : '#22c55e'};">
+                            ${paymentAmount > available ? '⚠ Budget Exceeded' : '✓ Within Budget'}
+                        </div>
+                        <div style="color: #6b7280; margin-top: 4px;">
+                            Payment: ₱${paymentAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            ${paymentAmount > available ? ` (Exceeds available by ₱${(paymentAmount - available).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})})` : ` (₱${(available - paymentAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining)`}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        } catch (error) {
+            console.error('Error fetching budget info:', error);
+        }
+    }
+    
+    // Update on fund source change
+    fundSourceSelect.addEventListener('change', updateBudgetInfo);
+    
+    // Update on payment amount change
+    paymentsInput.addEventListener('input', updateBudgetInfo);
+    
+    // Update on transaction type change
+    transactionTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateBudgetInfo);
+    });
+    
+    // Initial update
+    updateBudgetInfo();
+    
+    // MOOE Budget Display
+    const mooeSelect = document.querySelector('select[name="mooe"]');
+    
+    // Create MOOE budget info element if not exists
+    let mooeBudgetInfoDiv = document.getElementById('mooeBudgetInfo');
+    if (!mooeBudgetInfoDiv) {
+        mooeBudgetInfoDiv = document.createElement('div');
+        mooeBudgetInfoDiv.id = 'mooeBudgetInfo';
+        mooeBudgetInfoDiv.style.cssText = `
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        `;
+        // Insert after MOOE select
+        mooeSelect.closest('.col-md-6').parentElement.appendChild(mooeBudgetInfoDiv);
+    }
+    
+    async function updateMOOEBudgetInfo() {
+        const selectedMOOEId = mooeSelect.value;
+        const transactionType = Array.from(transactionTypeRadios).find(r => r.checked)?.value || 'Disbursement';
+        const paymentAmount = parseFloat(paymentsInput.value) || 0;
+        
+        if (!selectedMOOEId || transactionType !== 'Disbursement') {
+            mooeBudgetInfoDiv.style.display = 'none';
+            return;
+        }
+        
+        // Fetch budget info for selected MOOE
+        try {
+            const response = await fetch(`/api/mooe-budget/?mooe_id=${selectedMOOEId}`);
+            const data = await response.json();
+            
+            const annual_budget = parseFloat(data.annual_budget) || 0;
+            const total_disbursed = parseFloat(data.total_disbursed) || 0;
+            const available = annual_budget - total_disbursed;
+            
+            // Display budget info
+            mooeBudgetInfoDiv.style.display = 'block';
+            
+            const budgetPercentage = annual_budget > 0 ? (total_disbursed / annual_budget) * 100 : 0;
+            const statusColor = available >= 0 ? '#22c55e' : '#ef4444';
+            const barColor = budgetPercentage > 80 ? '#f59e0b' : (budgetPercentage > 95 ? '#ef4444' : '#3b82f6');
+            
+            mooeBudgetInfoDiv.innerHTML = `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600;">
+                        <span>MOOE Budget Status</span>
+                        <span style="color: ${statusColor};">₱${available.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${barColor}; height: 100%; width: ${Math.min(budgetPercentage, 100)}%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <span>Category Budget: ₱${annual_budget.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span>Disbursed: ₱${total_disbursed.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${budgetPercentage.toFixed(1)}%)</span>
+                    </div>
+                </div>
+                ${paymentAmount > 0 ? `
+                    <div style="padding: 12px; border-radius: 6px; background: ${paymentAmount > available ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)'}; border-left: 4px solid ${paymentAmount > available ? '#ef4444' : '#22c55e'};">
+                        <div style="font-weight: 600; color: ${paymentAmount > available ? '#ef4444' : '#22c55e'};">
+                            ${paymentAmount > available ? '⚠ MOOE Budget Exceeded' : '✓ Within MOOE Budget'}
+                        </div>
+                        <div style="color: #6b7280; margin-top: 4px;">
+                            Payment: ₱${paymentAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            ${paymentAmount > available ? ` (Exceeds available by ₱${(paymentAmount - available).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})})` : ` (₱${(available - paymentAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining)`}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        } catch (error) {
+            console.error('Error fetching MOOE budget info:', error);
+        }
+    }
+    
+    // Update on MOOE change
+    mooeSelect.addEventListener('change', updateMOOEBudgetInfo);
+    
+    // Update on payment amount change
+    paymentsInput.addEventListener('input', updateMOOEBudgetInfo);
+    
+    // Update on transaction type change
+    transactionTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateMOOEBudgetInfo);
+    });
+    
+    // Initial update
+    updateMOOEBudgetInfo();
+});
+</script>
+{% endblock %}
+

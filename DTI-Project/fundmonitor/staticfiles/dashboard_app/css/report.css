@@ -389,6 +389,27 @@
   font-family: var(--font-body);
 }
 
+.dist-total-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.dist-total-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.dist-total {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .acc-badge {
   font-size: 9px;
   letter-spacing: 1.5px;
@@ -898,4 +919,274 @@
 /* Keep thead th cursor default for non-sortable tables */
 .report .table-wrap thead th {
   cursor: default;
+}
+
+/* ─── QUARTERLY ACCORDION STYLES ─── */
+
+/* Quarterly badge colors */
+.q-badge {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.q-badge.q1 {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.q-badge.q2 {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
+.q-badge.q3 {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.q-badge.q4 {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Quarterly range label */
+.q-range {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* Quarterly totals in header */
+.q-fund-total {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: right;
+}
+
+.q-grand-total {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: right;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+}
+
+/* Quarterly table styling */
+.quarterly-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quarterly-table thead th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.quarterly-table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.quarterly-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.quarterly-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.quarterly-table tbody tr:hover {
+  background: var(--bg-elevated);
+}
+
+/* Month cell with indentation and dot */
+.month-cell {
+  padding: 9px 16px !important;
+  color: var(--text-secondary);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.month-label {
+  color: var(--text-primary);
+}
+
+/* Fund cells in quarterly table */
+.fund-cell {
+  padding: 9px 16px !important;
+  font-size: 11px;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.fund-cell:empty::after {
+  content: '—';
+  color: var(--text-secondary);
+}
+
+.total-cell {
+  padding: 9px 16px !important;
+  font-size: 11px;
+  text-align: right;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Responsive for quarterly accordion */
+@media (max-width: 1024px) {
+  .acc-header-right {
+    gap: 12px;
+  }
+
+  .q-fund-total {
+    font-size: 10px;
+    min-width: 90px;
+  }
+
+  .q-grand-total {
+    font-size: 11px;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .acc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .acc-header-right {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .q-fund-total {
+    min-width: auto;
+    flex: 1;
+    min-width: 45%;
+  }
+
+  .q-grand-total {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding: 8px 0 0 0;
+    margin-top: 8px;
+  }
+
+  .quarterly-table {
+    font-size: 10px;
+  }
+
+  .month-cell,
+  .fund-cell,
+  .total-cell {
+    padding: 7px 12px !important;
+  }
+}
+
+/* ─── QUARTER SUB-ACCORDION STYLES ─── */
+
+.qtr-item {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.qtr-item.open .qtr-body {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.qtr-item .qtr-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.qtr-hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+  background: var(--bg-elevated);
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  user-select: none;
+  transition: background 0.25s ease;
+}
+
+.qtr-hd:hover {
+  background: var(--bg-card);
+}
+
+.qtr-chevron {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  transition: transform 0.3s ease;
+  transform: rotate(0deg);
+  flex-shrink: 0;
+}
+
+.qtr-item .qtr-chevron {
+  transform: rotate(0deg);
+}
+
+.qtr-item:not(.open) .qtr-chevron {
+  transform: rotate(-90deg);
+}
+
+.qtr-total {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.row-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  margin-right: 6px;
 }

@@ -81,6 +81,12 @@ def dashboard(request):
     # ====== 1. KPI SUMMARY CARDS ======
     total_budget = FundSource.objects.aggregate(total=Sum('annual_budget'))['total'] or Decimal(0)
     
+    # Calculate active funds (those with budget > 0)
+    all_fund_sources = FundSource.objects.all()
+    active_funds = all_fund_sources.filter(annual_budget__gt=0)
+    active_fund_count = active_funds.count()
+    active_total_budget = active_funds.aggregate(total=Sum('annual_budget'))['total'] or Decimal(0)
+    
     # Calculate disbursements (excluding refunds and adjustments)
     disbursement_qs = transaction_qs.filter(transaction_type='Disbursement')
     total_disbursement = disbursement_qs.aggregate(total=Sum('payments'))['total'] or Decimal(0)
@@ -220,7 +226,8 @@ def dashboard(request):
     years = sorted(set(MasterFundMonitoring.objects.dates('date', 'year')))
     years = [dt.year for dt in years]
     
-    fund_sources = FundSource.objects.all()
+    # Only show active fund sources (budget > 0) in dropdowns
+    fund_sources = FundSource.objects.filter(annual_budget__gt=0)
     divisions = Division.objects.all()
     districts = District.objects.all()
     expense_classifications = ExpenseCategory.objects.all()
@@ -229,6 +236,8 @@ def dashboard(request):
     context = {
         # KPIs
         'total_budget': float(total_budget),
+        'active_fund_count': active_fund_count,
+        'active_total_budget': float(active_total_budget),
         'total_disbursement': float(total_disbursement),
         'remaining_balance': float(remaining_balance),
         'budget_utilization_rate': round(budget_utilization_rate, 2),

@@ -187,9 +187,19 @@ function renderExpenseAccordion() {
 
 // ─── INITIALIZATION ──────────────────────────────────────────────────────────
 function initExpensesReport(expenseData) {
+  // Reset state for fresh initialization
   EXPENSES = expenseData || [];
+  currentFilter = 'all';
+  currentSort = { col: 'total', dir: -1 };
 
-  // Add event listeners for filter buttons
+  // Remove old event listeners from previous page load
+  // (DOM elements are replaced, but we clear references)
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+  });
+
+  // Add event listeners for filter buttons (fresh)
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));

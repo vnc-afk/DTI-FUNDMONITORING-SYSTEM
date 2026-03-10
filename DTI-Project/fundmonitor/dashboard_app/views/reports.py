@@ -69,11 +69,12 @@ def mooe_report(request):
     """Generate MOOE (Maintenance and Other Operating Expenses) report"""
     from dashboard_app.models import BreakdownCategory, FundSourceBreakdown, MasterFundMonitoring
     
-    months = [
-        "Jan", "Feb", "Mar", "1st Qtr",
-        "Apr", "May", "Jun", "2nd Qtr",
-        "Jul", "Aug", "Sep", "3rd Qtr",
-        "Oct", "Nov", "Dec", "4th Qtr"
+    # Month names only (no quarters)
+    month_names = [
+        "Jan", "Feb", "Mar",
+        "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep",
+        "Oct", "Nov", "Dec"
     ]
     
     # Get all breakdown categories
@@ -162,139 +163,181 @@ def mooe_report(request):
     def calc_row_total(data_dict, codes):
         return sum(data_dict.get(code, 0) for code in codes)
     
-    # Months 1-3 (Jan, Feb, Mar) + Q1
-    row1 = {'name': 'Jan', 'month': 1, 'data': disbursement_data[1], 'total': calc_row_total(disbursement_data[1], category_codes)}
-    disbursement_breakdown.append(row1)
-    row2 = {'name': 'Feb', 'month': 2, 'data': disbursement_data[2], 'total': calc_row_total(disbursement_data[2], category_codes)}
-    disbursement_breakdown.append(row2)
-    row3 = {'name': 'Mar', 'month': 3, 'data': disbursement_data[3], 'total': calc_row_total(disbursement_data[3], category_codes)}
-    disbursement_breakdown.append(row3)
+    # Add individual month rows only (no quarterly totals - JS calculates them)
+    for month_num in range(1, 13):
+        row_total = calc_row_total(disbursement_data[month_num], category_codes)
+        disbursement_breakdown.append({
+            'month': month_names[month_num - 1],
+            'month_num': month_num,
+            'data': disbursement_data[month_num],
+            'total': row_total,
+            'quarter': None,
+        })
+        
+        row_total = calc_row_total(downloads_data[month_num], category_codes)
+        downloads_breakdown.append({
+            'month': month_names[month_num - 1],
+            'month_num': month_num,
+            'data': downloads_data[month_num],
+            'total': row_total,
+            'quarter': None,
+        })
     
-    q1_data = {}
-    for code in category_codes:
-        q1_data[code] = disbursement_data[1][code] + disbursement_data[2][code] + disbursement_data[3][code]
-    q1_row = {'name': '1st Qtr', 'quarter': 1, 'data': q1_data, 'total': calc_row_total(q1_data, category_codes)}
-    disbursement_breakdown.append(q1_row)
-    
-    # Months 4-6
-    row4 = {'name': 'Apr', 'month': 4, 'data': disbursement_data[4], 'total': calc_row_total(disbursement_data[4], category_codes)}
-    disbursement_breakdown.append(row4)
-    row5 = {'name': 'May', 'month': 5, 'data': disbursement_data[5], 'total': calc_row_total(disbursement_data[5], category_codes)}
-    disbursement_breakdown.append(row5)
-    row6 = {'name': 'Jun', 'month': 6, 'data': disbursement_data[6], 'total': calc_row_total(disbursement_data[6], category_codes)}
-    disbursement_breakdown.append(row6)
-    
-    q2_data = {}
-    for code in category_codes:
-        q2_data[code] = disbursement_data[4][code] + disbursement_data[5][code] + disbursement_data[6][code]
-    q2_row = {'name': '2nd Qtr', 'quarter': 2, 'data': q2_data, 'total': calc_row_total(q2_data, category_codes)}
-    disbursement_breakdown.append(q2_row)
-    
-    # Months 7-9
-    row7 = {'name': 'Jul', 'month': 7, 'data': disbursement_data[7], 'total': calc_row_total(disbursement_data[7], category_codes)}
-    disbursement_breakdown.append(row7)
-    row8 = {'name': 'Aug', 'month': 8, 'data': disbursement_data[8], 'total': calc_row_total(disbursement_data[8], category_codes)}
-    disbursement_breakdown.append(row8)
-    row9 = {'name': 'Sep', 'month': 9, 'data': disbursement_data[9], 'total': calc_row_total(disbursement_data[9], category_codes)}
-    disbursement_breakdown.append(row9)
-    
-    q3_data = {}
-    for code in category_codes:
-        q3_data[code] = disbursement_data[7][code] + disbursement_data[8][code] + disbursement_data[9][code]
-    q3_row = {'name': '3rd Qtr', 'quarter': 3, 'data': q3_data, 'total': calc_row_total(q3_data, category_codes)}
-    disbursement_breakdown.append(q3_row)
-    
-    # Months 10-12
-    row10 = {'name': 'Oct', 'month': 10, 'data': disbursement_data[10], 'total': calc_row_total(disbursement_data[10], category_codes)}
-    disbursement_breakdown.append(row10)
-    row11 = {'name': 'Nov', 'month': 11, 'data': disbursement_data[11], 'total': calc_row_total(disbursement_data[11], category_codes)}
-    disbursement_breakdown.append(row11)
-    row12 = {'name': 'Dec', 'month': 12, 'data': disbursement_data[12], 'total': calc_row_total(disbursement_data[12], category_codes)}
-    disbursement_breakdown.append(row12)
-    
-    q4_data = {}
-    for code in category_codes:
-        q4_data[code] = disbursement_data[10][code] + disbursement_data[11][code] + disbursement_data[12][code]
-    q4_row = {'name': '4th Qtr', 'quarter': 4, 'data': q4_data, 'total': calc_row_total(q4_data, category_codes)}
-    disbursement_breakdown.append(q4_row)
-    
-    # Same for downloads
-    drow1 = {'name': 'Jan', 'month': 1, 'data': downloads_data[1], 'total': calc_row_total(downloads_data[1], category_codes)}
-    downloads_breakdown.append(drow1)
-    drow2 = {'name': 'Feb', 'month': 2, 'data': downloads_data[2], 'total': calc_row_total(downloads_data[2], category_codes)}
-    downloads_breakdown.append(drow2)
-    drow3 = {'name': 'Mar', 'month': 3, 'data': downloads_data[3], 'total': calc_row_total(downloads_data[3], category_codes)}
-    downloads_breakdown.append(drow3)
-    
-    q1_down = {}
-    for code in category_codes:
-        q1_down[code] = downloads_data[1][code] + downloads_data[2][code] + downloads_data[3][code]
-    q1_down_row = {'name': '1st Qtr', 'quarter': 1, 'data': q1_down, 'total': calc_row_total(q1_down, category_codes)}
-    downloads_breakdown.append(q1_down_row)
-    
-    drow4 = {'name': 'Apr', 'month': 4, 'data': downloads_data[4], 'total': calc_row_total(downloads_data[4], category_codes)}
-    downloads_breakdown.append(drow4)
-    drow5 = {'name': 'May', 'month': 5, 'data': downloads_data[5], 'total': calc_row_total(downloads_data[5], category_codes)}
-    downloads_breakdown.append(drow5)
-    drow6 = {'name': 'Jun', 'month': 6, 'data': downloads_data[6], 'total': calc_row_total(downloads_data[6], category_codes)}
-    downloads_breakdown.append(drow6)
-    
-    q2_down = {}
-    for code in category_codes:
-        q2_down[code] = downloads_data[4][code] + downloads_data[5][code] + downloads_data[6][code]
-    q2_down_row = {'name': '2nd Qtr', 'quarter': 2, 'data': q2_down, 'total': calc_row_total(q2_down, category_codes)}
-    downloads_breakdown.append(q2_down_row)
-    
-    drow7 = {'name': 'Jul', 'month': 7, 'data': downloads_data[7], 'total': calc_row_total(downloads_data[7], category_codes)}
-    downloads_breakdown.append(drow7)
-    drow8 = {'name': 'Aug', 'month': 8, 'data': downloads_data[8], 'total': calc_row_total(downloads_data[8], category_codes)}
-    downloads_breakdown.append(drow8)
-    drow9 = {'name': 'Sep', 'month': 9, 'data': downloads_data[9], 'total': calc_row_total(downloads_data[9], category_codes)}
-    downloads_breakdown.append(drow9)
-    
-    q3_down = {}
-    for code in category_codes:
-        q3_down[code] = downloads_data[7][code] + downloads_data[8][code] + downloads_data[9][code]
-    q3_down_row = {'name': '3rd Qtr', 'quarter': 3, 'data': q3_down, 'total': calc_row_total(q3_down, category_codes)}
-    downloads_breakdown.append(q3_down_row)
-    
-    drow10 = {'name': 'Oct', 'month': 10, 'data': downloads_data[10], 'total': calc_row_total(downloads_data[10], category_codes)}
-    downloads_breakdown.append(drow10)
-    drow11 = {'name': 'Nov', 'month': 11, 'data': downloads_data[11], 'total': calc_row_total(downloads_data[11], category_codes)}
-    downloads_breakdown.append(drow11)
-    drow12 = {'name': 'Dec', 'month': 12, 'data': downloads_data[12], 'total': calc_row_total(downloads_data[12], category_codes)}
-    downloads_breakdown.append(drow12)
-    
-    q4_down = {}
-    for code in category_codes:
-        q4_down[code] = downloads_data[10][code] + downloads_data[11][code] + downloads_data[12][code]
-    q4_down_row = {'name': '4th Qtr', 'quarter': 4, 'data': q4_down, 'total': calc_row_total(q4_down, category_codes)}
-    downloads_breakdown.append(q4_down_row)
+    # Prepare data for JavaScript rendering
+    mooe_report_data = {
+        'categoryCodes': category_codes,
+        'budgetData': budget_data,
+        'disbursementBreakdown': disbursement_breakdown,
+        'downloadsBreakdown': downloads_breakdown,
+        'grandTotalBudget': float(grand_total_budget),
+        'grandTotalDisbursed': float(grand_total_disbursed),
+        'grandBalance': float(grand_balance),
+        'grandBur': float(grand_bur),
+    }
     
     context = {
-        "months": months,
-        "budget_data": budget_data,
-        "category_codes": category_codes,
+        "mooe_report_json": json.dumps(mooe_report_data),
         "grand_total_budget": float(grand_total_budget),
         "grand_total_disbursed": float(grand_total_disbursed),
         "grand_balance": float(grand_balance),
         "grand_bur": float(grand_bur),
-        "disbursement_breakdown": disbursement_breakdown,
-        "downloads_breakdown": downloads_breakdown,
     }
     
     return render(request, "reports/mooe_report.html", context)
 
 
 def nc_report(request):
-    """Generate Negosyo Center report"""
-    months = [
-        "Jan", "Feb", "Mar", "1st Qtr",
-        "Apr", "May", "Jun", "2nd Qtr",
-        "Jul", "Aug", "Sep", "3rd Qtr",
-        "Oct", "Nov", "Dec", "4th Qtr"
+    """Generate Negosyo Center report by district and municipality"""
+    from dashboard_app.models import NegosyoCenter, District, FundSource
+    from datetime import datetime
+    from collections import defaultdict
+    
+    current_year = datetime.now().year
+    
+    # Get all districts with their Negosyo Centers
+    districts = District.objects.prefetch_related('negosyo_centers').order_by('order', 'name')
+    
+    # Month names for display
+    month_names = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
     ]
-    return render(request, "reports/negosyo_center_report.html", {"months": months})
+    
+    # Prepare district data
+    districts_data = []
+    total_disbursement = 0.0
+    total_downloads = 0.0
+    
+    for district in districts:
+        negosyo_centers = district.negosyo_centers.filter(is_active=True).order_by('name')
+        
+        if not negosyo_centers.exists():
+            continue
+        
+        # Get all transactions for this district's NC locations
+        nc_ids = negosyo_centers.values_list('id', flat=True)
+        transactions = MasterFundMonitoring.objects.filter(
+            nc_id__in=nc_ids,
+            date__year=current_year
+        ).order_by('nc__name', 'date')
+        
+        # Initialize monthly data structure
+        # monthly_data[month_num][nc_id] = amount
+        monthly_data = {m: {} for m in range(1, 13)}
+        
+        # Initialize NC totals per month
+        for nc in negosyo_centers:
+            for month_num in range(1, 13):
+                monthly_data[month_num][nc.id] = 0.0
+        
+        # Aggregate transaction data by month and NC
+        for transaction in transactions:
+            month_num = transaction.date.month
+            nc_id = transaction.nc_id
+            payment = float(transaction.payments or 0)
+            monthly_data[month_num][nc_id] += payment
+            total_disbursement += payment
+            total_downloads += float(transaction.downloads or 0)
+        
+        # Create quarterly breakdown structure
+        quarters = []
+        quarter_configs = [
+            {'months': [1, 2, 3], 'label': 'Q1', 'range': 'January – March'},
+            {'months': [4, 5, 6], 'label': 'Q2', 'range': 'April – June'},
+            {'months': [7, 8, 9], 'label': 'Q3', 'range': 'July – September'},
+            {'months': [10, 11, 12], 'label': 'Q4', 'range': 'October – December'},
+        ]
+        
+        # Build quarterly data
+        for qtr_config in quarter_configs:
+            qtr_months = []
+            qtr_total = 0
+            
+            for month_num in qtr_config['months']:
+                month_row = {
+                    'name': month_names[month_num - 1],
+                    'month_num': month_num,
+                    'nc_data': {},  # nc_id -> amount
+                    'month_total': 0,
+                }
+                
+                for nc in negosyo_centers:
+                    amount = monthly_data[month_num].get(nc.id, 0.0)
+                    month_row['nc_data'][nc.id] = amount
+                    month_row['month_total'] += amount
+                    qtr_total += amount
+                
+                qtr_months.append(month_row)
+            
+            quarter = {
+                'label': qtr_config['label'],
+                'range': qtr_config['range'],
+                'months': qtr_months,
+                'total': qtr_total,
+            }
+            quarters.append(quarter)
+        
+        district_data = {
+            'name': district.name,
+            'order': district.order,
+            'negosyo_centers': [
+                {'id': nc.id, 'name': nc.name}
+                for nc in negosyo_centers
+            ],
+            'quarters': quarters,
+            'district_total': sum(q['total'] for q in quarters),
+        }
+        
+        districts_data.append(district_data)
+    
+    # Calculate budget totals
+    annual_budget = FundSource.objects.aggregate(total=Sum('annual_budget'))['total'] or Decimal(0)
+    annual_budget = float(annual_budget)
+    
+    # Calculate balance and BUR
+    current_balance = annual_budget - total_disbursement
+    bur_rate = (total_disbursement / annual_budget * 100) if annual_budget > 0 else 0
+    
+    # Prepare data for JavaScript rendering
+    nc_report_data = {
+        'districts': districts_data,
+        'totalDisbursement': total_disbursement,
+        'totalDownloads': total_downloads,
+        'annualBudget': annual_budget,
+        'currentBalance': current_balance,
+        'burRate': bur_rate,
+    }
+    
+    context = {
+        'nc_report_json': json.dumps(nc_report_data),
+        'annual_budget': annual_budget,
+        'total_disbursement': total_disbursement,
+        'total_downloads': total_downloads,
+        'current_balance': current_balance,
+        'bur_rate': bur_rate,
+    }
+    
+    return render(request, "reports/negosyo_center_report.html", context)
 
 
 def fund_report(request):
@@ -303,15 +346,16 @@ def fund_report(request):
     from django.db.models import Sum
     from datetime import datetime
     
-    months = [
-        "Jan", "Feb", "Mar", "1st Qtr",
-        "Apr", "May", "Jun", "2nd Qtr",
-        "Jul", "Aug", "Sep", "3rd Qtr",
-        "Oct", "Nov", "Dec", "4th Qtr"
+    # Month names only (no quarters)
+    month_names = [
+        "Jan", "Feb", "Mar",
+        "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep",
+        "Oct", "Nov", "Dec"
     ]
     
-    # Get all fund sources
-    fund_sources = FundSource.objects.all().order_by('name')
+    # Get only active fund sources (budget > 0)
+    fund_sources = FundSource.objects.filter(annual_budget__gt=0).order_by('name')
     fund_codes = [fund.id for fund in fund_sources]
     current_year = datetime.now().year
     
@@ -400,61 +444,41 @@ def fund_report(request):
         q_dl[2][fund.id] = downloads_data[7][fund.id] + downloads_data[8][fund.id] + downloads_data[9][fund.id]
         q_dl[3][fund.id] = downloads_data[10][fund.id] + downloads_data[11][fund.id] + downloads_data[12][fund.id]
     
-    # Add months and quarters in interleaved order:
-    # Jan, Feb, Mar, 1st Qtr, Apr, May, Jun, 2nd Qtr, etc.
-    months_per_qtr = [
-        (1, 2, 3),
-        (4, 5, 6),
-        (7, 8, 9),
-        (10, 11, 12),
-    ]
-    quarter_names = ['1st Qtr', '2nd Qtr', '3rd Qtr', '4th Qtr']
-    
-    for qtr_idx, (m1, m2, m3) in enumerate(months_per_qtr):
-        # Add 3 months for this quarter
-        for month_num in [m1, m2, m3]:
-            row_total = calc_row_total(disbursement_data[month_num], fund_codes)
-            disbursement_breakdown.append({
-                'month': months[month_num - 1],
-                'month_num': month_num,
-                'data': disbursement_data[month_num],
-                'total': row_total,
-                'quarter': None,
-            })
-            
-            row_total = calc_row_total(downloads_data[month_num], fund_codes)
-            downloads_breakdown.append({
-                'month': months[month_num - 1],
-                'month_num': month_num,
-                'data': downloads_data[month_num],
-                'total': row_total,
-                'quarter': None,
-            })
-        
-        # Add quarterly total after 3 months
+    # Add individual month rows only (no quarterly totals - JS calculates them)
+    for month_num in range(1, 13):
+        row_total = calc_row_total(disbursement_data[month_num], fund_codes)
         disbursement_breakdown.append({
-            'month': quarter_names[qtr_idx],
-            'month_num': 0,
-            'quarter': qtr_idx + 1,
-            'data': q_data[qtr_idx],
-            'total': calc_row_total(q_data[qtr_idx], fund_codes),
+            'month': month_names[month_num - 1],
+            'month_num': month_num,
+            'data': disbursement_data[month_num],
+            'total': row_total,
+            'quarter': None,
         })
         
+        row_total = calc_row_total(downloads_data[month_num], fund_codes)
         downloads_breakdown.append({
-            'month': quarter_names[qtr_idx],
-            'month_num': 0,
-            'quarter': qtr_idx + 1,
-            'data': q_dl[qtr_idx],
-            'total': calc_row_total(q_dl[qtr_idx], fund_codes),
+            'month': month_names[month_num - 1],
+            'month_num': month_num,
+            'data': downloads_data[month_num],
+            'total': row_total,
+            'quarter': None,
         })
+    
+    # Prepare data for JavaScript rendering
+    fund_report_data = {
+        'funds': [{'id': f.id, 'name': f.name} for f in fund_sources],
+        'budgetData': budget_data,
+        'disbursementBreakdown': disbursement_breakdown,
+        'downloadsBreakdown': downloads_breakdown,
+        'grandTotalBudget': grand_total_budget,
+        'grandTotalDisbursed': grand_total_disbursed,
+        'grandTotalDownloads': grand_total_downloads,
+        'grandTotalBalance': grand_total_balance,
+        'grandTotalBur': grand_total_bur,
+    }
     
     return render(request, "reports/fund_report.html", {
-        "months": months,
-        "fund_sources": fund_sources,
-        "fund_codes": fund_codes,
-        "budget_data": budget_data,
-        "disbursement_breakdown": disbursement_breakdown,
-        "downloads_breakdown": downloads_breakdown,
+        "fund_report_json": json.dumps(fund_report_data),
         "grand_total_budget": grand_total_budget,
         "grand_total_disbursed": grand_total_disbursed,
         "grand_total_downloads": grand_total_downloads,

@@ -1,8 +1,9 @@
 /**
- * calculatio.js
+ * calculations.js
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+// Initialize form calculations and functionality
+function initializeCalculations() {
     // ===== BANK STATEMENT FORM =====
     // Handle balance calculation for bank statement forms
     const debitInput = document.querySelector('input[name="debit"]');
@@ -323,4 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-});
+}
+
+// Initialize on page load and when AJAX loads new content
+document.addEventListener('DOMContentLoaded', initializeCalculations);

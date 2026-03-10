@@ -37,7 +37,7 @@ class ExpenseObject(models.Model):
         blank=True,
         null=True,
         validators=[validate_string_length(max_length=500)],
-        help_text="Additional details (optional)"
+        help_text="Additional details"
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -92,7 +92,7 @@ class ExpenseCategory(models.Model):
         blank=True,
         null=True,
         validators=[validate_string_length(max_length=500)],
-        help_text="Category description (optional)"
+        help_text="Category description"
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
