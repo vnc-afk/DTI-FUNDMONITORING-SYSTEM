@@ -13,6 +13,10 @@
 
     <div class="sidebar-section-label">Main Menu</div>
     <nav>
+        <a href="{% url 'executive_dashboard' %}" class="{% if request.resolver_match.url_name == 'executive_dashboard' %}active{% endif %}" title="Provincial Director Dashboard">
+            <i class="bi bi-star-fill"></i>
+            Executive Dashboard
+        </a>
         <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-grid-1x2"></i>
             Dashboard
@@ -73,5 +77,9 @@
         </button>
         <div class="version">v1.0.0</div>
     </div>
+
+    <a href="{% url 'import_data' %}" class="nav-link">
+       📥 Import Data
+    </a>
 
 </aside>

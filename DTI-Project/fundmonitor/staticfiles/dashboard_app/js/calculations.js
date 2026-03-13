@@ -96,11 +96,27 @@ function initializeCalculations() {
                 fetch(`/api/tax_rates/${purchaseTypeId}/`)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            });
                         }
                         return response.json();
                     })
                     .then(taxRates => {
+                        // Check if response contains an error
+                        if (taxRates.status === 'error' || taxRates.error) {
+                            console.error('✗ API Error:', taxRates.error);
+                            console.warn('No tax rates available for this purchase type. Tax fields will be cleared.');
+                            // Clear tax fields instead of showing alert
+                            Object.values(taxFields).forEach(fieldName => {
+                                const field = document.querySelector(`[name="${fieldName}"]`);
+                                if (field) field.value = '';
+                            });
+                            return;
+                        }
+                        
                         // Get current payment amount
                         const paymentAmount = parseFloat(paymentsInput?.value || 0);
                         
@@ -137,7 +153,17 @@ function initializeCalculations() {
                     })
                     .catch(error => {
                         console.error('✗ Error fetching tax rates:', error);
-                        alert('Error loading tax rates. Please check your purchase type selection.');
+                        // Only show alert for critical errors
+                        if (error.message.includes('network') || error.message.includes('Failed to fetch')) {
+                            alert('Network error while loading tax rates. Please check your connection.');
+                        } else {
+                            console.warn('Tax rates unavailable. Clearing tax fields.');
+                        }
+                        // Clear tax fields on error
+                        Object.values(taxFields).forEach(fieldName => {
+                            const field = document.querySelector(`[name="${fieldName}"]`);
+                            if (field) field.value = '';
+                        });
                     });
             } else {
                 // Clear all tax fields if no purchase type selected

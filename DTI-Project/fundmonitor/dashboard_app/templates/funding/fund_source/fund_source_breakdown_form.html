@@ -12,6 +12,7 @@
 
 {% block content %}
 <div class="form-namespace">
+  <!-- Page Header -->
   <div class="page-header">
     <div class="page-header-left">
       <h1>
@@ -21,321 +22,114 @@
           Add Breakdown
         {% endif %}
       </h1>
-      <p>{{ fund.name }}</p>
+      <p class="page-subtitle">{{ fund.name }} — Budget allocation configuration</p>
     </div>
   </div>
 
-  <!-- Fund Info Card -->
-  <div class="info-card">
-    <div class="info-card-content">
-      <div class="info-item">
-        <span class="info-label">Fund Source</span>
-        <span class="info-value">{{ fund.name }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Annual Budget</span>
-        <span class="info-value">₱ {{ fund.annual_budget|currency:2 }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Remaining Available</span>
-        <span class="info-value">₱ {{ remaining_budget|currency:2 }}</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Breakdown Form -->
-  <div class="form-card">
-    <div class="form-header">
-      <h2>
-        {% if form.instance.id %}
-          Edit Breakdown Details
-        {% else %}
-          Breakdown Details
-        {% endif %}
-      </h2>
-    </div>
-
-    <form method="post" class="form">
-      {% csrf_token %}
-
-      <!-- Form Errors -->
-      {% if form.non_field_errors %}
-      <div class="alert alert-danger" role="alert">
-        <strong>Error:</strong>
-        {% for error in form.non_field_errors %}
-          <div>{{ error }}</div>
-        {% endfor %}
+  <!-- Breakdown Form Card -->
+  <div class="form-page-card">
+    <div class="form-card-header">
+      <div class="form-card-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
       </div>
-      {% endif %}
-
-      <!-- Category Field -->
-      <div class="form-group">
-        <label for="{{ form.category.id_for_label }}" class="form-label">
-          Category <span class="required">*</span>
-        </label>
-        {{ form.category }}
-        {% if form.category.errors %}
-          <div class="form-error">
-            {% for error in form.category.errors %}
-              <span>{{ error }}</span>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <div class="form-help">Select a predefined breakdown category</div>
-      </div>
-
-      <!-- Budget Amount Field -->
-      <div class="form-group">
-        <label for="{{ form.budget_amount.id_for_label }}" class="form-label">
-          Budget Amount <span class="required">*</span>
-        </label>
-        {{ form.budget_amount }}
-        {% if form.budget_amount.errors %}
-          <div class="form-error">
-            {% for error in form.budget_amount.errors %}
-              <span>{{ error }}</span>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <div class="form-help">Enter the budget allocation for this category</div>
-      </div>
-
-      <!-- Category Information -->
-      <div class="category-info">
-        <div class="info-box">
-          <h4>Breakdown Categories</h4>
-          <ul class="category-list">
-            <li><strong>OO1:</strong> Personnel Services</li>
-            <li><strong>OO2:</strong> Maintenance & Other Operating Expenses</li>
-            <li><strong>OO3:</strong> Financial Expenses</li>
-            <li><strong>4.1A:</strong> Capital Outlay (Equipment)</li>
-            <li><strong>4.1B:</strong> Capital Outlay (Infrastructure)</li>
-            <li><strong>4.2:</strong> Other Capital Outlays</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">
+      <div class="form-card-header-text">
+        <h5>
           {% if form.instance.id %}
-            Update Breakdown
+            Edit Breakdown Details
           {% else %}
-            Add Breakdown
+            Add New Breakdown
           {% endif %}
-        </button>
-        <a href="{% url 'fund_source_detail' fund.id %}" class="btn-secondary">
-          Cancel
-        </a>
+        </h5>
+        <p>Configure how this budget will be allocated</p>
       </div>
-    </form>
+    </div>
+
+    <div class="form-card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Form Errors -->
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          <div class="alert-body">
+            {% for error in form.non_field_errors %}
+              <p class="alert-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Form Section -->
+        <div class="form-section">
+          <div class="form-section-title">Breakdown Details</div>
+
+          <!-- Category Field -->
+          <div class="form-group">
+            <label for="{{ form.category.id_for_label }}" class="form-label">
+              Category
+              <span class="required">*</span>
+            </label>
+            {{ form.category }}
+            {% if form.category.errors %}
+              <div class="field-error">
+                {% for error in form.category.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-hint">Select a predefined breakdown category (OO1-OO3, 4.1A-4.2)</div>
+          </div>
+
+          <!-- Budget Amount Field -->
+          <div class="form-group">
+            <label for="{{ form.budget_amount.id_for_label }}" class="form-label">
+              Budget Amount (₱)
+              <span class="required">*</span>
+            </label>
+            {{ form.budget_amount }}
+            {% if form.budget_amount.errors %}
+              <div class="field-error">
+                {% for error in form.budget_amount.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-hint">Enter the budget allocation amount for this category (max: ₱ {{ remaining_budget|currency:2 }})</div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-card-footer">
+          <div class="form-card-footer-hint">
+            {% if form.instance.id %}
+              Update this breakdown to reflect changes in the budget allocation.
+            {% else %}
+              Add a new breakdown to allocate funds to specific categories.
+            {% endif %}
+          </div>
+          <div class="form-card-footer-actions">
+            <button type="submit" class="btn btn-primary">
+              {% if form.instance.id %}
+                Update Breakdown
+              {% else %}
+                Add Breakdown
+              {% endif %}
+            </button>
+            <a href="{% url 'fund_source_detail' fund.id %}" class="btn btn-secondary">
+              Cancel
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
 </div><!-- /.form-namespace -->
 {% endblock %}
 
-{% block extra_css %}
-<style>
-  .form-namespace {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .info-card {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 24px;
-  }
-
-  .info-card-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-  }
-
-  .info-item {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .info-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-  }
-
-  .info-value {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-1);
-  }
-
-  .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .form-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface-2);
-  }
-
-  .form-header h2 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-1);
-  }
-
-  .form {
-    padding: 20px;
-  }
-
-  .form-group {
-    margin-bottom: 24px;
-  }
-
-  .form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-1);
-  }
-
-  .required {
-    color: var(--danger);
-  }
-
-  .form-control, .form-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    background: var(--surface);
-    color: var(--text-1);
-    transition: all 0.2s ease;
-  }
-
-  .form-control:focus, .form-select:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-  }
-
-  .form-error {
-    margin-top: 6px;
-    padding: 8px 12px;
-    background: rgba(231, 76, 60, 0.1);
-    border-left: 3px solid var(--danger);
-    border-radius: 4px;
-    color: var(--danger);
-    font-size: 13px;
-  }
-
-  .form-help {
-    margin-top: 6px;
-    font-size: 13px;
-    color: var(--text-3);
-  }
-
-  .alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    font-size: 14px;
-  }
-
-  .alert-danger {
-    background: rgba(231, 76, 60, 0.1);
-    border: 1px solid var(--danger);
-    color: var(--danger);
-  }
-
-  .category-info {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-
-  .info-box {
-    background: rgba(52, 152, 219, 0.05);
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    border-radius: 6px;
-    padding: 16px;
-  }
-
-  .info-box h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--primary);
-  }
-
-  .category-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .category-list li {
-    padding: 8px 0;
-    font-size: 13px;
-    color: var(--text-2);
-  }
-
-  .category-list strong {
-    color: var(--text-1);
-  }
-
-  .form-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-
-  .btn-primary, .btn-secondary {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: var(--primary-dark, #2980b9);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-  }
-
-  .btn-secondary {
-    background: var(--surface-2);
-    color: var(--text-1);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-</style>
-{% endblock %}

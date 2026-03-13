@@ -354,8 +354,17 @@ def fund_report(request):
         "Oct", "Nov", "Dec"
     ]
     
-    # Get only active fund sources (budget > 0)
+    # Get all fund sources: those with budget AND those with actual transaction data
     fund_sources = FundSource.objects.filter(annual_budget__gt=0).order_by('name')
+    
+    # Also include fund sources that have data in MasterFundMonitoring but no budget
+    fund_sources_with_data = FundSource.objects.filter(
+        id__in=MasterFundMonitoring.objects.values_list('fund_source_id', flat=True).distinct()
+    ).order_by('name')
+    
+    # Combine both querysets and remove duplicates
+    all_fund_ids = set([f.id for f in fund_sources]) | set([f.id for f in fund_sources_with_data])
+    fund_sources = FundSource.objects.filter(id__in=all_fund_ids).order_by('name')
     fund_codes = [fund.id for fund in fund_sources]
     current_year = datetime.now().year
     

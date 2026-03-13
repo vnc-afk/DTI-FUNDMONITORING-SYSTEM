@@ -247,6 +247,38 @@ function reinitializePageScripts() {
     if (typeof initializeExpensesIfReady === 'function') {
         initializeExpensesIfReady();
     }
+    if (typeof initializeFundReportIfReady === 'function') {
+        initializeFundReportIfReady();
+    }
+    if (typeof initializeMooeReportIfReady === 'function') {
+        initializeMooeReportIfReady();
+    }
+    if (typeof initializeNcReportIfReady === 'function') {
+        initializeNcReportIfReady();
+    }
+    if (typeof initializeBulkDelete === 'function') {
+        initializeBulkDelete();
+    }
+    
+    // Reinitialize dashboard charts if they exist on the page
+    // Wait for both DOM to be ready AND dashboard data to be available
+    if (typeof safeInitializeDashboardCharts === 'function') {
+        console.log('Scheduling dashboard charts initialization after AJAX navigation');
+        
+        // Function to check if dashboard data is ready
+        function initDashboardWhenReady() {
+            if (window.dashboardData && document.getElementById('monthlyChart')) {
+                console.log('Dashboard data available, initializing charts...');
+                safeInitializeDashboardCharts();
+            } else {
+                // Retry after 100ms if data not ready yet
+                setTimeout(initDashboardWhenReady, 100);
+            }
+        }
+        
+        // Start checking after initial delay
+        setTimeout(initDashboardWhenReady, 150);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

@@ -5,12 +5,12 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 :root[data-theme="light"] {
-    /* Background Palette - Light */
-    --bg-base:          #f2f4f8;
-    --bg-surface:       #eaedf4;
-    --bg-card:          #e3e7f0;
-    --bg-card-hover:    #dce0eb;
-    --bg-elevated:      #e0e4ee;
+    /* Background Palette - Light (Cool, Neutral Tones) */
+    --bg-base:          #ffffff;   /* canvas default */
+    --bg-surface:       #f6f8fa;   /* canvas subtle */
+    --bg-card:          #eaeef2;   /* border default */
+    --bg-card-hover:    #d0d7de;   /* border muted */
+    --bg-elevated:      #f6f8fa;   /* canvas inset */
 
     /* Border - Light */
     --border:           rgba(15, 23, 42, 0.08);
@@ -21,10 +21,10 @@
     --accent-dim:       rgba(59, 130, 246, 0.12);
     --accent-glow:      rgba(59, 130, 246, 0.25);
 
-    /* Text - Light */
-    --text-primary:     #0f172a;
-    --text-secondary:   #475569;
-    --text-muted:       #94a3b8;
+    /* Text - Light (Enhanced for Accessibility) */
+    --text-primary:     #0f1419;
+    --text-secondary:   #1a1f2e;
+    --text-muted:       #3d4556;
     --text-accent:      #3b82f6;
 
     /* Semantic Colors */
@@ -146,4 +146,16 @@ body[data-theme="light"] {
     background: #60a5fa;
     border-color: #60a5fa;
     box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Light theme action button styles */
+:root[data-theme="light"] .act-clear {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+}
+
+:root[data-theme="light"] .act-clear:hover {
+    background: #c6f6d5;
+    border-color: #86efac;
 }

@@ -1,13 +1,14 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from dashboard_app.validators import (
-    validate_tin_format,
-    validate_phone_number,
     validate_string_length,
     validate_unique_supplier_name,
     sanitize_string_input,
     validate_no_script_content,
     validate_alphanumeric_with_spaces,
+    validate_tin_format,
+    validate_tin_numeric,
+    validate_phone_number,
 )
 
 
@@ -17,7 +18,7 @@ class Supplier(models.Model):
     CATEGORY_CHOICES = [
         ('NV', 'Non-VAT Registered'),
         ('V', 'VAT Registered'),
-        ('NA', 'N/A'),
+        ('—', 'N/A'),
     ]
     
     supplier = models.CharField(
@@ -25,7 +26,6 @@ class Supplier(models.Model):
         unique=True,
         validators=[
             validate_string_length(min_length=2, max_length=200),
-            validate_alphanumeric_with_spaces,
         ],
         help_text="Supplier name (alphanumeric with spaces)"
     )
@@ -33,6 +33,7 @@ class Supplier(models.Model):
         max_length=50,
         validators=[
             validate_tin_format,
+            validate_tin_numeric,
         ],
         help_text="Tax Identification Number (###-###-###-###)",
         blank=True,
@@ -61,15 +62,16 @@ class Supplier(models.Model):
         max_length=200,
         validators=[
             validate_string_length(min_length=2, max_length=200),
-            validate_alphanumeric_with_spaces,
         ],
         help_text="Proprietor/Owner name",
         blank=True,
         null=True,
     )
     contact_number = models.CharField(
-        max_length=20,
-        validators=[validate_phone_number],
+        max_length=30,
+        validators=[
+            validate_phone_number,
+        ],
         help_text="Philippine phone number format",
         blank=True,
         null=True,
@@ -92,6 +94,7 @@ class Supplier(models.Model):
         self.address = sanitize_string_input(self.address)
         self.propprietor = sanitize_string_input(self.propprietor)
         self.philgeps_registration = sanitize_string_input(self.philgeps_registration)
+        self.contact_number = sanitize_string_input(self.contact_number) if self.contact_number else ''
         
         # Check for script injection
         validate_no_script_content(self.supplier)

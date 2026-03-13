@@ -104,11 +104,26 @@ def dashboard(request):
         amount = transactions.filter(division=div).aggregate(Sum('payment_amount'))['payment_amount__sum'] or Decimal('0')
         division_values.append(float(amount))
     
-    # Get monthly balance trend (simplified)
-    bank_dates = [d.isoformat() for d in [timezone.now().date()]]
-    bank_debits = [0]
-    bank_credits = [float(total_disbursement)]
-    bank_balances = [float(remaining_balance)]
+    # Get monthly balance trend from BankStatement records
+    bank_statements = BankStatement.objects.all().order_by('date')
+    bank_dates = []
+    bank_debits = []
+    bank_credits = []
+    bank_balances = []
+    
+    if bank_statements.exists():
+        for stmt in bank_statements:
+            bank_dates.append(stmt.date.isoformat())
+            bank_debits.append(float(stmt.debit or 0))
+            bank_credits.append(float(stmt.credit or 0))
+            bank_balances.append(float(stmt.balance or 0))
+    else:
+        # Fallback: if no bank statements, create a minimal trend from today
+        today = timezone.now().date()
+        bank_dates = [today.isoformat()]
+        bank_debits = [float(total_disbursement)]
+        bank_credits = [0]
+        bank_balances = [float(remaining_balance)]
     
     # Get filter options
     years = FundSource.objects.values_list('year', flat=True).distinct().order_by('-year')

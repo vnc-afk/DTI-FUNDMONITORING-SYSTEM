@@ -71,6 +71,7 @@ class MasterFundMonitoring(models.Model):
         max_length=20,
         choices=[
             ('Disbursement', 'Disbursement'),
+            ('Downloads', 'Downloads'),
             ('Refund', 'Refund'),
             ('Adjustment', 'Adjustment'),
         ],
@@ -123,7 +124,7 @@ class MasterFundMonitoring(models.Model):
         null=True,
         default=0,
         validators=[validate_transaction_amount],
-        help_text="Downloads amount"
+        help_text="Downloads"
     )
     cheque_number = models.CharField(
         max_length=50,

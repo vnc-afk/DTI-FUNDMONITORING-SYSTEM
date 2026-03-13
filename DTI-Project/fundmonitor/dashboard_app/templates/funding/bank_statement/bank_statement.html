@@ -5,40 +5,11 @@
 
 {% block content %}
 <div class="table-namespace">
-  <div class="page-header">
-    <div class="page-header-left">
-      <h1>Bank Statement</h1>
-      <p>Track all debit, credit, and balance movements</p>
-    </div>
-    <a href="{% url 'bank_statement_add' %}" class="btn-add">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5"  y1="12" x2="19" y2="12"/>
-      </svg>
-      Add Statement
-    </a>
-  </div>
+  <!-- Page Header -->
+  {% include 'components/page_header.html' with title='Bank Statement' subtitle='Track all debit, credit, and balance movements' add_url='bank_statement_add' add_button_text='Add Statement' %}
 
-  <!-- ══════════════════════════════════
-       SUMMARY CARDS
-  ══════════════════════════════════ -->
-  <div class="summary-row">
-    <div class="summary-card">
-      <div class="summary-card-label">Current Debit</div>
-      <div class="summary-card-value debit">₱ {{ current_debit|default:"0.00"|currency:2 }}</div>
-      <div class="summary-card-sub">Latest transaction</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-label">Current Credit</div>
-      <div class="summary-card-value credit">₱ {{ current_credit|default:"0.00"|currency:2 }}</div>
-      <div class="summary-card-sub">Latest transaction</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-label">Current Balance</div>
-      <div class="summary-card-value balance">₱ {{ current_balance|default:"0.00"|currency:2 }}</div>
-      <div class="summary-card-sub">As of today</div>
-    </div>
-  </div>
+  <!-- Summary Cards -->
+  {% include 'components/summary_cards.html' with cards=summary_cards %}
 
   <!-- ══════════════════════════════════
        TABLE CARD
@@ -46,41 +17,7 @@
   <div class="table-card">
 
     <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="toolbar-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <line x1="2" y1="10" x2="22" y2="10"/>
-          </svg>
-          Transactions
-        </div>
-        <span class="toolbar-count" id="entryCount">{{ statement_count }} entries</span>
-      </div>
-      <div class="toolbar-right">
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="text" class="search-input" placeholder="Search transactions…" id="searchInput">
-        </div>
-        <select class="filter-select" id="statusFilter">
-          <option value="">All Status</option>
-          <option value="cleared">Cleared</option>
-          <option value="on process">On Process</option>
-          <option value="failed">Failed</option>
-        </select>
-        <button class="icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Export
-        </button>
-      </div>
-    </div>
+    {% include 'components/toolbar.html' with toolbar_title='Transactions' entry_count_text=toolbar_count search_placeholder='Search transactions…' show_filter=True filter_id='statusFilter' filter_all_text='All Status' filter_options=status_filter_options show_bulk_delete=True %}
 
     <!-- Table -->
     <div class="table-wrap">
@@ -112,7 +49,7 @@
 
         <tbody id="tableBody">
           {% for statement in statements %}
-          <tr data-status="{% if statement.status == 'Cleared' %}cleared{% elif statement.status == 'On Process' %}on process{% else %}failed{% endif %}">
+          <tr data-status="{% if statement.status == 'Cleared' %}cleared{% elif statement.status == 'On Process' %}on process{% else %}failed{% endif %}" data-id="{{ statement.pk }}">
             <td>
               {% if statement.date %}
               <div class="date-main">{{ statement.date|date:"M d, Y" }}</div>
@@ -150,27 +87,26 @@
                   </svg>
                   {{ statement.status }}
                 </span>
-              {% elif statement.status == 'On Process' %}
+              {% else %}
                 <span class="badge badge-process">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  {{ statement.status }}
-                </span>
-              {% else %}
-                <span class="badge badge-failed">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9"  y1="9" x2="15" y2="15"/>
-                  </svg>
-                  {{ statement.status }}
+                  On Process
                 </span>
               {% endif %}
             </td>
             <td>
               <div class="actions">
+                {% if statement.status != 'Cleared' %}
+                  <button class="act-btn act-clear" title="Mark as Cleared" data-id="{{ statement.pk }}" onclick="clearStatus(this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </button>
+                {% endif %}
                 <a href="{% url 'bank_statement_edit' statement.pk %}" class="act-btn act-edit">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -206,31 +142,76 @@
       </table>
 
       <!-- No Results -->
-      <div class="no-results" id="noResults">
-        <div class="no-results-icon">🔍</div>
-        <div class="no-results-label">No transactions match your search</div>
-      </div>
+      {% include 'components/no_results.html' with no_results_message='No transactions match your search' %}
     </div>
 
     <!-- Table Footer -->
-    <div class="table-footer">
-      <div class="footer-info">
-        Showing <strong id="visibleCount">{{ statement_count }}</strong> of <strong>{{ statement_count }}</strong> entries
-      </div>
-      <div class="pagination">
-        <button class="page-btn" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
-      </div>
-    </div>
+    {% include 'components/table_footer.html' with page_obj=page_obj total_count=statement_count %}
 
   </div><!-- /.table-card -->
 
 </div><!-- /.container -->
 </div><!-- /.table-namespace -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Set config before bulk-delete.js auto-initialization
+  window.bulkDeleteManager = {
+    bulkDeleteBtnId: 'bulkDeleteBtn',
+    tableBodyId: 'tableBody',
+    modelName: 'transaction',
+    deleteUrl: '{% url 'bank_statement_bulk_delete' %}'
+  };
+
+  // Function to handle clearing status
+  function clearStatus(button) {
+    const id = button.dataset.id;
+    const row = button.closest('tr');
+    
+    fetch(`/bank_statement/${id}/update_status/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+      },
+      body: JSON.stringify({ status: 'Cleared' })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Update the badge in the status column
+        const statusCell = row.querySelector('td:nth-child(7)');
+        statusCell.innerHTML = `
+          <span class="badge badge-cleared">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Cleared
+          </span>
+        `;
+        
+        // Remove the clear button
+        button.remove();
+        
+        // Show success message
+        alert('Status updated to Cleared');
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to update status');
+    });
+  }
+</script>
+<script src="{% static 'dashboard_app/js/bulk-delete.js' %}"></script>
 {% endblock %}
 

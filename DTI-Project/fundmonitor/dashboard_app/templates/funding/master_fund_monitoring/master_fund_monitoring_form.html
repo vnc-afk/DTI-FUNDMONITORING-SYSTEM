@@ -34,7 +34,13 @@
 
         <!-- Body -->
         <div class="form-card-body">
-            <form method="post" id="previewForm" novalidate>
+            <form method="post" id="previewForm" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Fund Monitoring"
+                  data-confirm-message="Please review the fund monitoring details before saving."
+                  data-confirm-text="Save Record"
+                  data-confirm-type="success"
+                  data-confirm-icon="📈">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 {% if form.errors %}
@@ -152,6 +158,7 @@
                                                {% if form.transaction_type.value == value %}checked{% endif %}>
                                         <label class="form-check-label" for="id_transaction_type_{{ forloop.counter }}">
                                             {% if value == 'Disbursement' %}<i class="bi bi-arrow-right"></i>{% endif %}
+                                            {% if value == 'Downloads' %}<i class="bi bi-download"></i>{% endif %}
                                             {% if value == 'Refund' %}<i class="bi bi-arrow-uturn-left"></i>{% endif %}
                                             {% if value == 'Adjustment' %}<i class="bi bi-arrow-repeat"></i>{% endif %}
                                             {{ label }}
@@ -160,7 +167,7 @@
                                 {% endfor %}
                             </div>
                             {{ form.transaction_type.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Select transaction type: Disbursement for normal payments, Refund for returned funds, Adjustment for corrections</div>
+                            <div class="form-hint"><i class="bi bi-info-circle"></i> Select transaction type: Disbursement for normal payments, Downloads for fund withdrawals, Refund for returned funds, Adjustment for corrections</div>
                         </div>
 
                     </div>
@@ -218,14 +225,14 @@
                         <div class="col-md-4">
                             <label class="form-label">
                                 <i class="bi bi-receipt"></i>
-                                Payments <span class="required">*</span>
+                                Payments
                             </label>
                             <div class="input-group-custom">
                                 <span class="input-prefix">₱</span>
                                 {{ form.payments }}
                             </div>
                             {{ form.payments.errors }}
-                            <div class="form-hint"><i class="bi bi-info-circle"></i> Payment amount</div>
+                            <div class="form-hint"><i class="bi bi-info-circle"></i> Payment amount (optional)</div>
                         </div>
 
                         <div class="col-md-4">
@@ -540,20 +547,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             const annual_budget = parseFloat(data.annual_budget) || 0;
+            const total_downloads = parseFloat(data.total_downloads) || 0;
             const total_disbursed = parseFloat(data.total_disbursed) || 0;
-            const available = annual_budget - total_disbursed;
+            const available = annual_budget + total_downloads - total_disbursed;
             
             // Display budget info
             budgetInfoDiv.style.display = 'block';
             
-            const budgetPercentage = annual_budget > 0 ? (total_disbursed / annual_budget) * 100 : 0;
+            const totalAvailable = annual_budget + total_downloads;
+            const budgetPercentage = totalAvailable > 0 ? (total_disbursed / totalAvailable) * 100 : 0;
             const statusColor = available >= 0 ? '#22c55e' : '#ef4444';
             const barColor = budgetPercentage > 80 ? '#f59e0b' : (budgetPercentage > 95 ? '#ef4444' : '#3b82f6');
             
             budgetInfoDiv.innerHTML = `
                 <div style="margin-bottom: 12px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600;">
-                        <span>Budget Status</span>
+                        <span>Available Budget</span>
                         <span style="color: ${statusColor};">₱${available.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                     </div>
                     <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
@@ -561,6 +570,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #6b7280;">
                         <span>Annual Budget: ₱${annual_budget.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span>Downloads (MDP): ₱${total_downloads.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #6b7280;">
+                        <span>Total Available: ₱${totalAvailable.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         <span>Disbursed: ₱${total_disbursed.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${budgetPercentage.toFixed(1)}%)</span>
                     </div>
                 </div>
@@ -630,20 +643,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             const annual_budget = parseFloat(data.annual_budget) || 0;
+            const total_downloads = parseFloat(data.total_downloads) || 0;
             const total_disbursed = parseFloat(data.total_disbursed) || 0;
-            const available = annual_budget - total_disbursed;
+            const available = annual_budget + total_downloads - total_disbursed;
             
             // Display budget info
             mooeBudgetInfoDiv.style.display = 'block';
             
-            const budgetPercentage = annual_budget > 0 ? (total_disbursed / annual_budget) * 100 : 0;
+            const totalAvailable = annual_budget + total_downloads;
+            const budgetPercentage = totalAvailable > 0 ? (total_disbursed / totalAvailable) * 100 : 0;
             const statusColor = available >= 0 ? '#22c55e' : '#ef4444';
             const barColor = budgetPercentage > 80 ? '#f59e0b' : (budgetPercentage > 95 ? '#ef4444' : '#3b82f6');
             
             mooeBudgetInfoDiv.innerHTML = `
                 <div style="margin-bottom: 12px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600;">
-                        <span>MOOE Budget Status</span>
+                        <span>Available MOOE Budget</span>
                         <span style="color: ${statusColor};">₱${available.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                     </div>
                     <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
@@ -651,6 +666,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #6b7280;">
                         <span>Category Budget: ₱${annual_budget.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span>Downloads (MDP): ₱${total_downloads.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #6b7280;">
+                        <span>Total Available: ₱${totalAvailable.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         <span>Disbursed: ₱${total_disbursed.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${budgetPercentage.toFixed(1)}%)</span>
                     </div>
                 </div>
@@ -686,5 +705,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateMOOEBudgetInfo();
 });
 </script>
+
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
 {% endblock %}
 

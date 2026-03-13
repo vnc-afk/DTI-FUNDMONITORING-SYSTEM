@@ -7,6 +7,19 @@
   color: var(--text-primary);
 }
 
+/* Light theme report adjustments */
+:root[data-theme="light"] .report table {
+  background: var(--bg-card);
+}
+
+:root[data-theme="light"] .report tbody tr:hover {
+  background: var(--bg-elevated);
+}
+
+:root[data-theme="light"] .report tbody tr:nth-child(even) {
+  background: rgba(59, 130, 246, 0.02);
+}
+
 /* ─── HEADER ─── */
 .report .header {
   display: flex;
@@ -213,11 +226,21 @@
   text-transform: uppercase;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
   font-weight: 600;
+}
+
+:root[data-theme="light"] .report thead th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .report thead th {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
 }
 
 .report thead th:not(:first-child) {
@@ -255,6 +278,10 @@
   background: var(--bg-elevated);
 }
 
+:root[data-theme="dark"] .report tbody tr:nth-child(even) {
+  background: rgba(59, 130, 246, 0.03);
+}
+
 .report tbody tr.hidden {
   display: none;
 }
@@ -263,10 +290,21 @@
   padding: 9px 16px;
   font-size: 11px;
   color: var(--text-primary);
+  background: var(--bg-card);
 }
 
 .report td:not(:first-child) {
   text-align: right;
+}
+
+:root[data-theme="light"] .report td {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .report td {
+  background: var(--bg-base);
+  color: var(--text-primary);
 }
 
 .cat-dot {
@@ -305,6 +343,17 @@
   font-size: 11px;
   border-top: 1px solid var(--border);
   color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+:root[data-theme="light"] .report tfoot td {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .report tfoot td {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
 }
 
 .report tfoot td:not(:first-child) {
@@ -324,7 +373,6 @@
 
 /* ─── ACCORDION ─── */
 .report .accordion {
-  margin-bottom: 40px;
   animation: fadeUp 0.3s ease 0.15s both;
 }
 
@@ -516,6 +564,252 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ─── REPORT ROW CLASSES ─── */
+.report-row-budget {
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+:root[data-theme="light"] .report-row-budget {
+  background: rgba(59, 130, 246, 0.06) !important;
+}
+
+.report-row-disburse {
+  background: rgba(244, 63, 94, 0.08) !important;
+}
+
+:root[data-theme="light"] .report-row-disburse {
+  background: rgba(244, 63, 94, 0.06) !important;
+}
+
+.report-row-balance {
+  background: rgba(34, 197, 94, 0.08) !important;
+}
+
+:root[data-theme="light"] .report-row-balance {
+  background: rgba(34, 197, 94, 0.06) !important;
+}
+
+.report-row-bur {
+  background: rgba(168, 85, 247, 0.08) !important;
+}
+
+:root[data-theme="light"] .report-row-bur {
+  background: rgba(168, 85, 247, 0.06) !important;
+}
+
+/* ─── BUDGET SUMMARY ROW COLORS ─── */
+/* Row-based colors for Budget Summary table */
+.budget-summary tbody tr.report-row-budget td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Annual Budget */
+}
+
+.budget-summary tbody tr.report-row-disburse td {
+  background: rgba(34, 197, 94, 0.12) !important; /* Green for Total Disbursement */
+}
+
+.budget-summary tbody tr.report-row-balance td {
+  background: rgba(249, 115, 22, 0.12) !important; /* Orange for Current Balance */
+}
+
+.budget-summary tbody tr.report-row-bur td {
+  background: rgba(168, 85, 247, 0.12) !important; /* Purple for BUR */
+}
+
+.budget-summary tbody tr.report-row-downloads td {
+  background: transparent !important; /* No color for Total Downloads */
+}
+
+/* Quarter row colors */
+.budget-summary tbody tr.quarter-q1 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q1 */
+}
+
+.budget-summary tbody tr.quarter-q2 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q2 */
+}
+
+.budget-summary tbody tr.quarter-q3 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q3 */
+}
+
+.budget-summary tbody tr.quarter-q4 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q4 */
+}
+
+/* Quarter colors for all tables (Disbursement, Downloads) */
+tbody tr.quarter-q1 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q1 */
+}
+
+tbody tr.quarter-q2 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q2 */
+}
+
+tbody tr.quarter-q3 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q3 */
+}
+
+tbody tr.quarter-q4 td {
+  background: rgba(59, 130, 246, 0.12) !important; /* Blue for Q4 */
+}
+
+/* Dark theme adjustments */
+:root[data-theme="dark"] .budget-summary tbody tr.quarter-q1 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] .budget-summary tbody tr.quarter-q2 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] .budget-summary tbody tr.quarter-q3 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] .budget-summary tbody tr.quarter-q4 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] tbody tr.quarter-q1 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] tbody tr.quarter-q2 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] tbody tr.quarter-q3 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+:root[data-theme="dark"] tbody tr.quarter-q4 td {
+  background: rgba(59, 130, 246, 0.20) !important;
+}
+
+/* BUR Cell Styles */
+.bur-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bur-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bur-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ─── PRINT STYLES ─── */
+@media print {
+  .report {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .report .header {
+    border-color: #cccccc;
+  }
+
+  .report h1 {
+    color: #000000;
+  }
+
+  .report .sub,
+  .report .section-title,
+  .report .filter-label {
+    color: #666666;
+  }
+
+  .report .summary-cards,
+  .report .filter-bar {
+    display: none;
+  }
+
+  .report .table-wrap,
+  .report .accordion {
+    background: #ffffff;
+    border-color: #cccccc;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+
+  .report table {
+    background: #ffffff;
+  }
+
+  .report thead th {
+    background: #f5f5f5;
+    color: #000000;
+    border-color: #cccccc;
+    font-weight: 700;
+  }
+
+  .report tbody tr {
+    border-color: #e0e0e0;
+  }
+
+  .report tbody tr:hover {
+    background: transparent;
+  }
+
+  .report td {
+    color: #000000;
+    padding: 8px 12px;
+  }
+
+  .acc-item {
+    background: #ffffff;
+    border-color: #cccccc;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+
+  .acc-header {
+    background: #f9f9f9;
+    border-bottom: 1px solid #cccccc;
+  }
+
+  .acc-q-label {
+    color: #000000;
+    font-weight: 600;
+  }
+
+  .acc-body {
+    display: block !important;
+    border-top: 1px solid #cccccc;
+  }
+
+  .acc-chevron,
+  .btn,
+  .filter-btn,
+  button {
+    display: none;
+  }
+
+  .report-row-budget,
+  .report-row-disburse,
+  .report-row-balance,
+  .report-row-bur,
+  :root[data-theme="light"] .report-row-budget,
+  :root[data-theme="light"] .report-row-disburse,
+  :root[data-theme="light"] .report-row-balance,
+  :root[data-theme="light"] .report-row-bur {
+    background: transparent !important;
   }
 }
 

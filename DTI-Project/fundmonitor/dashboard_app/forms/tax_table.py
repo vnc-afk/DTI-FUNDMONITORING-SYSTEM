@@ -10,9 +10,11 @@ class TaxTableForm(forms.ModelForm):
     
     purchase_type = forms.ModelChoiceField(
         queryset=PurchaseType.objects.filter(is_active=True),
+        empty_label="-- Select Purchase Type --",
         widget=forms.Select(attrs={
             'class': 'form-select',
-            'required': True
+            'required': True,
+            'id': 'id_purchase_type'
         }),
         help_text="Select a purchase type"
     )
@@ -22,10 +24,6 @@ class TaxTableForm(forms.ModelForm):
         fields = ['purchase_type', 'vat_goods_5', 'vat_services_5', 'vat_goods_services_3', 
                   'vat_goods_1', 'vat_services_2', 'vat_rental_5', 'vat_prof_fee_10']
         widgets = {
-            'purchase_type': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
             'vat_goods_5': forms.TextInput(attrs={'class': 'form-control'}),
             'vat_services_5': forms.TextInput(attrs={'class': 'form-control'}),
             'vat_goods_services_3': forms.TextInput(attrs={'class': 'form-control'}),

@@ -34,7 +34,13 @@
 
         <!-- Body -->
         <div class="form-card-body">
-            <form method="post" id="previewForm" novalidate>
+            <form method="post" id="previewForm" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Transaction"
+                  data-confirm-message="Please review the transaction details before saving."
+                  data-confirm-text="Save Transaction"
+                  data-confirm-type="success"
+                  data-confirm-icon="💾">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 {% if form.errors %}
@@ -210,6 +216,7 @@
     </div>
     </div><!-- /.form-namespace -->
 
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
     <script>
         // Radio button toggle functionality - click to select, click again to deselect
         document.addEventListener('DOMContentLoaded', function() {
@@ -231,9 +238,14 @@
                             // If not checked, check it
                             radio.checked = true;
                         }
+                        
+                        // Dispatch change event to trigger form validation and live preview
+                        radio.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 });
             });
         });
     </script>
+
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
 {% endblock %}

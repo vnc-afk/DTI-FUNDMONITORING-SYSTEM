@@ -34,7 +34,14 @@
 
         <!-- Body -->
         <div class="form-card-body">
-            <form method="post" novalidate>
+            <form method="post" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Fund Source"
+                  data-confirm-message="Please review the fund source information before saving."
+                  data-confirm-text="Save Fund Source"
+                  data-confirm-type="success"
+                  data-confirm-icon="💰"
+                  data-detail-fields="code,fund_source,annual_budget">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 {% if form.errors %}
@@ -88,4 +95,6 @@
         </div>
     </div>
     </div><!-- /.form-namespace -->
+
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
 {% endblock %}

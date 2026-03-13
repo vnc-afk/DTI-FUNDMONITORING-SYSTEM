@@ -1,0 +1,17 @@
+{% load format_filters %}
+
+{% block summary_cards %}
+{% if cards %}
+<div class="summary-row">
+  {% for card in cards %}
+  <div class="summary-card">
+    <div class="summary-card-label">{{ card.label }}</div>
+    <div class="summary-card-value{% if card.css_class %} {{ card.css_class }}{% endif %}">
+      {% if card.is_currency %}₱ {{ card.value|currency:2 }}{% else %}{{ card.value }}{% endif %}
+    </div>
+    <div class="summary-card-sub">{{ card.sublabel }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

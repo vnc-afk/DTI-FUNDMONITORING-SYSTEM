@@ -18,9 +18,8 @@ class ExpenseObject(models.Model):
         unique=True,
         validators=[
             validate_string_length(min_length=5, max_length=50),
-            validate_numeric_only,
         ],
-        help_text="Numeric account code (e.g., '5020101000')"
+        help_text="Numeric account code (e.g., '5020101000' or '50205020-01')"
     )
     name = models.CharField(
         max_length=255,

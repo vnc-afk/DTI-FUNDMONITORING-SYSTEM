@@ -74,12 +74,30 @@ class FundSourceBreakdownForm(forms.ModelForm):
         return budget_amount
     
     def clean(self):
-        """Validate total breakdown doesn't exceed annual budget"""
+        """Validate total breakdown doesn't exceed annual budget and check for duplicates"""
         cleaned_data = super().clean()
         budget_amount = cleaned_data.get('budget_amount')
+        category = cleaned_data.get('category')
         
-        if not self.fund_source or budget_amount is None:
+        if not self.fund_source or budget_amount is None or not category:
             return cleaned_data
+        
+        # Check for duplicate fund_source + category combination
+        query = FundSourceBreakdown.objects.filter(
+            fund_source=self.fund_source,
+            category=category
+        )
+        
+        # Exclude current instance if editing
+        if self.instance and self.instance.pk:
+            query = query.exclude(id=self.instance.pk)
+        
+        if query.exists():
+            existing = query.first()
+            raise ValidationError(
+                f'Category {category.code} is already allocated ₱{existing.budget_amount:,.2f}. Please edit the existing breakdown or select a different category.',
+                code='duplicate_breakdown'
+            )
         
         # Calculate total breakdown
         # Build exclude kwargs safely

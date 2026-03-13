@@ -30,16 +30,15 @@ class MasterFundMonitoringForm(forms.ModelForm):
         label='Payee'
     )
     
-    # Make fund_source a dropdown of fund sources (required)
-    # Only show active fund sources (budget > 0)
+    # Make fund_source a dropdown of fund sources (optional)
+    # Show all fund sources including inactive ones
     fund_source = forms.ModelChoiceField(
-        queryset=FundSource.objects.filter(annual_budget__gt=0),
+        queryset=FundSource.objects.all(),
         widget=forms.Select(attrs={
-            'class': 'form-select',
-            'required': True
+            'class': 'form-select'
         }),
         label='Fund Source',
-        required=True,
+        required=False,
         error_messages={
             'required': 'Please select a Fund Source.'
         }
@@ -109,10 +108,11 @@ class MasterFundMonitoringForm(forms.ModelForm):
         required=False
     )
     
-    # Transaction Type - Disbursement, Refund, or Adjustment
+    # Transaction Type - Disbursement, Downloads, Refund, or Adjustment
     transaction_type = forms.ChoiceField(
         choices=[
             ('Disbursement', 'Disbursement'),
+            ('Downloads', 'Downloads'),
             ('Refund', 'Refund'),
             ('Adjustment', 'Adjustment'),
         ],
@@ -122,7 +122,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
         }),
         label='Transaction Type',
         initial='Disbursement',
-        help_text='Select whether this is a disbursement, refund, or adjustment'
+        help_text='Select whether this is a disbursement, downloads, refund, or adjustment'
     )
     
     class Meta:
@@ -159,8 +159,7 @@ class MasterFundMonitoringForm(forms.ModelForm):
             'payments': forms.NumberInput(attrs={
                 'class': 'form-control has-prefix-text',
                 'step': '0.01',
-                'min': '0',
-                'required': True
+                'min': '0'
             }),
             'dv_number': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -320,12 +319,12 @@ class MasterFundMonitoringForm(forms.ModelForm):
         return sanitize_string_input(particulars)
     
     def clean_payments(self):
-        """Validate payments amount; field is now required and must be positive."""
+        """Validate payments amount; field is optional but must be positive if provided."""
         payments = self.cleaned_data.get('payments')
         
-        # Required check
+        # Optional check - if empty, return 0
         if payments in (None, ''):
-            raise ValidationError('Payments amount is required.', code='required')
+            return 0
         
         try:
             validate_transaction_amount(payments)
@@ -415,41 +414,54 @@ class MasterFundMonitoringForm(forms.ModelForm):
                 'cleared_date': 'Cleared date must be on or after the transaction date.'
             })
         
-        # Validate budget for Disbursement transactions
-        if fund_source and payments and transaction_type == 'Disbursement':
+        # Validate budget for Disbursement and Downloads transactions
+        if fund_source and payments and transaction_type in ['Disbursement', 'Downloads']:
             from decimal import Decimal
             
             # Get the fund source budget
             fund_budget = Decimal(str(fund_source.annual_budget or 0))
             
-            # Calculate total disbursements for this fund source (excluding current record if editing)
+            # Calculate total disbursements and downloads for this fund source (excluding current record if editing)
             from django.db.models import Sum
             total_disbursed = MasterFundMonitoring.objects.filter(
                 fund_source=fund_source,
-                transaction_type='Disbursement'
+                transaction_type__in=['Disbursement', 'Downloads']
+            ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+            
+            # Calculate total refunds for this fund source (refunds reduce net disbursed)
+            total_refunded = MasterFundMonitoring.objects.filter(
+                fund_source=fund_source,
+                transaction_type='Refund'
             ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
             
             # If editing, exclude the current record's payment from total
             if self.instance.pk:
-                total_disbursed -= Decimal(str(self.instance.payments or 0))
+                if self.instance.transaction_type in ['Disbursement', 'Downloads']:
+                    total_disbursed -= Decimal(str(self.instance.payments or 0))
+                elif self.instance.transaction_type == 'Refund':
+                    total_refunded -= Decimal(str(self.instance.payments or 0))
+            
+            # Calculate net disbursed (disbursements + downloads minus refunds)
+            net_disbursed = total_disbursed - total_refunded
             
             # Calculate available budget
-            available_budget = fund_budget - total_disbursed
+            available_budget = fund_budget - net_disbursed
             new_payment = Decimal(str(payments))
             
             # Check if payment exceeds available budget
             if new_payment > available_budget:
                 remaining = available_budget
+                trans_type = 'payment' if transaction_type == 'Disbursement' else 'download'
                 raise ValidationError({
-                    'payments': f'Payment exceeds available budget. Fund budget: ₱{fund_budget:,.2f}, '
-                                f'Already disbursed: ₱{total_disbursed:,.2f}, '
+                    'payments': f'{transaction_type} exceeds available budget. Fund budget: ₱{fund_budget:,.2f}, '
+                                f'Net disbursed (after refunds): ₱{net_disbursed:,.2f}, '
                                 f'Available: ₱{remaining:,.2f}. '
-                                f'You are trying to disburse ₱{new_payment:,.2f}.'
+                                f'You are trying to {trans_type} ₱{new_payment:,.2f}.'
                 })
         
-        # Validate MOOE budget for Disbursement transactions
+        # Validate MOOE budget for Disbursement and Downloads transactions
         mooe = cleaned_data.get('mooe')
-        if mooe and payments and transaction_type == 'Disbursement':
+        if mooe and payments and transaction_type in ['Disbursement', 'Downloads']:
             from decimal import Decimal
             from dashboard_app.models import FundSourceBreakdown
             
@@ -461,25 +473,37 @@ class MasterFundMonitoringForm(forms.ModelForm):
                 category__code=mooe_code
             ).aggregate(total=Sum('budget_amount'))['total'] or Decimal(0)
             
-            # Calculate total disbursements for this MOOE category (excluding current record if editing)
+            # Calculate total disbursements and downloads for this MOOE category (excluding current record if editing)
             mooe_disbursed = MasterFundMonitoring.objects.filter(
                 mooe=mooe_code,
-                transaction_type='Disbursement'
+                transaction_type__in=['Disbursement', 'Downloads']
+            ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+            
+            # Calculate total refunds for this MOOE category (refunds reduce net disbursed)
+            mooe_refunded = MasterFundMonitoring.objects.filter(
+                mooe=mooe_code,
+                transaction_type='Refund'
             ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
             
             # If editing, exclude the current record's payment from total
             if self.instance.pk:
-                mooe_disbursed -= Decimal(str(self.instance.payments or 0))
+                if self.instance.transaction_type in ['Disbursement', 'Downloads']:
+                    mooe_disbursed -= Decimal(str(self.instance.payments or 0))
+                elif self.instance.transaction_type == 'Refund':
+                    mooe_refunded -= Decimal(str(self.instance.payments or 0))
+            
+            # Calculate net disbursed for MOOE (disbursements + downloads minus refunds)
+            mooe_net_disbursed = mooe_disbursed - mooe_refunded
             
             # Calculate available MOOE budget
-            mooe_available = mooe_budget - mooe_disbursed
+            mooe_available = mooe_budget - mooe_net_disbursed
             new_payment_decimal = Decimal(str(payments))
             
             # Check if payment exceeds available MOOE budget
             if new_payment_decimal > mooe_available:
                 raise ValidationError({
                     'payments': f'Payment exceeds MOOE budget. MOOE budget: ₱{mooe_budget:,.2f}, '
-                                f'Already disbursed: ₱{mooe_disbursed:,.2f}, '
+                                f'Net disbursed (after refunds): ₱{mooe_net_disbursed:,.2f}, '
                                 f'Available: ₱{mooe_available:,.2f}. '
                                 f'You are trying to disburse ₱{new_payment_decimal:,.2f}.'
                 })

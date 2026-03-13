@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 
 {% block page_title %}Tax Entry{% endblock %}
 
@@ -25,7 +25,13 @@
         </div>
 
         <div class="form-card-body">
-            <form method="post" novalidate>
+            <form method="post" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Tax Entry"
+                  data-confirm-message="Please review the tax information before saving."
+                  data-confirm-text="Save Entry"
+                  data-confirm-type="success"
+                  data-confirm-icon="📊">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 {% if form.errors %}
@@ -153,4 +159,6 @@
         </div>
     </div>
     </div>
+
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
 {% endblock %}

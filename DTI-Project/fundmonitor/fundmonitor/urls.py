@@ -21,6 +21,7 @@ from dashboard_app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('executive-dashboard/', views.executive_dashboard, name='executive_dashboard'),
     path('api/dashboard-data/', views.get_dashboard_data, name='get_dashboard_data'),
     path('tin/', views.tin, name='tin'),
     path('fund/', views.fund_report, name='fund_report'),
@@ -33,6 +34,8 @@ urlpatterns = [
     path('bank_statement/add/', views.bank_statement_create, name='bank_statement_add'),
     path('bank_statement/edit/<int:pk>/', views.bank_statement_update, name='bank_statement_edit'),
     path('bank_statement/delete/<int:pk>/', views.bank_statement_delete, name='bank_statement_delete'),
+    path('bank_statement/<int:pk>/update_status/', views.bank_statement_update_status, name='bank_statement_update_status'),
+    path('bank_statement/bulk_delete/', views.bank_statement_bulk_delete, name='bank_statement_bulk_delete'),
 
     path('fund_sources/', views.fund_sources_view, name='fund_sources'),
     path('fund_sources/add/', views.fund_source_create, name='fund_source_add'),
@@ -53,6 +56,7 @@ urlpatterns = [
     path('master_fund_monitoring/add/', views.master_fund_monitoring_create, name='master_fund_monitoring_add'),
     path('master_fund_monitoring/edit/<int:pk>/', views.master_fund_monitoring_update, name='master_fund_monitoring_edit'),
     path('master_fund_monitoring/delete/<int:pk>/', views.master_fund_monitoring_delete, name='master_fund_monitoring_delete'),
+    path('master_fund_monitoring/bulk_delete/', views.master_fund_monitoring_bulk_delete, name='master_fund_monitoring_bulk_delete'),
     path('api/supplier/<int:supplier_id>/', views.get_supplier_data, name='get_supplier_data'),
     path('api/tax_rates/<int:purchase_type_id>/', views.get_tax_rates, name='get_tax_rates'),
     path('api/fund-budget/', views.get_fund_budget, name='get_fund_budget'),
@@ -64,9 +68,15 @@ urlpatterns = [
     path('staff/add/', views.staff_add, name='staff_add'),
     path('staff/edit/<int:pk>/', views.staff_edit, name='staff_edit'),
     path('staff/delete/<int:pk>/', views.staff_delete, name='staff_delete'),
+    path('staff/bulk_delete/', views.staff_bulk_delete, name='staff_bulk_delete'),
 # Tin CRUD
     path('suppliers/', views.supplier_list, name='supplier_list'),
     path('suppliers/add/', views.supplier_add, name='supplier_add'),
     path('suppliers/edit/<int:pk>/', views.supplier_edit, name='supplier_edit'),
     path('suppliers/delete/<int:pk>/', views.supplier_delete, name='supplier_delete'),
+    path('suppliers/bulk_delete/', views.supplier_bulk_delete, name='supplier_bulk_delete'),
+    
+    # Data Import
+    path('import/', views.import_data, name='import_data'),
+    path('import/result/', views.import_result, name='import_result'),
 ]

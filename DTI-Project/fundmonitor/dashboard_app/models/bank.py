@@ -123,6 +123,7 @@ class BankStatement(models.Model):
     status = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
+        default='On Process',
         null=True,
         blank=True,
         help_text="Transaction status"
@@ -182,18 +183,43 @@ class BankStatement(models.Model):
                 'At least one of debit or credit must be non-zero.',
                 code='no_amount'
             )
+        
+        # Validate balance is not negative
+        if self.balance is not None and self.balance < 0:
+            raise ValidationError(
+                'Balance cannot be negative. Please check the transaction amounts or opening balance.',
+                code='negative_balance'
+            )
     
     def save(self, *args, **kwargs):
-        # Check if there are any previous transactions
-        previous_statements = BankStatement.objects.exclude(id=self.id).order_by('-date', '-created_at')
+        # Check if this is the first chronological transaction
+        first_transaction = BankStatement.objects.exclude(id=self.id).order_by('date', 'created_at').first()
         
-        if previous_statements.exists():
-            # Auto-calculate balance based on previous transactions
-            # This overrides any user input for subsequent transactions
+        is_first_transaction = not first_transaction
+        
+        if not is_first_transaction and self.created_at:
+            # Compare dates and creation times only if created_at exists
+            is_first_transaction = (
+                first_transaction.date > self.date or 
+                (first_transaction.date == self.date and first_transaction.created_at > self.created_at)
+            )
+        
+        if is_first_transaction:
+            # For first transaction, preserve user's balance input or default to 0
+            if self.balance is None:
+                self.balance = 0
+        else:
+            # For subsequent transactions, auto-calculate balance based on previous transactions
             self.balance = self._calculate_balance()
-        elif self.balance is None:
-            # First transaction - if balance is None, set to 0
-            self.balance = 0
         
         self.full_clean()
         super().save(*args, **kwargs)
+        
+        # If this is the first transaction, recalculate all subsequent transactions
+        if is_first_transaction:
+            subsequent_transactions = BankStatement.objects.exclude(id=self.id).order_by('date', 'created_at')
+            for transaction in subsequent_transactions:
+                # Recalculate balance for each subsequent transaction
+                transaction.balance = transaction._calculate_balance()
+                # Save without triggering this same logic again
+                super(BankStatement, transaction).save(update_fields=['balance', 'updated_at'])

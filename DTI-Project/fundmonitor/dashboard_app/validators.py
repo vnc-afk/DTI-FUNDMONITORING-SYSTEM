@@ -103,21 +103,52 @@ def validate_tin_numeric(value):
 
 def validate_phone_number(value):
     """
-    Validates Philippine phone number format
-    Accepts: 09XX-XXX-XXXX, 09XXXXXXXXXX, +63-9XX-XXX-XXXX, (02) XXXX-XXXX
+    Validates Philippine phone number format - MORE FLEXIBLE
+    Accepts:
+    - Mobile: 09XX-XXX-XXXX, 09XXXXXXXXXX, +63-9XX-XXX-XXXX
+    - Landline: (02) XXXX-XXXX, 02-XXXX-XXXX, 4808394 (7-8 digits)
+    - Multiple numbers separated by slash: 480-7481 / 480-7687
+    - Dual mobile: 09061348372 / 09558044035
     """
-    value = str(value).replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+    if not value or not str(value).strip():
+        # Empty is allowed - field is optional
+        return
     
-    # Remove leading +63 or 0 for validation
-    if value.startswith('+63'):
-        value = value[3:]
-    elif value.startswith('0'):
-        value = value[1:]
+    value_str = str(value).strip()
     
-    if not (value.isdigit() and len(value) == 10):
+    # Handle dual phone numbers - extract first one if separated by /
+    if '/' in value_str:
+        value_str = value_str.split('/')[0].strip()
+    
+    # Remove all formatting characters
+    cleaned = value_str.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('+', '')
+    
+    # Remove leading country code (63) or leading 0
+    if cleaned.startswith('63'):
+        cleaned = cleaned[2:]
+    elif cleaned.startswith('0'):
+        cleaned = cleaned[1:]
+    
+    # Check if remaining value is all digits
+    if not cleaned.isdigit():
         raise ValidationError(
-            "Invalid phone number format. Please enter a valid Philippine number with 10 digits (e.g., 09XX-XXX-XXXX).",
+            "Invalid phone number format. Phone number must contain only digits, hyphens, spaces, and parentheses. "
+            "Accepted formats: 09XX-XXX-XXXX (mobile), (02)XXXX-XXXX (landline), or 480-7481 (local).",
             code="invalid_phone"
+        )
+    
+    # Accept 7+ digits (covers local area codes, landlines, and mobile)
+    if len(cleaned) < 7:
+        raise ValidationError(
+            "Invalid phone number. Phone number must have at least 7 digits.",
+            code="invalid_phone_length"
+        )
+    
+    # Accept up to 11 digits (covers mobile with 0 prefix = 10 digits, or 11 with +63)
+    if len(cleaned) > 11:
+        raise ValidationError(
+            "Invalid phone number. Phone number has too many digits (max 11).",
+            code="invalid_phone_too_long"
         )
 
 
@@ -190,9 +221,9 @@ def validate_transaction_amount(value):
                 "Transaction amount cannot be negative. Please enter a positive value.",
                 code="negative_amount"
             )
-        if decimal_value > Decimal('99999999.99'):
+        if decimal_value > Decimal('9999999999.99'):
             raise ValidationError(
-                "Transaction amount exceeds the maximum allowed limit of ₱99,999,999.99.",
+                "Transaction amount exceeds the maximum allowed limit of ₱9,999,999,999.99.",
                 code="amount_too_large"
             )
     except (ValueError, TypeError):

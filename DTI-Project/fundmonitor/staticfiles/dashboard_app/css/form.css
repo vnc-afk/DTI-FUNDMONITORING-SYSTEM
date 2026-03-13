@@ -457,6 +457,7 @@ body {
 
 .form-namespace .ts-control {
     border: 1.5px solid var(--border) !important;
+    color: var(--text-primary);
     border-radius: 8px !important;
     padding: 8px 12px !important;
     font-size: 0.875rem !important;
@@ -484,7 +485,7 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     margin-top: 0 !important;
     z-index: 1050 !important;
-    background: var(--bg-card);
+
     top: 100% !important;
     position: absolute !important;
 }
@@ -647,9 +648,44 @@ body {
 
 .form-namespace .status-radio-label:hover {
     background: var(--bg-card-hover);
-    border-color: var(--accent-glow);
-    color: var(--text-primary);
 }
+
+/* ── Alert Messages ── */
+.form-namespace .alert {
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideDown 0.3s ease-out;
+    border-left: 3px solid;
+}
+
+.form-namespace .alert-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-namespace .alert-message {
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.form-namespace .alert-danger {
+    background: rgba(239, 68, 68, 0.08);
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+
+.form-namespace .alert-danger .alert-message {
+    color: #991b1b;
+}
+
 
 .form-namespace .status-badge {
     display: inline-flex;
@@ -745,6 +781,18 @@ body {
 
 .form-namespace .ts-dropdown-content::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.4);
+}
+
+/* ── Toolbar & Form Content ── */
+.form-namespace .toolbar-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-namespace .form-content {
+    padding: 20px;
 }
 
 .formula-wrapper {

@@ -19,7 +19,7 @@
   --table-accent-mid: var(--accent-glow);
   --table-debit: #f43f5e;
   --table-debit-soft: rgba(244, 63, 94, 0.1);
-  --table-credit: #3b82f6;
+  --table-credit: #10b981;
   --table-credit-soft: rgba(59, 130, 246, 0.1);
   --table-warning: #f59e0b;
   --table-warning-soft: rgba(245, 158, 11, 0.1);
@@ -82,6 +82,21 @@
   transform: translateY(-2px);
 }
 .table-namespace .btn-add svg { width: 15px; height: 15px; }
+.table-namespace .btn-add.disabled {
+  background: var(--table-surface-2);
+  color: var(--table-text-2);
+  border-color: var(--table-border);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+.table-namespace .btn-add.disabled:hover {
+  background: var(--table-surface-2);
+  border-color: var(--table-border);
+  box-shadow: none;
+  transform: none;
+  color: var(--table-text-2);
+}
 
 /* ── Summary Cards ── */
 .table-namespace .summary-row {
@@ -444,6 +459,8 @@
 .table-namespace .act-edit:hover  { background: var(--accent-dim); border-color: var(--accent-glow); }
 .table-namespace .act-delete { background: var(--table-debit-soft); color: var(--table-debit); border-color: rgba(244, 63, 94, 0.3); }
 .table-namespace .act-delete:hover { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.4); }
+.table-namespace .act-clear { background: rgba(34, 197, 94, 0.12); color: #86efac; border-color: rgba(34, 197, 94, 0.3); }
+.table-namespace .act-clear:hover { background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.4); }
 
 /* ── tfoot ── */
 .table-namespace tfoot tr td {
@@ -711,6 +728,140 @@
   .detail-value {
     font-size: 0.75rem;
   }
+}
+
+/* ── PROGRESS BAR STYLES ── */
+.table-namespace .breakdown-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.table-namespace .progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.table-namespace .progress-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--table-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.table-namespace .progress-percentage {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 6px 12px;
+  border-radius: 8px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.table-namespace .progress-percentage.progress-success {
+  font-size: 0.8rem;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.table-namespace .progress-percentage.progress-warning {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.table-namespace .progress-percentage.progress-danger {
+  font-size: 0.8rem;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.table-namespace .progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-namespace .progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--table-surface-2);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--table-border);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.table-namespace .progress-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.table-namespace .progress-fill.fill-success {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.table-namespace .progress-fill.fill-warning {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.table-namespace .progress-fill.fill-danger {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.table-namespace .progress-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.table-namespace .progress-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--table-text-2);
+  flex: 1;
+}
+
+.table-namespace .progress-text .text-success {
+  color: #22c55e;
+}
+
+.table-namespace .progress-text .text-danger {
+  color: #ef4444;
+}
+
+.table-namespace .progress-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--table-text-3);
+}
+
+.table-namespace .progress-stats .stat {
+  font-family: 'DM Mono', monospace;
+  padding: 4px 8px;
+  background: var(--table-surface-2);
+  border: 1px solid var(--table-border);
+  border-radius: 5px;
+  font-weight: 500;
 }
 
   /* ── Legend Styling ── */

@@ -3,62 +3,181 @@
 
 {% block page_title %}Delete {{ object_type }}{% endblock %}
 
-{% block content %}
-{% load static %}
+{% block extra_css %}
+<style>
+  .delete-confirmation-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 32px;
+  }
 
-<div class="form-namespace">
-    <div class="page-header">
-        <a href="{{ back_url }}" class="back-link">
-            <i class="bi bi-chevron-left"></i> Back
-        </a>
-        <h1>Delete {{ object_type }}</h1>
-        <p>Confirm deletion of this {{ object_type|lower }}</p>
+  .delete-confirmation-message {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    border-radius: var(--radius-sm, 8px);
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .delete-confirmation-message-icon {
+    color: var(--danger, #ef4444);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .delete-confirmation-message-content {
+    flex: 1;
+  }
+
+  .delete-confirmation-message-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .delete-confirmation-message-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    padding: 9px 18px;
+    border-radius: var(--radius-sm, 8px);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-cancel:hover {
+    background: var(--bg-card);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-danger {
+    background: var(--danger, #ef4444);
+    color: white;
+    border: 2px solid var(--danger, #ef4444);
+    padding: 9px 18px;
+    border-radius: var(--radius-sm, 8px);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-danger:hover {
+    background: #f87171;
+    border-color: #f87171;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-danger:active {
+    transform: translateY(0);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-namespace delete-confirmation-page">
+
+    <!-- Warning Message -->
+    <div class="delete-confirmation-message">
+        <span class="delete-confirmation-message-icon">⚠️</span>
+        <div class="delete-confirmation-message-content">
+            <div class="delete-confirmation-message-title">Warning: This action cannot be undone</div>
+            <div class="delete-confirmation-message-text">
+                Once you delete this item, it will be permanently removed from the system.
+            </div>
+        </div>
     </div>
 
-    <div class="form-page-card" style="max-width: 600px; margin: 0 auto;">
-        <div class="form-card-header" style=" border-bottom: 1px solid #fee2e2;">
-            <div class="form-card-header-icon" style="color: #dc2626;">
-                <i class="bi bi-exclamation-triangle-fill"></i>
+    <!-- Details Card -->
+    <div class="form-page-card" style="max-width: 100%; margin-bottom: 24px;">
+        <div class="form-card-header">
+            <div class="form-card-header-icon">
+                <i class="bi bi-card-text"></i>
             </div>
             <div class="form-card-header-text">
-                <h5 style="color: #dc2626;">Confirm Deletion</h5>
-                <p>This action cannot be undone</p>
+                <h5>{{ object_type }} Details</h5>
+                <p>Review the item you're about to delete</p>
             </div>
         </div>
 
         <div class="form-card-body">
-            <div style="padding: 20px; background-color: #fef2f2; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #7f1d1d;">
-                    <strong>Are you sure you want to delete this {{ object_type|lower }}?</strong>
-                </p>
-            </div>
-
-            <div style=" padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0 0 10px 0; font-size: 0.875rem; color: #6b7280;"><strong>Details:</strong></p>
-                <table style="width: 100%; font-size: 0.875rem;">
-                    {% for field_label, field_value in object_details.items %}
-                    <tr>
-                        <td style="padding: 5px; color: #6b7280;">{{ field_label }}:</td>
-                        <td style="padding: 5px; font-weight: 500;">{{ field_value }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-
-        <div class="form-card-footer">
-            <div class="form-card-footer-actions">
-                <a href="{{ back_url }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-lg"></i> Cancel
-                </a>
-                <form method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Delete {{ object_type }}
-                    </button>
-                </form>
-            </div>
+            {% if object_details %}
+            <table style="width: 100%; font-size: 0.9rem;">
+                {% for field_label, field_value in object_details.items %}
+                <tr style="border-bottom: 1px solid var(--border); padding: 12px 0;">
+                    <td style="padding: 12px 0; color: var(--text-secondary); font-weight: 500;">{{ field_label }}:</td>
+                    <td style="padding: 12px 0 12px 16px; color: var(--text-primary); font-weight: 600;">{{ field_value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p style="color: var(--text-secondary); margin: 0;">No additional details available.</p>
+            {% endif %}
         </div>
     </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{{ back_url }}" class="btn-cancel">
+            <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <button 
+            type="button" 
+            class="btn-danger"
+            data-confirm-delete="true"
+            data-item-name="{{ object_type|lower }}"
+            data-item-label="{{ item_label }}"
+            data-delete-url="{{ delete_url }}"
+            data-redirect-url="{{ back_url }}"
+        >
+            <i class="bi bi-trash"></i> Delete {{ object_type }}
+        </button>
+    </div>
 </div>
+
+<script>
+    // Debug logging to help identify issues
+    (function() {
+        const deleteBtn = document.querySelector('[data-confirm-delete]');
+        if (deleteBtn) {
+            console.log('Delete button found', {
+                deleteUrl: deleteBtn.dataset.deleteUrl,
+                itemName: deleteBtn.dataset.itemName,
+                itemLabel: deleteBtn.dataset.itemLabel,
+                redirectUrl: deleteBtn.dataset.redirectUrl
+            });
+        } else {
+            console.warn('Delete button with data-confirm-delete attribute not found');
+        }
+    })();
+</script>
+
+<script src="{% static 'dashboard_app/js/confirm-delete.js' %}"></script>
 {% endblock %}
+

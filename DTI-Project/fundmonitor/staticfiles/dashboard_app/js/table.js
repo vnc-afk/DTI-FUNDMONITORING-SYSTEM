@@ -99,17 +99,43 @@ function initializeTableFunctionality() {
       // Apply new direction
       th.classList.add(isAsc ? 'sorted-desc' : 'sorted-asc');
 
-      // Sort rows
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      rows.sort((a, b) => {
-        const aVal = a.querySelectorAll('td')[col]?.textContent.trim() || '';
-        const bVal = b.querySelectorAll('td')[col]?.textContent.trim() || '';
-        return isAsc
-          ? bVal.localeCompare(aVal, undefined, { numeric: true })
-          : aVal.localeCompare(bVal, undefined, { numeric: true });
-      });
+      // Check if table has expandable rows
+      const hasExpandableRows = tbody.querySelectorAll('tr.expandable-row').length > 0;
 
-      rows.forEach(r => tbody.appendChild(r));
+      if (hasExpandableRows) {
+        // Sort with expandable row pairs (detail rows stay with expandable rows)
+        const expandableRows = Array.from(tbody.querySelectorAll('tr.expandable-row'));
+        
+        expandableRows.sort((a, b) => {
+          const aVal = a.querySelectorAll('td')[col]?.textContent.trim() || '';
+          const bVal = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+          return isAsc
+            ? bVal.localeCompare(aVal, undefined, { numeric: true })
+            : aVal.localeCompare(bVal, undefined, { numeric: true });
+        });
+
+        // Re-append rows with their paired detail rows
+        expandableRows.forEach(expandRow => {
+          const recordId = expandRow.dataset.id;
+          const detailRow = document.querySelector(`tr.detail-row[data-id="${recordId}"]`);
+          tbody.appendChild(expandRow);
+          if (detailRow) {
+            tbody.appendChild(detailRow);
+          }
+        });
+      } else {
+        // Regular sort for tables without expandable rows
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+          const aVal = a.querySelectorAll('td')[col]?.textContent.trim() || '';
+          const bVal = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+          return isAsc
+            ? bVal.localeCompare(aVal, undefined, { numeric: true })
+            : aVal.localeCompare(bVal, undefined, { numeric: true });
+        });
+
+        rows.forEach(r => tbody.appendChild(r));
+      }
     });
   });
 

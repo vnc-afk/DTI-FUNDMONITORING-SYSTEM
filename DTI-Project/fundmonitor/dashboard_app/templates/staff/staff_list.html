@@ -3,37 +3,26 @@
 
 {% block page_title %}Staff List{% endblock %}
 
+{% block scripts %}
+<script>
+  // Set config before bulk-delete.js auto-initialization
+  window.bulkDeleteManager = {
+    bulkDeleteBtnId: 'bulkDeleteBtn',
+    tableBodyId: 'tableBody',
+    modelName: 'staff member',
+    deleteUrl: '{% url 'staff_bulk_delete' %}'
+  };
+</script>
+<script src="{% static 'dashboard_app/js/bulk-delete.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="table-namespace">
-  <div class="page-header">
-    <div class="page-header-left">
-      <h1>Staff List</h1>
-      <p>Manage personnel records</p>
-    </div>
-    <a href="{% url 'staff_add' %}" class="btn-add">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5"  y1="12" x2="19" y2="12"/>
-      </svg>
-      Add Staff
-    </a>
-  </div>
+  <!-- Page Header -->
+  {% include 'components/page_header.html' with title='Staff List' subtitle='Manage personnel records' add_url='staff_add' add_button_text='Add Staff' %}
 
-  <!-- ══════════════════════════════════
-       SUMMARY CARDS
-  ══════════════════════════════════ -->
-  <div class="summary-row">
-    <div class="summary-card">
-      <div class="summary-card-label">Total Staff Members</div>
-      <div class="summary-card-value">{{ staff_count }}</div>
-      <div class="summary-card-sub">Active personnel</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-label">Total Divisions</div>
-      <div class="summary-card-value">{{ divisions_count }}</div>
-      <div class="summary-card-sub">Departments</div>
-    </div>
-  </div>
+  <!-- Summary Cards -->
+  {% include 'components/summary_cards.html' with cards=summary_cards %}
 
   <!-- ══════════════════════════════════
        TABLE CARD
@@ -41,41 +30,7 @@
   <div class="table-card">
 
     <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="toolbar-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <line x1="2" y1="10" x2="22" y2="10"/>
-          </svg>
-          Staff Members
-        </div>
-        <span class="toolbar-count" id="entryCount">{{ staff_count }} staff member{{ staff_count|pluralize }}</span>
-      </div>
-      <div class="toolbar-right">
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="text" class="search-input" placeholder="Search staff…" id="searchInput">
-        </div>
-        <select class="filter-select" id="divisionFilter">
-          <option value="">All Divisions</option>
-          {% for division in divisions %}
-            <option value="{{ division|lower }}">{{ division }}</option>
-          {% endfor %}
-        </select>
-        <button class="icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Export
-        </button>
-      </div>
-    </div>
+    {% include 'components/toolbar.html' with toolbar_title='Staff Members' entry_count_text=toolbar_count search_placeholder='Search staff…' show_filter=True filter_id='divisionFilter' filter_all_text='All Divisions' filter_options=division_filter_options show_bulk_delete=True %}
 
     <!-- Table -->
     <div class="table-wrap">
@@ -97,7 +52,7 @@
 
         <tbody id="tableBody">
           {% for staff in staff_members %}
-          <tr data-division="{{ staff.division|lower }}">
+          <tr data-division="{{ staff.division|lower }}" data-id="{{ staff.pk }}">
             <td><span class="mono">{{ forloop.counter }}</span></td>
             <td>
               <div class="desc-main">{{ staff.first_name }} {% if staff.middle_initial %}{{ staff.middle_initial }} {% endif %}{{ staff.last_name }}</div>
@@ -135,36 +90,18 @@
           <tr>
             <td colspan="2">Totals ({{ staff_count }} staff member{{ staff_count|pluralize }})</td>
             <td>{{ divisions_count }} division{{ divisions_count|pluralize }}</td>
-            <td></td>
           </tr>
         </tfoot>
       </table>
 
       <!-- No Results -->
-      <div class="no-results" id="noResults">
-        <div class="no-results-icon">🔍</div>
-        <div class="no-results-label">No staff members match your search</div>
-      </div>
+      {% include 'components/no_results.html' with no_results_message='No staff members match your search' %}
     </div>
 
     <!-- Table Footer -->
-    <div class="table-footer">
-      <div class="footer-info">
-        Showing <strong id="visibleCount">{{ staff_count }}</strong> of <strong>{{ staff_count }}</strong> entries
-      </div>
-      <div class="pagination">
-        <button class="page-btn" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
-      </div>
-    </div>
+    {% include 'components/table_footer.html' with page_obj=page_obj total_count=staff_count %}
 
   </div><!-- /.table-card -->
 
-</div><!-- /.container -->
 </div><!-- /.table-namespace -->
 {% endblock %}

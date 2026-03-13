@@ -256,6 +256,9 @@ function reinitializePageScripts() {
     if (typeof initializeNcReportIfReady === 'function') {
         initializeNcReportIfReady();
     }
+    if (typeof initializeBulkDelete === 'function') {
+        initializeBulkDelete();
+    }
     
     // Reinitialize dashboard charts if they exist on the page
     // Wait for both DOM to be ready AND dashboard data to be available

@@ -2,19 +2,54 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.core.paginator import Paginator
+from django.db.models import Q
 from dashboard_app.models import TaxTable
 from dashboard_app.forms import TaxTableForm
 
 
 def tax_table_list(request):
-    """List all tax table entries"""
-    entries = TaxTable.objects.all()
-    count = entries.count()
+    """List all tax table entries with search support"""
+    all_entries = TaxTable.objects.all()
+    
+    # Get search query from URL parameter
+    search_query = request.GET.get('q', '').strip()
+    is_searching = bool(search_query)
+    
+    # Apply search filter if query exists
+    if search_query:
+        all_entries = all_entries.filter(
+            Q(purchase_type__name__icontains=search_query)
+        )
+    
+    count = all_entries.count()
+    
+    # Pagination: 50 items per page (only when NOT searching)
+    if is_searching:
+        # Show all results when searching without pagination
+        entries = all_entries
+        paginator = None
+    else:
+        paginator = Paginator(all_entries, 50)
+        page_number = request.GET.get('page', 1)
+        entries = paginator.get_page(page_number)
+    
+    # Prepare page object
+    if is_searching:
+        page_obj = None
+    else:
+        page_obj = entries
+    
     context = {
         'entries': entries,
         'entry_count': count,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'search_query': search_query,
+        'is_searching': is_searching,
     }
     return render(request, 'funding/tax/tax_table.html', context)
+
 
 
 def tax_table_create(request):
@@ -62,7 +97,10 @@ def tax_table_delete(request, pk):
     
     context = {
         'object_type': 'Tax Table Entry',
+        'item_label': f"Tax Table: {tax_table.purchase_type.name if tax_table.purchase_type else 'N/A'}",
+        'item_name': 'tax table entry',
         'back_url': reverse('tax_table'),
+        'delete_url': reverse('tax_table_delete', args=[pk]),
         'object_details': object_details,
     }
     

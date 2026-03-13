@@ -34,7 +34,13 @@
 
         <!-- Body -->
         <div class="form-card-body">
-            <form method="post" novalidate>
+            <form method="post" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Staff"
+                  data-confirm-message="Please review the staff information before saving."
+                  data-confirm-text="Save Staff"
+                  data-confirm-type="success"
+                  data-confirm-icon="👤">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 {% if form.errors %}
@@ -104,4 +110,6 @@
         </div>
     </div>
     </div><!-- /.form-namespace -->
+
+<script src="{% static 'dashboard_app/js/form-submit-helper.js' %}"></script>
 {% endblock %}

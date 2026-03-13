@@ -156,6 +156,10 @@ class BankStatementForm(forms.ModelForm):
                 validate_transaction_amount(balance)
             except ValidationError:
                 raise ValidationError('Balance must be a valid positive number.', code='invalid_amount')
+            
+            # Validate balance is not negative for first transaction
+            if balance is not None and balance < 0:
+                raise ValidationError('Balance cannot be negative. Please enter a non-negative opening balance.', code='negative_balance')
         
         # For subsequent transactions, balance can be any value (will be auto-calculated)
         return balance or 0
@@ -204,6 +208,13 @@ class BankStatementForm(forms.ModelForm):
                 # Calculate: Previous Balance + Credit - Debit using Decimal for precision
                 calculated_balance = previous_balance + Decimal(str(credit)) - Decimal(str(debit))
                 cleaned_data['balance'] = calculated_balance
+                
+                # Validate the calculated balance is not negative
+                if calculated_balance < 0:
+                    raise ValidationError(
+                        'This transaction would result in a negative balance. Please check the debit/credit amounts.',
+                        code='negative_balance'
+                    )
             else:
                 # Shouldn't happen, but just in case
                 cleaned_data['balance'] = Decimal(str(credit)) - Decimal(str(debit))

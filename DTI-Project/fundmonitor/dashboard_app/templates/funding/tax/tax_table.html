@@ -132,12 +132,8 @@
       </div>
     </div>
 
-    <!-- Table Footer (simplified, pagination omitted) -->
-    <div class="table-footer">
-      <div class="footer-info">
-        Showing <strong id="visibleCount">{{ entry_count }}</strong> of <strong>{{ entry_count }}</strong> entries
-      </div>
-    </div>
+    <!-- Table Footer -->
+    {% include 'components/table_footer.html' with page_obj=page_obj total_count=entry_count %}
   </div><!-- /.table-card -->
 
 </div><!-- /.table-namespace -->

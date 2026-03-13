@@ -58,6 +58,13 @@ def parse_tax_rate(value):
 def get_tax_rates(request, purchase_type_id):
     """API endpoint to get tax rates for a specific purchase type"""
     try:
+        # Validate that purchase_type_id is provided and is a valid integer
+        if not purchase_type_id:
+            return JsonResponse(
+                {'error': 'Purchase type ID is required', 'status': 'error'},
+                status=400
+            )
+        
         tax_entry = TaxTable.objects.get(purchase_type_id=purchase_type_id)
         
         data = {
@@ -71,7 +78,15 @@ def get_tax_rates(request, purchase_type_id):
         }
         return JsonResponse(data)
     except TaxTable.DoesNotExist:
-        return JsonResponse({'error': 'Tax rates not found for this purchase type'}, status=404)
+        return JsonResponse(
+            {'error': f'Tax rates not configured for purchase type {purchase_type_id}. Please set up tax rules in the Tax Table.', 'status': 'error'},
+            status=404
+        )
+    except Exception as e:
+        return JsonResponse(
+            {'error': f'Error retrieving tax rates: {str(e)}', 'status': 'error'},
+            status=500
+        )
 
 
 def get_fund_budget(request):
@@ -90,12 +105,34 @@ def get_fund_budget(request):
             transaction_type='Disbursement'
         ).aggregate(total=Sum('payments'))['total'] or 0
         
+        # Calculate total refunds for this fund (refunds reduce the net disbursed amount)
+        total_refunded = MasterFundMonitoring.objects.filter(
+            fund_source=fund,
+            transaction_type='Refund'
+        ).aggregate(total=Sum('payments'))['total'] or 0
+        
+        # Calculate total downloads (fund allocations from higher office via MDP)
+        total_downloads = MasterFundMonitoring.objects.filter(
+            fund_source=fund
+        ).aggregate(total=Sum('downloads'))['total'] or 0
+        
+        # Net disbursed = disbursements minus refunds
+        net_disbursed = total_disbursed - total_refunded
+        
+        # Total available = annual budget + downloads - net disbursed
+        total_available = (fund.annual_budget or 0) + total_downloads
+        available = total_available - net_disbursed
+        
         data = {
             'id': fund.id,
             'name': fund.name,
             'annual_budget': float(fund.annual_budget or 0),
+            'total_downloads': float(total_downloads),
+            'total_available': float(total_available),
             'total_disbursed': float(total_disbursed),
-            'available': float((fund.annual_budget or 0) - (total_disbursed or 0)),
+            'total_refunded': float(total_refunded),
+            'net_disbursed': float(net_disbursed),
+            'available': float(available),
         }
         return JsonResponse(data)
     except FundSource.DoesNotExist:
@@ -123,13 +160,35 @@ def get_mooe_budget(request):
             transaction_type='Disbursement'
         ).aggregate(total=Sum('payments'))['total'] or 0
         
+        # Calculate total refunds for this MOOE category (refunds reduce the net disbursed amount)
+        total_refunded = MasterFundMonitoring.objects.filter(
+            mooe=mooe.code,
+            transaction_type='Refund'
+        ).aggregate(total=Sum('payments'))['total'] or 0
+        
+        # Calculate total downloads for this MOOE category
+        total_downloads = MasterFundMonitoring.objects.filter(
+            mooe=mooe.code
+        ).aggregate(total=Sum('downloads'))['total'] or 0
+        
+        # Net disbursed = disbursements minus refunds
+        net_disbursed = total_disbursed - total_refunded
+        
+        # Total available = annual budget + downloads - net disbursed
+        total_available = annual_budget + total_downloads
+        available = total_available - net_disbursed
+        
         data = {
             'id': mooe.id,
             'code': mooe.code,
             'name': mooe.name,
             'annual_budget': float(annual_budget),
+            'total_downloads': float(total_downloads),
+            'total_available': float(total_available),
             'total_disbursed': float(total_disbursed),
-            'available': float(annual_budget - total_disbursed),
+            'total_refunded': float(total_refunded),
+            'net_disbursed': float(net_disbursed),
+            'available': float(available),
         }
         return JsonResponse(data)
     except BreakdownCategory.DoesNotExist:

@@ -35,6 +35,8 @@ from .bank_statement import (
     bank_statement_create,
     bank_statement_update,
     bank_statement_delete,
+    bank_statement_update_status,
+    bank_statement_bulk_delete,
 )
 
 # Master Fund Monitoring Views
@@ -43,6 +45,7 @@ from .master_fund_monitoring import (
     master_fund_monitoring_create,
     master_fund_monitoring_update,
     master_fund_monitoring_delete,
+    master_fund_monitoring_bulk_delete,
 )
 
 # API Views
@@ -71,11 +74,14 @@ __all__ = [
     'bank_statement_create',
     'bank_statement_update',
     'bank_statement_delete',
+    'bank_statement_update_status',
+    'bank_statement_bulk_delete',
     # Master Fund Monitoring
     'master_fund_monitoring_list',
     'master_fund_monitoring_create',
     'master_fund_monitoring_update',
     'master_fund_monitoring_delete',
+    'master_fund_monitoring_bulk_delete',
     # API
     'get_supplier_data',
     'get_tax_rates',

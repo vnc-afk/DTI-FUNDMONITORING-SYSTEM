@@ -11,6 +11,7 @@
 // Dashboard data from Django context - Load FIRST before any other scripts
 window.dashboardData = {
     monthlyData:           {{ monthly_data|safe }},
+    monthlyDownloads:      {{ monthly_downloads|safe }},
     fundLabels:            {{ fund_labels|safe }},
     fundValues:            {{ fund_values|safe }},
     budgetLabels:          {{ budget_labels|safe }},
@@ -20,8 +21,8 @@ window.dashboardData = {
     expenseValues:         {{ expense_values|safe }},
     supplierLabels:        {{ supplier_labels|safe }},
     supplierValues:        {{ supplier_values|safe }},
-    taxLabels:             {{ tax_labels|safe }},
-    taxValues:             {{ tax_values|safe }},
+    mooeLabels:            {{ mooe_labels|safe }},
+    mooeValues:            {{ mooe_values|safe }},
     chequeLabels:          {{ cheque_labels|safe }},
     chequeCounts:          {{ cheque_counts|safe }},
     districtLabels:        {{ district_labels|safe }},
@@ -239,13 +240,25 @@ window.dashboardData = {
             <div id="monthlyChart" class="chart-plot"></div>
         </div>
 
+        <!-- 1b. Monthly Downloads Trend — Full width -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <div class="chart-header-text">
+                    <h3>Monthly Downloads Trend</h3>
+                    <p>Fund allocations received from higher office (MDP)</p>
+                </div>
+                <span class="chart-badge">Line Chart</span>
+            </div>
+            <div id="monthlyDownloadsChart" class="chart-plot"></div>
+        </div>
+
         <!-- 2 & 3. Fund Source & Budget Analysis — 2 col -->
         <div class="charts-grid two-col">
             <div class="chart-card">
                 <div class="chart-header">  
                     <div class="chart-header-text">
                         <h3>Remaining Balance by Fund Source</h3>
-                        <p>Available funds remaining in each source</p>
+                        <p>Available funds after disbursements and downloads</p>
                     </div>
                     <span class="chart-badge">Donut</span>
                 </div>
@@ -290,12 +303,12 @@ window.dashboardData = {
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="chart-header-text">
-                        <h3>Tax Withholding Summary</h3>
-                        <p>BIR withholding taxes by category</p>
+                        <h3>MOOE Breakdown Remaining Balance</h3>
+                        <p>Available budget in each MOOE category</p>
                     </div>
-                    <span class="chart-badge">Stacked Bar</span>
+                    <span class="chart-badge">Bar Chart</span>
                 </div>
-                <div id="taxChart" class="chart-plot"></div>
+                <div id="mooeChart" class="chart-plot"></div>
             </div>
         </div>
 
