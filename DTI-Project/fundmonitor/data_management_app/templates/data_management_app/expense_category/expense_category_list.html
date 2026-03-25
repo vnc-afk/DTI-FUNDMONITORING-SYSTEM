@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Expense Category{% endblock %}
+
+{% block content %}
+<div class="table-namespace">
+
+  {% include 'components/page_header.html' with title='Expense Category List' subtitle='Manage expense classification categories' add_url='expense_category_add' add_button_text='Add Expense Category' %}
+
+  {% include 'components/summary_cards.html' with cards=summary_cards %}
+
+  <div class="table-card">
+
+    {% include 'components/toolbar.html' with toolbar_title='Expense Categories' entry_count_text=toolbar_count search_placeholder='Search expense categories…' show_filter=True filter_id='statusFilter' filter_all_text='All Status' filter_options=status_filter_options status_filter=status_filter show_bulk_delete=True %}
+
+    <div class="table-wrap">
+      <table id="expenseCategoryTable">
+        <thead>
+          <tr>
+            <th data-col="0">
+              Name <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th data-col="1">
+              Description <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th data-col="2">
+              Status <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="tableBody">
+          {% for expense_category in expense_categories %}
+          <tr data-status="{% if expense_category.is_active %}active{% else %}inactive{% endif %}" data-id="{{ expense_category.pk }}">
+            <td><div class="desc-main">{{ expense_category.name }}</div></td>
+            <td><span class="desc-main">{{ expense_category.description|default:'—' }}</span></td>
+            <td>
+              <span class="badge {% if expense_category.is_active %}badge-cleared{% else %}badge-failed{% endif %}">
+                {% if expense_category.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+            </td>
+            <td>
+              <div class="actions">
+                <a href="{% url 'expense_category_edit' expense_category.pk %}" class="act-btn act-edit" title="Edit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </a>
+                <button
+                  type="button"
+                  class="act-btn act-delete"
+                  title="Delete"
+                  data-confirm-action="delete"
+                  data-action-url="{% url 'expense_category_delete' expense_category.pk %}"
+                  data-action-name="Expense Category"
+                  data-action-label="{{ expense_category.name }}"
+                  data-redirect-url="{% url 'expense_category_list' %}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" style="text-align:center; padding: 32px; color: var(--text-3);">No expense categories available.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% include 'components/no_results.html' with no_results_message='No expense categories match your search' %}
+    </div>
+
+    {% include 'components/table_footer.html' with page_obj=page_obj total_count=category_count %}
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.bulkDeleteManager = {
+    bulkDeleteBtnId: 'bulkDeleteBtn',
+    tableBodyId: 'tableBody',
+    modelName: 'expense category',
+    deleteUrl: "{% url 'expense_category_bulk_delete' %}"
+  };
+</script>
+{% endblock %}

@@ -1,14 +1,23 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F
 from django.utils.timezone import now
 from django.http import JsonResponse
+from django.utils.safestring import mark_safe
 import json
 from decimal import Decimal
-from dashboard_app.models import (
-    MasterFundMonitoring, FundSource, Supplier, 
-    ExpenseObject, ExpenseCategory, Staff, Division,
-    District, NegosyoCenter, BankStatement, BankAccount
+from bank_statement_app.models import BankAccount, BankStatement
+from data_management_app.models import (
+    District,
+    Division,
+    ExpenseCategory,
+    ExpenseObject,
+    FundSource,
+    NegosyoCenter,
+    Staff,
+    Supplier,
 )
+from mater_fundmonitor_app.models import MasterFundMonitoring
 
 
 def get_filter_parameters(request):
@@ -46,6 +55,7 @@ def get_filter_parameters(request):
     return filters
 
 
+@login_required
 def dashboard(request):
     """
     Main dashboard view with comprehensive analytics and filtering.
@@ -233,7 +243,7 @@ def dashboard(request):
     # Get ALL breakdown categories, not just those with transactions
     mooe_remaining = []
     try:
-        from dashboard_app.models import BreakdownCategory, FundSourceBreakdown
+        from data_management_app.models import BreakdownCategory, FundSourceBreakdown
         all_categories = BreakdownCategory.objects.filter(is_active=True).order_by('order')
         
         for category in all_categories:
@@ -314,7 +324,7 @@ def dashboard(request):
     
     # Debug: Log if no bank statements found
     if not bank_statements:
-        print(f"⚠️  No BankStatement records found for year {year_to_filter}")
+        print(f"[WARNING] No BankStatement records found for year {year_to_filter}")
     
     # ====== FILTER OPTIONS ======
     # Reuse years already calculated at the top (all_available_years)
@@ -463,19 +473,19 @@ def executive_dashboard(request):
     # Determine budget health status
     if budget_utilization_pct > 100:
         budget_status = 'OVER_BUDGET'
-        status_label = '⚠️ OVER BUDGET'
+        status_label = mark_safe('<i class="fa-solid fa-exclamation-circle"></i> OVER BUDGET')
         status_color = '#e74c3c'  # Red
     elif budget_utilization_pct >= 80:
         budget_status = 'CRITICAL'
-        status_label = '🔴 CRITICAL (80%+)'
+        status_label = mark_safe('<i class="fa-solid fa-circle" style="color: #e67e22;"></i> CRITICAL (80%+)')
         status_color = '#e67e22'  # Orange
     elif budget_utilization_pct >= 60:
         budget_status = 'HIGH'
-        status_label = '🟡 HIGH (60%+)'
+        status_label = mark_safe('<i class="fa-solid fa-circle" style="color: #f39c12;"></i> HIGH (60%+)')
         status_color = '#f39c12'  # Yellow
     else:
         budget_status = 'HEALTHY'
-        status_label = '🟢 HEALTHY'
+        status_label = mark_safe('<i class="fa-solid fa-circle" style="color: #27ae60;"></i> HEALTHY')
         status_color = '#27ae60'  # Green
     
     # ====== FUND-BY-FUND BREAKDOWN ======
@@ -541,7 +551,7 @@ def executive_dashboard(request):
     if budget_utilization_pct > 100:
         alerts.append({
             'type': 'danger',
-            'icon': '⚠️',
+            'icon': mark_safe('<i class="fa-solid fa-circle-exclamation"></i>'),
             'title': 'Over Budget',
             'message': f'Total spending exceeds budget by ₱{float(abs(remaining_balance)):,.2f}',
             'severity': 'high'
@@ -551,7 +561,7 @@ def executive_dashboard(request):
     if budget_utilization_pct > 80 and budget_utilization_pct <= 100:
         alerts.append({
             'type': 'warning',
-            'icon': '🔴',
+            'icon': mark_safe('<i class="fa-solid fa-circle" style="color: #e67e22;"></i>'),
             'title': 'Budget Alert',
             'message': f'Budget utilization is at {budget_utilization_pct:.1f}% - {budget_utilization_pct:.1f}% spent',
             'severity': 'high'
@@ -562,7 +572,7 @@ def executive_dashboard(request):
         if fund['utilization'] > 95:
             alerts.append({
                 'type': 'warning',
-                'icon': '⚠️',
+                'icon': mark_safe('<i class="fa-solid fa-triangle-exclamation"></i>'),
                 'title': f'{fund["name"]} Fund Nearly Depleted',
                 'message': f'{fund["utilization"]:.1f}% utilized - Only ₱{fund["remaining"]:,.2f} remaining',
                 'severity': 'medium'
@@ -577,7 +587,7 @@ def executive_dashboard(request):
         if days_since > 30:
             alerts.append({
                 'type': 'info',
-                'icon': 'ℹ️',
+                'icon': mark_safe('<i class="fa-solid fa-circle-info"></i>'),
                 'title': 'No Recent Transactions',
                 'message': f'Last transaction was {days_since} days ago',
                 'severity': 'low'

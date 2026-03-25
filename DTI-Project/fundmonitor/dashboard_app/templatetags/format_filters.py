@@ -37,9 +37,12 @@ def intcomma_format(value, use_l10n=None):
     else:
         integer_part = str_value
         decimal_part = None
-    
-    # Add commas to integer part
-    integer_with_commas = '{:,}'.format(int(integer_part))
+
+    # Non-numeric values should pass through unchanged.
+    try:
+        integer_with_commas = '{:,}'.format(int(integer_part))
+    except (ValueError, TypeError):
+        return str(value)
     
     # Reconstruct the number
     result = integer_with_commas

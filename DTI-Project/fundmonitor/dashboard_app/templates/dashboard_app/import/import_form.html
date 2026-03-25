@@ -1,0 +1,829 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Import Data{% endblock %}
+
+{% block page_title %}Import Data{% endblock %}
+
+{% block content %}
+<div class="form-namespace">
+    <!-- Back link + Header -->
+    <a href="{% url 'dashboard' %}" class="back-link">
+        <i class="bi bi-chevron-left"></i> Back to Dashboard
+    </a>
+    {% include 'components/page_header.html' with title='Import Data' subtitle='Bulk import suppliers, bank statements, staff, or fund monitoring data from Excel/CSV files' %}
+
+    <!-- Form Card -->
+    <div class="form-page-card">
+        <!-- Header -->
+        <div class="form-card-header">
+            <div class="form-card-header-icon">
+                <i class="bi bi-cloud-upload"></i>
+            </div>
+            <div class="form-card-header-text">
+                <h5>Data Import</h5>
+                <p>Upload your file to import records into the system</p>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="form-card-body">
+            {% if messages %}
+            <!-- Messages -->
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-{% if message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="importForm" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Upload Data"
+                  data-confirm-message="Please review your file selection before importing."
+                  data-confirm-text="Upload File"
+                                    data-confirmation-type="info"
+                  data-confirm-icon="📤">
+                {% csrf_token %}
+
+                <!-- Section: Data Type Selection -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-list-check" style="color:var(--accent);"></i>
+                        Data Type
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                {{ form.data_type.label }} <span class="required">*</span>
+                            </label>
+                            <div class="d-flex gap-3 mt-2">
+                                {% for radio_widget in form.data_type %}
+                                <div class="form-check">
+                                    {{ radio_widget.tag }}
+                                    <label class="form-check-label" for="{{ radio_widget.id_for_label }}">
+                                        <i class="bi bi-{% if radio_widget.choice_label == 'Suppliers' %}truck{% else %}building{% endif %}"></i>
+                                        {{ radio_widget.choice_label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.data_type.errors %}
+                            <div class="form-error mt-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {{ form.data_type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: File Upload -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-file-earmark" style="color:var(--accent);"></i>
+                        File Selection
+                    </div>
+                    <div class="row g-3">
+                        <!-- File Input -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                {{ form.file.label }} <span class="required">*</span>
+                            </label>
+                            <div class="file-upload-wrapper">
+                                <input 
+                                    type="file" 
+                                    class="form-control file-input {% if form.file.errors %}is-invalid{% endif %}"
+                                    id="{{ form.file.id_for_label }}"
+                                    name="file"
+                                    accept=".xlsx,.xls,.csv"
+                                    required
+                                >
+                                <label for="{{ form.file.id_for_label }}" class="file-upload-label">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <span id="fileLabel">Choose file or drag & drop</span>
+                                    <small class="d-block text-muted mt-1">{{ form.file.help_text }}</small>
+                                </label>
+                            </div>
+                            <div id="fileInfo" class="mt-2" style="display: none;">
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle"></i> 
+                                    <span id="fileName"></span> selected
+                                </small>
+                            </div>
+                            {% if form.file.errors %}
+                            <div class="form-error mt-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {{ form.file.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sheet Name -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-columns-gap"></i>
+                                {{ form.sheet_name.label }}
+                            </label>
+                            {{ form.sheet_name }}
+                            <small class="text-muted d-block mt-1">{{ form.sheet_name.help_text }}</small>
+                            {% if form.sheet_name.errors %}
+                            <div class="form-error mt-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {{ form.sheet_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Skip Rows -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-arrow-down"></i>
+                                {{ form.skip_rows.label }}
+                            </label>
+                            {{ form.skip_rows }}
+                            <small class="text-muted d-block mt-1">{{ form.skip_rows.help_text }}</small>
+                            {% if form.skip_rows.errors %}
+                            <div class="form-error mt-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {{ form.skip_rows.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Options -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-sliders" style="color:var(--accent);"></i>
+                        Import Options
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.skip_errors }}
+                                <label class="form-check-label" for="{{ form.skip_errors.id_for_label }}">
+                                    <i class="bi bi-check-lg"></i>
+                                    {{ form.skip_errors.label }}
+                                </label>
+                                <small class="text-muted d-block mt-1">{{ form.skip_errors.help_text }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Action Buttons -->
+                <div class="form-section">
+                    <div class="row g-3">
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-upload"></i> Import Data
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="mb-2">Processing Import</h5>
+                    <p class="text-muted mb-0">Please wait while we import your data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Card -->
+    <div class="form-page-card mt-4">
+        <div class="form-card-header">
+            <div class="form-card-header-icon">
+                <i class="bi bi-question-circle"></i>
+            </div>
+            <div class="form-card-header-text">
+                <h5>Import Guide</h5>
+                <p>Learn how to prepare and import your data</p>
+            </div>
+        </div>
+
+        <div class="form-card-body">
+            <div class="accordion" id="helpAccordion">
+                <!-- Multiple Sheets Help -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#multiSheetHelp">
+                            <i class="bi bi-columns-gap me-2"></i> Multiple Sheets & Title Rows
+                        </button>
+                    </h2>
+                    <div id="multiSheetHelp" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p><strong>If your Excel has multiple sheets or title rows:</strong></p>
+                            <ol>
+                                <li><strong>Multiple sheets:</strong> Enter the exact sheet name (e.g., "Bank Statements", "Sheet1")</li>
+                                <li><strong>Title rows:</strong> If your file has a title row before headers, set "Skip rows" to the number of rows to skip</li>
+                                <li><strong>Example:</strong> If row 1 has "DTI System Report" and row 2 has headers, set "Skip rows" to 1</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suppliers Format -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#supplierHelp">
+                            <i class="bi bi-truck me-2"></i> Supplier Import Format
+                        </button>
+                    </h2>
+                    <div id="supplierHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Required columns:</strong></p>
+                            <ul>
+                                <li><code>supplier</code> - Supplier name</li>
+                            </ul>
+                            <p><strong>Optional columns:</strong></p>
+                            <ul>
+                                <li><code>tin</code> - Tax ID (###-###-###-###)</li>
+                                <li><code>vat_status</code> - VAT status: NV, V, NA</li>
+                                <li><code>philgeps_registration</code> - PhilGEPS code</li>
+                                <li><code>address</code> - Business address</li>
+                                <li><code>propprietor</code> - Owner name</li>
+                                <li><code>contact_number</code> - Phone number</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Statements Format -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bankHelp">
+                            <i class="bi bi-building me-2"></i> Bank Statement Import Format
+                        </button>
+                    </h2>
+                    <div id="bankHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Required columns:</strong></p>
+                            <ul>
+                                <li><code>date</code> - Transaction date (YYYY-MM-DD)</li>
+                                <li><code>description</code> - Transaction description</li>
+                                <li><code>balance</code> - Account balance</li>
+                            </ul>
+                            <p><strong>Optional columns:</strong></p>
+                            <ul>
+                                <li><code>check_number</code> - Check/Reference number</li>
+                                <li><code>debit</code> - Money going out</li>
+                                <li><code>credit</code> - Money coming in</li>
+                                <li><code>status</code> - Status: Cleared, On Process</li>
+                            </ul>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small><strong>Note:</strong> Only ONE of debit or credit per row. Both cannot be > 0.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Master Fund Monitoring Format -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mfmHelp">
+                            <i class="bi bi-graph-up me-2"></i> Master Fund Monitoring Import Format
+                        </button>
+                    </h2>
+                    <div id="mfmHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Required columns:</strong></p>
+                            <ul>
+                                <li><code>date</code> - Transaction date (YYYY-MM-DD)</li>
+                                <li><code>payee</code> - Supplier/Payee name</li>
+                                <li><code>particulars</code> - Transaction details</li>
+                            </ul>
+                            <p><strong>Optional columns:</strong></p>
+                            <ul>
+                                <li><code>month</code> - Month of transaction</li>
+                                <li><code>division</code> - Budget division</li>
+                                <li><code>fund_source</code> - Fund source</li>
+                                <li><code>mooe</code> - MOOE category code</li>
+                                <li><code>nc</code> - Negosyo Center</li>
+                                <li><code>tin</code> - Tax ID (auto-populated from supplier)</li>
+                                <li><code>tax_type</code> - Tax type classification</li>
+                                <li><code>purchase_type</code> - Type of purchase</li>
+                                <li><code>payments</code> - Payment amount</li>
+                                <li><code>downloads</code> - Download amount</li>
+                                <li><code>dv_number</code> - Disbursement Voucher number</li>
+                                <li><code>cheque_number</code> - Check/Cheque number</li>
+                                <li><code>cleared_date</code> - Date transaction cleared (YYYY-MM-DD)</li>
+                                <li><code>account_title</code> - Account/Expense object</li>
+                                <li><code>expense_classification</code> - Expense category</li>
+                                <li><code>cheque_status</code> - Status: Pending, Cleared</li>
+                                <li><code>staff</code> - Responsible staff member</li>
+                            </ul>
+                            <p><strong>Tax breakdown columns (optional):</strong></p>
+                            <ul>
+                                <li><code>goods (5%)</code>, <code>services (5%)</code>, <code>goods & services (3%)</code></li>
+                                <li><code>goods (1%)</code>, <code>services (2%)</code>, <code>rental (5%)</code>, <code>prof. fee (10%)</code></li>
+                            </ul>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small><strong>Tip:</strong> Payee must exist in the Suppliers list or will be created automatically during import.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Import Format -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#staffHelp">
+                            <i class="bi bi-people me-2"></i> Staff Import Format
+                        </button>
+                    </h2>
+                    <div id="staffHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Format:</strong> Simple list of staff names (either format supported)</p>
+                            <p>Your file should contain a <strong>single column with staff full names</strong> — no headers needed. Each row contains one staff member's name. Two formats are supported:</p>
+                            
+                            <p><strong>Format 1: Standard (First Name Middle Initial Last Name)</strong></p>
+                            <pre style="background: var(--bg-surface); padding: 12px; border-radius: 4px; overflow-x: auto;">John Michael G Smith
+Jane Marie D Johnson
+Robert Alexander C Lee</pre>
+
+                            <p><strong>Format 2: Reverse (Last Name, First Name Middle Initial)</strong></p>
+                            <pre style="background: var(--bg-surface); padding: 12px; border-radius: 4px; overflow-x: auto;">Smith, John Michael G
+Johnson, Jane Marie D
+Lee, Robert Alexander C</pre>
+
+                            <p><strong>Examples in CSV:</strong></p>
+                            <p>Format 1 with multi-word first names:</p>
+                            <pre style="background: var(--bg-surface); padding: 12px; border-radius: 4px; overflow-x: auto;">John Michael G Smith
+Jane Marie D Johnson
+Robert Alexander C Lee
+Maria Elena F Garcia Lopez</pre>
+
+                            <p>Format 2 with multi-word first names:</p>
+                            <pre style="background: var(--bg-surface); padding: 12px; border-radius: 4px; overflow-x: auto;">Smith, John Michael G
+Johnson, Jane Marie D
+Lee, Robert Alexander C
+Garcia, Maria Elena F</pre>
+
+                            <p><strong>How names are parsed:</strong></p>
+                            <ul>
+                                <li>The system looks for a 1-2 letter word as the middle initial</li>
+                                <li>Everything BEFORE the middle initial becomes the first name (can be multiple words)</li>
+                                <li>Everything AFTER the middle initial becomes the last name (can be multiple words)</li>
+                                <li>Example: "John Michael G Smith" → First: <strong>John Michael</strong>, Middle: <strong>G</strong>, Last: <strong>Smith</strong></li>
+                                <li>Example: "Maria Elena F Garcia Lopez" → First: <strong>Maria Elena</strong>, Middle: <strong>F</strong>, Last: <strong>Garcia Lopez</strong></li>
+                            </ul>
+
+                            <p><strong>Notes:</strong></p>
+                            <ul>
+                                <li>Staff names should be in a single column only</li>
+                                <li>No header row is required</li>
+                                <li>Supports both formats: "First Middle Initial Last" and "Last, First Middle Initial"</li>
+                                <li><strong>First names can have multiple words:</strong> "John Michael" or "Juan Carlos"</li>
+                                <li><strong>Last names can have multiple words:</strong> "Garcia Lopez" or "Smith Johnson"</li>
+                                <li><strong>Middle initial is 1-2 letters:</strong> Single letter (D, G, M) or double (AB, CD) with optional dot</li>
+                                <li>The middle initial acts as a separator between first and last names</li>
+                                <li>Names are automatically trimmed of extra spaces</li>
+                                <li>Empty rows are skipped automatically</li>
+                                <li>Duplicate staff names will not be created (existing records will be updated)</li>
+                                <li>Accented characters (é, ñ, á, etc.) are preserved as-is in the database</li>
+                                <li>Numbers are automatically removed from names</li>
+                                <li>Allowed characters: letters (including accented), spaces, hyphens, periods, and apostrophes</li>
+                            </ul>
+
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small><strong>Tip:</strong> You can import staff in bulk from an Excel or CSV file. Choose the format that matches your data.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── FILE UPLOAD ── */
+    .file-upload-wrapper {
+        position: relative;
+        border: 2px dashed var(--border-strong);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--bg-elevated);
+        transition: var(--transition);
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: var(--accent);
+        background: var(--bg-card);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .file-upload-wrapper.dragover {
+        border-color: var(--accent);
+        background: var(--bg-card);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .file-input {
+        display: none !important;
+    }
+
+    .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1.5rem;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .file-upload-label i {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--accent);
+    }
+
+    .file-upload-label span {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .file-upload-label small {
+        color: var(--text-secondary) !important;
+        font-size: 0.8rem;
+    }
+
+    /* ── FILE INFO ── */
+    #fileInfo {
+        padding: 8px 12px;
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: var(--radius-sm);
+    }
+
+    #fileInfo small {
+        color: var(--success) !important;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* ── FORM LABELS ── */
+    .form-namespace .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-namespace .form-label i {
+        color: var(--accent);
+        font-size: 0.9rem;
+    }
+
+    .form-namespace .required {
+        color: var(--danger);
+        font-weight: 700;
+    }
+
+    /* ── FORM INPUTS ── */
+    .form-namespace .form-control,
+    .form-namespace .form-select {
+        font-size: 0.875rem;
+        font-family: var(--font-body);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        color: var(--text-primary);
+        background: var(--bg-surface);
+        width: 100%;
+        transition: var(--transition);
+    }
+
+    .form-namespace .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-namespace .form-control:hover,
+    .form-namespace .form-select:hover {
+        border-color: var(--accent-glow);
+    }
+
+    .form-namespace .form-control:focus,
+    .form-namespace .form-select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+        outline: none;
+    }
+
+    .form-namespace .form-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%238b90a8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+        cursor: pointer;
+    }
+
+    /* ── FORM CHECKS (Radio/Checkbox) ── */
+    .form-namespace .form-check {
+        margin-bottom: 0;
+    }
+
+    .form-namespace .form-check input[type="radio"],
+    .form-namespace .form-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 3px;
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background: var(--bg-surface);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .form-namespace .form-check input[type="radio"] {
+        border-radius: 50%;
+    }
+
+    .form-namespace .form-check input[type="radio"]:checked,
+    .form-namespace .form-check input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .form-namespace .form-check input[type="radio"]:focus,
+    .form-namespace .form-check input[type="checkbox"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .form-namespace .form-check-label {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        margin-left: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-namespace .form-check-label i {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    /* ── ERROR MESSAGES ── */
+    .form-namespace .form-error {
+        padding: 8px 12px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-sm);
+        color: var(--danger);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-namespace .form-error i {
+        flex-shrink: 0;
+    }
+
+    /* ── HELP TEXT ── */
+    .form-namespace .text-muted {
+        color: var(--text-secondary) !important;
+        font-size: 0.8rem;
+    }
+
+    /* ── ACCORDION ── */
+    .form-namespace .accordion-button {
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+    }
+
+    .form-namespace .accordion-button:not(.collapsed) {
+        background: var(--bg-card);
+        border-color: var(--accent);
+        box-shadow: none;
+        color: var(--text-primary);
+    }
+
+    .form-namespace .accordion-button:hover {
+        background: var(--bg-card);
+        border-color: var(--accent-glow);
+    }
+
+    .form-namespace .accordion-button::after {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%233b82f6'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    }
+
+    .form-namespace .accordion-body {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-top: none;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .form-namespace .accordion-item {
+        border: none;
+        margin-bottom: 12px;
+    }
+
+    .form-namespace .accordion-item:first-child .accordion-button {
+        border-radius: var(--radius-sm);
+    }
+
+    .form-namespace .accordion-item:not(:last-child) {
+        margin-bottom: 12px;
+    }
+
+    /* ── ACCORDION CONTENT ── */
+    .form-namespace .accordion-body p {
+        margin-bottom: 12px;
+        color: var(--text-primary);
+    }
+
+    .form-namespace .accordion-body strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .form-namespace .accordion-body ol,
+    .form-namespace .accordion-body ul {
+        margin-bottom: 12px;
+        padding-left: 20px;
+        color: var(--text-primary);
+    }
+
+    .form-namespace .accordion-body li {
+        margin-bottom: 6px;
+        color: var(--text-primary);
+    }
+
+    .form-namespace .accordion-body code {
+        background: var(--bg-surface);
+        color: var(--accent);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+
+    .form-namespace .accordion-body .alert {
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+    .form-namespace .accordion-body .alert i {
+        color: var(--info);
+        margin-right: 6px;
+    }
+
+    .form-namespace .accordion-body .alert-info small {
+        color: var(--text-primary);
+    }
+
+    /* ── BUTTONS ── */
+    .form-namespace .btn {
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-namespace .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: 2px solid var(--accent);
+    }
+
+    .form-namespace .btn-primary:hover {
+        background: #60a5fa;
+        border-color: #60a5fa;
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: translateY(-2px);
+    }
+
+    .form-namespace .btn-outline-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 1px solid var(--border-strong);
+    }
+
+    .form-namespace .btn-outline-secondary:hover {
+        background: var(--bg-card);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+</style>
+
+<script>
+    document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        if (fileName) {
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('fileLabel').textContent = 'File selected: ' + fileName;
+        }
+    });
+
+    // Drag and drop
+    const wrapper = document.querySelector('.file-upload-wrapper');
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        wrapper.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        wrapper.addEventListener(eventName, () => wrapper.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        wrapper.addEventListener(eventName, () => wrapper.classList.remove('dragover'), false);
+    });
+
+    wrapper.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }, false);
+</script>
+
+<!-- Loading Modal Handler -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('importForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+
+    const originalFormSubmit = HTMLFormElement.prototype.submit;
+
+    function showLoadingState() {
+        loadingModal.show();
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Importing...';
+    }
+
+    // Prevent default form submission to let form-submit-helper show confirmation dialog first.
+    // The helper will call form.submit() after confirmation, which triggers the override below.
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+    });
+
+    // For programmatic submit (used by form-submit-helper after confirmation).
+    form.submit = function() {
+        showLoadingState();
+        originalFormSubmit.call(this);
+    };
+});
+</script>
+
+<script src="{% static 'js/form-submit-helper.js' %}"></script>
+{% endblock %}

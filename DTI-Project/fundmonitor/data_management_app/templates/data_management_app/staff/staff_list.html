@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Staff List{% endblock %}
+
+
+{% block content %}
+<div class="table-namespace">
+  <!-- Page Header -->
+  {% include 'components/page_header.html' with title='Staff List' subtitle='Manage personnel records' add_url='staff_add' add_button_text='Add Staff' %}
+
+  <!-- Summary Cards -->
+  {% include 'components/summary_cards.html' with cards=summary_cards %}
+
+  <!-- ══════════════════════════════════
+       TABLE CARD
+  ══════════════════════════════════ -->
+  <div class="table-card">
+
+    <!-- Toolbar -->
+    {% include 'components/toolbar.html' with toolbar_title='Staff Members' entry_count_text=toolbar_count search_placeholder='Search staff…' show_filter=True filter_id='divisionFilter' filter_all_text='All Divisions' filter_options=division_filter_options status_filter=division_filter show_bulk_delete=True %}
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="staffTable">
+        <thead>
+          <tr>
+            <th data-col="0" class="sorted-asc">
+              # <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th data-col="1">
+              Staff Name <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th data-col="2">
+              Division <span class="sort-icon"><span class="up"></span><span class="dn"></span></span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="tableBody">
+          {% for staff in staff_members %}
+          <tr data-division="{{ staff.division|lower }}" data-id="{{ staff.pk }}">
+            <td><span class="mono">{{ forloop.counter }}</span></td>
+            <td>
+              <div class="desc-main">{{ staff.first_name }} {% if staff.middle_initial %}{{ staff.middle_initial }} {% endif %}{{ staff.last_name }}</div>
+            </td>
+            <td>
+              <div class="desc-main">{{ staff.division }}</div>
+            </td>
+            <td>
+              <div class="actions">
+                <a href="{% url 'staff_edit' staff.pk %}" class="act-btn act-edit" title="Edit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </a>
+                <button
+                  type="button"
+                  class="act-btn act-delete"
+                  title="Delete"
+                  data-confirm-action="delete"
+                  data-action-url="{% url 'staff_delete' staff.pk %}"
+                  data-action-name="Staff"
+                  data-action-label="{{ staff }}"
+                  data-redirect-url="{% url 'staff' %}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" style="text-align:center; padding: 32px; color: var(--text-3);">No staff members available.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+        <tfoot>
+          <tr>
+            <td colspan="2">Totals ({{ staff_count }} staff member{{ staff_count|pluralize }})</td>
+            <td>{{ divisions_count }} division{{ divisions_count|pluralize }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- No Results -->
+      {% include 'components/no_results.html' with no_results_message='No staff members match your search' %}
+    </div>
+
+    <!-- Table Footer -->
+    {% include 'components/table_footer.html' with page_obj=page_obj total_count=staff_count %}
+
+  </div><!-- /.table-card -->
+
+</div><!-- /.table-namespace -->
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  // Set config before bulk-delete.js auto-initialization
+  window.bulkDeleteManager = {
+    bulkDeleteBtnId: 'bulkDeleteBtn',
+    tableBodyId: 'tableBody',
+    modelName: 'staff member',
+    deleteUrl: "{% url 'staff_bulk_delete' %}"
+  };
+</script>
+{% endblock %}

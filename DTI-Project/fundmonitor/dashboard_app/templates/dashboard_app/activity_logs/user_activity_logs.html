@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load activity_logs_tags %}
+{% load static %}
+
+{% block title %}{{ viewed_user.get_full_name|default:viewed_user.username }}'s Activity Logs{% endblock %}
+
+{% block page_title %}User Activity Logs{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/activity-logs.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="activity-namespace">
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1><i class="bi bi-person-circle activity-heading-icon"></i>{{ viewed_user.get_full_name|default:viewed_user.username }}'s Activity</h1>
+                <p>User activity log | <strong>{{ total_logs|intcomma }}</strong> activities</p>
+            </div>
+            <div class="page-header-actions">
+                {% if user.is_superuser %}
+                <a href="{% url 'activity_logs' %}" class="btn btn-primary activity-header-btn">
+                    <i class="bi bi-arrow-left"></i> Back to All Logs
+                </a>
+                {% else %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary activity-header-btn">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filter-card">
+            <div class="filter-header">
+                <h6><i class="bi bi-funnel"></i> Filters</h6>
+            </div>
+            <div class="filter-body">
+                <form method="get" class="filter-form" id="filter-form">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="filter-form-group">
+                                <label for="search">Search</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Search by object or description..." value="{{ search_query }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="filter-form-group">
+                                <label for="action">Action</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="">All Actions</option>
+                                    {% for action_code, action_name in actions %}
+                                        <option value="{{ action_code }}" {% if action_filter == action_code %}selected{% endif %}>
+                                            {{ action_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="filter-form-group">
+                                <label for="date">Date Range</label>
+                                <select class="form-control" id="date" name="date">
+                                    <option value="">All Time</option>
+                                    <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                                    <option value="week" {% if date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
+                                    <option value="month" {% if date_filter == 'month' %}selected{% endif %}>Last 30 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="filter-form-group">
+                                <label>&nbsp;</label>
+                                <div class="filter-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> Filter
+                                    </button>
+                                    <a href="{% url 'user_activity_logs' viewed_user.id %}" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+    </div>
+        <!-- Result Summary -->
+        {% if logs %}
+            <div class="result-summary">
+                Showing <strong>{{ logs|length }}</strong> of <strong>{{ page_obj.paginator.count|intcomma }}</strong> activities
+            </div>
+        {% endif %}
+        
+        <!-- Activity Table -->
+        <div class="activity-table-wrapper">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Action</th>
+                        <th>Model</th>
+                        <th>Object</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <span title="{{ log.get_formatted_timestamp }}" class="activity-time-primary">
+                                        {{ log.timestamp|naturaltime }}
+                                    </span>
+                                    <br>
+                                    <small class="activity-time-secondary">{{ log.timestamp|date:'Y-m-d H:i' }}</small>
+                                </td>
+                                <td>
+                                    {% if log.action == 'CREATE' %}
+                                        <span class="activity-badge badge-create">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'UPDATE' %}
+                                        <span class="activity-badge badge-update">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'DELETE' %}
+                                        <span class="activity-badge badge-delete">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'VIEW' %}
+                                        <span class="activity-badge badge-view">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'LOGIN' %}
+                                        <span class="activity-badge badge-login">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'LOGOUT' %}
+                                        <span class="activity-badge badge-logout">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'DOWNLOAD' %}
+                                        <span class="activity-badge badge-download">{{ log.get_action_display }}</span>
+                                    {% elif log.action == 'IMPORT' %}
+                                        <span class="activity-badge badge-import">{{ log.get_action_display }}</span>
+                                    {% else %}
+                                        <span class="activity-badge badge-other">{{ log.get_action_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_superuser %}
+                                    <a href="{% url 'model_activity_logs' log.model_name %}" 
+                                       class="activity-model-link">
+                                        {{ log.model_name }}
+                                    </a>
+                                    {% else %}
+                                    <span class="activity-model-text">
+                                        {{ log.model_name }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.object_repr %}
+                                        <code class="activity-inline-code">{{ log.object_repr|truncatewords:5 }}</code>
+                                    {% else %}
+                                        <em class="activity-na-text">N/A</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" 
+                                            data-bs-target="#logModal{{ log.id }}">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                    
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="logModal{{ log.id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content activity-modal-content">
+                                                <div class="modal-header activity-modal-header">
+                                                    <h5 class="modal-title activity-modal-title">Activity Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body activity-modal-body">
+                                                    <div class="row mb-3 activity-modal-info-grid">
+                                                        <div class="col-md-6">
+                                                            <p><strong>Action:</strong> {{ log.get_action_display }}</p>
+                                                            <p><strong>Model:</strong> {{ log.model_name }}</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p><strong>Timestamp:</strong> {{ log.get_formatted_timestamp }}</p>
+                                                            <p><strong>IP Address:</strong> <code>{{ log.ip_address|default:"Unknown" }}</code></p>
+                                                        </div>
+                                                    </div>
+
+                                                    {% if log.description %}
+                                                        <hr>
+                                                        <h6><strong>Description</strong></h6>
+                                                        <p class="activity-prewrap-text">{{ log.description }}</p>
+                                                    {% endif %}
+                                                    
+                                                    {% if log.changed_fields %}
+                                                        <hr>
+                                                        <h6><strong>Changed Fields</strong></h6>
+                                                        <div class="table-responsive">
+                                                            <table class="activity-table activity-modal-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Field</th>
+                                                                        <th>Old Value</th>
+                                                                        <th>New Value</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for field, changes in log.changed_fields.items %}
+                                                                        <tr>
+                                                                            <td><strong>{{ field }}</strong></td>
+                                                                            <td><code>{{ changes.old|default:"(empty)" }}</code></td>
+                                                                            <td><code>{{ changes.new|default:"(empty)" }}</code></td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="bi bi-inbox activity-empty-icon"></i>
+                                    </div>
+                                    <div class="empty-state-text">No activity logs found</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        {% if paginator.num_pages > 1 %}
+            <div class="activity-pagination">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'user_activity_logs' viewed_user.id %}?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'user_activity_logs' viewed_user.id %}?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{% url 'user_activity_logs' viewed_user.id %}?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'user_activity_logs' viewed_user.id %}?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'user_activity_logs' viewed_user.id %}?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', () => {
+            document.getElementById('filter-form').submit();
+        });
+    });
+</script>
+{% endblock %}

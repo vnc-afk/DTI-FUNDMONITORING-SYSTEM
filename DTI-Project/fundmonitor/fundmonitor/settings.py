@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ibik)x33zg)svk(3alylixrw2eu(f!x^%btq5j3x%32wz(j$i4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.160', '127.0.0.1', '127.0.0.1:8000', '0.0.0.0', 'localhost', 'localhost:8000']
+ALLOWED_HOSTS = ['192.168.0.137', '192.168.0.137:8000', '127.0.0.1', '127.0.0.1:8000', '0.0.0.0',]
  
 
 # Application definition
@@ -37,8 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
     'dashboard_app',
+    'mater_fundmonitor_app',
+    'bank_statement_app',
+    'data_management_app',
+    'reports_app',
+    'user_app',
     'django.contrib.humanize',
 ]
 
@@ -49,6 +53,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'dashboard_app.middleware.CurrentUserMiddleware',
+    'dashboard_app.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -58,7 +64,7 @@ ROOT_URLCONF = 'fundmonitor.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -66,7 +72,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dashboard_app.utils.context_processors.page_title',
+                'dashboard_app.utils.context_processors.topbar_notifications',
             ],
+            'libraries': {
+                'format_filters': 'dashboard_app.templatetags.format_filters',
+                'activity_logs_tags': 'dashboard_app.templatetags.activity_logs_tags',
+            },
         },
     },
 ]
@@ -113,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
@@ -126,6 +138,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # Root-level static folder
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -136,3 +149,16 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication Settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Session Settings
+# Default session timeout: 1 week (unless "Remember me" is checked)
+SESSION_COOKIE_AGE = 604800  # 1 week in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire session when browser closes (unless remember_me checked)
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing session cookie
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection

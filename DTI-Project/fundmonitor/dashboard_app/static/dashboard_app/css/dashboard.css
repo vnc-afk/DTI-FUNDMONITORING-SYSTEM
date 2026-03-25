@@ -1,24 +1,13 @@
 /* ══════════════════════════════════════════════════════════════════════════════
    DTI FUND MONITORING — REFINED ANALYTICS DASHBOARD
+   Inherits theme from modern-theme.css and light-theme.css
    ══════════════════════════════════════════════════════════════════════════════ */
 
+@import 'modern-theme.css';
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
+/* Color palette extensions for dashboard (inherits from theme) */
 :root {
-    /* Core Palette — Deep Navy + Electric Teal */
-    --bg-base:          #07080f;
-    --bg-surface:       #0e1018;
-    --bg-card:          #12141e;
-    --bg-card-hover:    #181b28;
-    --bg-elevated:      #1c1f2e;
-
-    --border:           rgba(255, 255, 255, 0.07);
-    --border-strong:    rgba(255, 255, 255, 0.13);
-
-    --accent:           #3b82f6;
-    --accent-dim:       rgba(59, 130, 246, 0.12);
-    --accent-glow:      rgba(59, 130, 246, 0.25);
-
     --blue:             #3b82f6;
     --blue-dim:         rgba(59, 130, 246, 0.12);
 
@@ -33,21 +22,6 @@
 
     --sky:              #38bdf8;
     --sky-dim:          rgba(56, 189, 248, 0.12);
-
-    /* Text */
-    --text-primary:     #f0f2f8;
-    --text-secondary:   #8b90a8;
-    --text-muted:       #50546a;
-    --text-accent:      #3b82f6;
-
-    /* Typography */
-    --font-body:        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono:        'DM Mono', 'Fira Code', monospace;
-
-    /* Space & Shape */
-    --radius-sm:        6px;
-    --radius:           12px;
-    --radius-lg:        18px;
     --radius-xl:        24px;
 
     --shadow-card:      0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);

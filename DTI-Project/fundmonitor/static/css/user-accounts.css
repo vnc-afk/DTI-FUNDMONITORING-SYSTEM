@@ -1,0 +1,921 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   USER ACCOUNTS MANAGEMENT — CUSTOM STYLES ONLY
+   Extends form.css and table.css patterns for account management pages
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.table-namespace {
+    background: transparent;
+}
+
+:root[data-theme="light"] .table-namespace {
+    background: #ffffff;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES & RESETS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.user-accounts-text-muted {
+    color: var(--text-muted);
+}
+
+.user-accounts-d-block {
+    display: block;
+}
+
+.user-accounts-d-flex {
+    display: flex;
+}
+
+.user-accounts-gap-2 { gap: 8px; }
+.user-accounts-gap-3 { gap: 12px; }
+.user-accounts-gap-4 { gap: 16px; }
+
+.user-accounts-mt-2 { margin-top: 8px; }
+.user-accounts-mt-3 { margin-top: 12px; }
+.user-accounts-mb-3 { margin-bottom: 12px; }
+.user-accounts-mb-4 { margin-bottom: 16px; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   USER ACCOUNTS TOOLBAR
+   ────────────────────────────────────────────────────────────────────────── */
+
+.table-namespace .user-accounts-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-namespace .user-accounts-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-namespace .user-accounts-toolbar-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-namespace .user-accounts-entry-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid var(--accent-glow);
+}
+
+.table-namespace .user-accounts-toolbar-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 300px;
+}
+
+.table-namespace .user-accounts-toolbar-search {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+    min-width: 300px;
+}
+
+.table-namespace .user-accounts-search-box {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.table-namespace .user-accounts-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: var(--font-body);
+    transition: var(--transition);
+}
+
+.table-namespace .user-accounts-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.table-namespace .user-accounts-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.table-namespace .user-accounts-search-btn {
+    position: absolute;
+    left: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 4px;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.table-namespace .user-accounts-search-btn:hover {
+    color: var(--accent);
+}
+
+.table-namespace .user-accounts-clear-search-btn {
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    margin-left: 2px;
+}
+
+.table-namespace .user-accounts-clear-search-btn:hover {
+    color: var(--accent);
+}
+
+.table-namespace .filter-dropdown {
+    position: relative;
+}
+
+.table-namespace .user-accounts-filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: var(--transition);
+}
+
+.table-namespace .user-accounts-filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.table-namespace .user-accounts-clear-filter-btn {
+    margin-left: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.table-namespace .user-accounts-clear-filter-btn:hover {
+    color: var(--accent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   BADGES & STATUSES
+   ────────────────────────────────────────────────────────────────────────── */
+
+.username-badge,
+.email-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-family: 'Courier New', monospace;
+}
+
+.user-accounts-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.user-accounts-badge-danger {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.user-accounts-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.user-accounts-badge-secondary {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.user-accounts-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.user-accounts-status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.user-accounts-status-inactive {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   ACTION BUTTONS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.table-namespace .user-accounts-action-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.table-namespace .action-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.table-namespace .user-accounts-action-btn {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    text-decoration: none;
+    min-width: 32px;
+    height: 32px;
+}
+
+.table-namespace .user-accounts-action-btn:hover:not(.disabled) {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+}
+
+.table-namespace .user-accounts-action-btn:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.table-namespace .user-accounts-action-btn.action-view {
+    color: var(--accent);
+    border-color: var(--accent-glow);
+    background: var(--accent-dim);
+}
+
+.table-namespace .user-accounts-action-btn.action-view:hover {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.table-namespace .user-accounts-action-btn.action-edit {
+    color: var(--text-secondary);
+}
+
+.table-namespace .user-accounts-action-btn.toggle-status-btn {
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.table-namespace .user-accounts-action-btn.toggle-status-btn:hover {
+    background: #f59e0b;
+    color: #ffffff;
+    border-color: #f59e0b;
+}
+
+.table-namespace .user-accounts-action-btn.action-delete {
+    color: #f43f5e;
+}
+
+.table-namespace .user-accounts-action-btn.action-delete:hover {
+    background: #f43f5e;
+    color: white;
+    border-color: #f43f5e;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.25);
+}
+
+.table-namespace .user-accounts-action-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   USER DETAIL PAGE
+   ────────────────────────────────────────────────────────────────────────── */
+
+.detail-namespace {
+    padding: 32px;
+}
+
+.detail-namespace .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.detail-namespace .back-link:hover {
+    text-decoration: underline;
+}
+
+.detail-namespace .page-header h1 {
+    margin: 8px 0 4px;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.detail-namespace .page-header p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.detail-namespace .detail-container {
+    margin-top: 24px;
+}
+
+.detail-namespace .detail-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    max-width: 900px;
+}
+
+.detail-namespace .detail-card-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 32px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+    color: white;
+    border-bottom: 2px solid var(--border);
+}
+
+.detail-namespace .user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
+    font-size: 32px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.detail-namespace .header-info h2 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 800;
+}
+
+.detail-namespace .detail-card-body {
+    padding: 32px;
+}
+
+.detail-namespace .user-accounts-status-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.detail-namespace .user-accounts-status-badge.inactive {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.detail-namespace .info-section {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-namespace .info-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.detail-namespace .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-namespace .section-title i {
+    font-size: 1.1rem;
+    color: var(--accent);
+}
+
+.detail-namespace .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.detail-namespace .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-namespace .info-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.detail-namespace .info-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.detail-namespace .info-value a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.detail-namespace .info-value a:hover {
+    text-decoration: underline;
+}
+
+.detail-namespace .roles-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.detail-namespace .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-card-hover);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.detail-namespace .role-badge i {
+    font-size: 1rem;
+    color: var(--accent);
+}
+
+.detail-namespace .user-accounts-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.detail-namespace .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.detail-namespace .user-accounts-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    font-family: var(--font-body);
+}
+
+.detail-namespace .user-accounts-action-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.detail-namespace .user-accounts-action-edit {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+}
+
+.detail-namespace .user-accounts-action-edit:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+}
+
+.detail-namespace .user-accounts-action-toggle {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.detail-namespace .user-accounts-action-toggle:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+.detail-namespace .user-accounts-action-reset {
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid #38bdf8;
+}
+
+.detail-namespace .user-accounts-action-reset:hover {
+    background: #38bdf8;
+    color: white;
+}
+
+.detail-namespace .user-accounts-action-delete {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid #f43f5e;
+}
+
+.detail-namespace .user-accounts-action-delete:hover {
+    background: #f43f5e;
+    color: white;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   FORM BUTTONS & ACTIONS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.form-namespace .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.user-accounts-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    font-family: var(--font-body);
+}
+
+.user-accounts-btn-primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+}
+
+.user-accounts-btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+}
+
+.user-accounts-btn-outline-secondary {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.user-accounts-btn-outline-secondary:hover:not(:disabled) {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+}
+
+.user-accounts-btn-lg {
+    padding: 12px 28px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.user-accounts-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   PERMISSION CARDS & RADIO BUTTONS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.form-namespace .permissions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-namespace .permissions-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.05em;
+}
+
+.form-namespace .permission-card {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    transition: var(--transition);
+    align-items: stretch;
+    gap: 12px;
+}
+
+.form-namespace .permission-card:hover {
+    border-color: var(--accent-glow);
+    background: var(--bg-card-hover);
+}
+
+.form-namespace .permission-check.regular-user {
+    --permission-color: #3b82f6;
+}
+
+.form-namespace .permission-check.staff-user {
+    --permission-color: #f59e0b;
+}
+
+.form-namespace .permission-check.superuser {
+    --permission-color: #ec4899;
+}
+
+.form-namespace .permission-check {
+    margin: 0;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-namespace .permission-check input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: var(--bg-input);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.form-namespace .permission-check input[type="radio"]:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.form-namespace .permission-check input[type="radio"]:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 4px var(--bg-card);
+}
+
+.form-namespace .permission-check input[type="radio"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-dim), inset 0 0 0 4px var(--bg-card);
+}
+
+.form-namespace .permission-check .form-check-label {
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.form-namespace .permission-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-namespace .permission-title i {
+    font-size: 1rem;
+    color: var(--permission-color, var(--accent));
+}
+
+.form-namespace .permission-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.form-namespace .permission-card input[type="radio"]:checked + .form-check-label {
+    color: var(--text-primary);
+}
+
+.form-namespace .permission-check input[type="radio"]:checked + .form-check-label .permission-title {
+    color: var(--accent);
+}
+
+.form-namespace .permission-check input[type="radio"]:checked + .form-check-label .permission-desc {
+    color: var(--text-primary);
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-badge-danger,
+:root[data-theme="light"] .table-namespace .user-accounts-status-inactive,
+:root[data-theme="light"] .detail-namespace .user-accounts-status-badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-badge-warning,
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.toggle-status-btn {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-status-active,
+:root[data-theme="light"] .detail-namespace .user-accounts-status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.action-delete,
+:root[data-theme="light"] .detail-namespace .user-accounts-action-delete {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.action-view {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.action-view:hover,
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.action-delete:hover,
+:root[data-theme="light"] .table-namespace .user-accounts-action-btn.toggle-status-btn:hover {
+    color: #ffffff;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .table-namespace .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table-namespace .toolbar-right {
+        width: 100%;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .table-namespace .toolbar-search {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .table-namespace .search-box,
+    .table-namespace .filter-dropdown {
+        width: 100%;
+    }
+
+    .detail-namespace .detail-card-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .detail-namespace .action-buttons {
+        flex-direction: column;
+    }
+
+    .detail-namespace .user-accounts-action-btn {
+        width: 100%;
+    }
+
+    .detail-namespace .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-namespace .form-actions {
+        flex-direction: column;
+    }
+
+    .form-namespace .form-actions .user-accounts-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-namespace .permission-card {
+        padding: 12px;
+    }
+
+    .table-namespace .col-actions {
+        width: auto;
+    }
+
+    .table-namespace .action-buttons {
+        flex-direction: column;
+    }
+
+    .table-namespace .user-accounts-action-btn {
+        width: 100%;
+    }
+}

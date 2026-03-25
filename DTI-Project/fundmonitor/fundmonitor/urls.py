@@ -15,68 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from dashboard_app import views   
+from django.urls import path, include
 
 urlpatterns = [
+    # User routes
+    path('', include('user_app.urls')),
+    
+    # Admin
     path('admin/', admin.site.urls),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('executive-dashboard/', views.executive_dashboard, name='executive_dashboard'),
-    path('api/dashboard-data/', views.get_dashboard_data, name='get_dashboard_data'),
-    path('tin/', views.tin, name='tin'),
-    path('fund/', views.fund_report, name='fund_report'),
-    path('mooe/', views.mooe_report, name='mooe_report'),
-    path('nc/', views.nc_report, name='nc_report'),
-    path('report/', views.expense_report, name='expense_report'),
-    path('', views.dashboard, name='home'),  
 
-    path('bank_statement/', views.bank_statement_list, name='bank_statement_list'),
-    path('bank_statement/add/', views.bank_statement_create, name='bank_statement_add'),
-    path('bank_statement/edit/<int:pk>/', views.bank_statement_update, name='bank_statement_edit'),
-    path('bank_statement/delete/<int:pk>/', views.bank_statement_delete, name='bank_statement_delete'),
-    path('bank_statement/<int:pk>/update_status/', views.bank_statement_update_status, name='bank_statement_update_status'),
-    path('bank_statement/bulk_delete/', views.bank_statement_bulk_delete, name='bank_statement_bulk_delete'),
-
-    path('fund_sources/', views.fund_sources_view, name='fund_sources'),
-    path('fund_sources/add/', views.fund_source_create, name='fund_source_add'),
-    path('fund_sources/edit/<int:pk>/', views.fund_source_update, name='fund_source_edit'),
-    path('fund_sources/delete/<int:pk>/', views.fund_source_delete, name='fund_source_delete'),
-    path('fund_sources/<int:pk>/', views.fund_source_detail, name='fund_source_detail'),
-    path('fund_sources/<int:fund_id>/breakdown/add/', views.fund_source_breakdown_add, name='fund_source_breakdown_add'),
-    path('fund_sources/breakdown/<int:pk>/edit/', views.fund_source_breakdown_edit, name='fund_source_breakdown_edit'),
-    path('fund_sources/breakdown/<int:pk>/delete/', views.fund_source_breakdown_delete, name='fund_source_breakdown_delete'),
-    
-    # Tax table CRUD
-    path('tax_table/', views.tax_table_list, name='tax_table'),
-    path('tax_table/add/', views.tax_table_create, name='tax_table_add'),
-    path('tax_table/edit/<int:pk>/', views.tax_table_update, name='tax_table_edit'),
-    path('tax_table/delete/<int:pk>/', views.tax_table_delete, name='tax_table_delete'),
-    
-    path('master_fund_monitoring/', views.master_fund_monitoring_list, name='master_fund_monitoring_list'),
-    path('master_fund_monitoring/add/', views.master_fund_monitoring_create, name='master_fund_monitoring_add'),
-    path('master_fund_monitoring/edit/<int:pk>/', views.master_fund_monitoring_update, name='master_fund_monitoring_edit'),
-    path('master_fund_monitoring/delete/<int:pk>/', views.master_fund_monitoring_delete, name='master_fund_monitoring_delete'),
-    path('master_fund_monitoring/bulk_delete/', views.master_fund_monitoring_bulk_delete, name='master_fund_monitoring_bulk_delete'),
-    path('api/supplier/<int:supplier_id>/', views.get_supplier_data, name='get_supplier_data'),
-    path('api/tax_rates/<int:purchase_type_id>/', views.get_tax_rates, name='get_tax_rates'),
-    path('api/fund-budget/', views.get_fund_budget, name='get_fund_budget'),
-    path('api/mooe-budget/', views.get_mooe_budget, name='get_mooe_budget'),
-    
-    path('mooe/download/<str:report_type>/', views.download_mooe, name='download_mooe'),
-# Staff CRUD
-    path('staff/', views.staff_list, name='staff'),
-    path('staff/add/', views.staff_add, name='staff_add'),
-    path('staff/edit/<int:pk>/', views.staff_edit, name='staff_edit'),
-    path('staff/delete/<int:pk>/', views.staff_delete, name='staff_delete'),
-    path('staff/bulk_delete/', views.staff_bulk_delete, name='staff_bulk_delete'),
-# Tin CRUD
-    path('suppliers/', views.supplier_list, name='supplier_list'),
-    path('suppliers/add/', views.supplier_add, name='supplier_add'),
-    path('suppliers/edit/<int:pk>/', views.supplier_edit, name='supplier_edit'),
-    path('suppliers/delete/<int:pk>/', views.supplier_delete, name='supplier_delete'),
-    path('suppliers/bulk_delete/', views.supplier_bulk_delete, name='supplier_bulk_delete'),
-    
-    # Data Import
-    path('import/', views.import_data, name='import_data'),
-    path('import/result/', views.import_result, name='import_result'),
+    # App route groups for phased restructuring
+    path('', include('dashboard_app.urls')),
+    path('', include('mater_fundmonitor_app.urls')),
+    path('', include('bank_statement_app.urls')),
+    path('', include('data_management_app.urls')),
+    path('', include('reports_app.urls')),
 ]

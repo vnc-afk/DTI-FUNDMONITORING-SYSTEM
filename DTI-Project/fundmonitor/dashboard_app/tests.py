@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dashboard_app.forms import MasterFundMonitoringForm, SupplierForm
-from dashboard_app.models import Supplier, FundSource, Division, BreakdownCategory, NegosyoCenter
+from data_management_app.forms import SupplierForm
+from mater_fundmonitor_app.forms import MasterFundMonitoringForm
+from data_management_app.models import Supplier, FundSource, Division, BreakdownCategory, NegosyoCenter, District
 
 
 class MasterFundMonitoringFormTests(TestCase):
@@ -13,7 +14,6 @@ class MasterFundMonitoringFormTests(TestCase):
         self.division = Division.objects.create(name='Test Division')
         self.mooe_cat = BreakdownCategory.objects.create(name='Test', code='MO001', is_active=True)
         # need a district for the NC
-        from dashboard_app.models.funding import District
         self.district = District.objects.create(name='Test District', order=1)
         self.nc = NegosyoCenter.objects.create(name='Test NC', code='test_nc', district=self.district)
 

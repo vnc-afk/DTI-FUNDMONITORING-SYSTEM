@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from dashboard_app.models import PurchaseType
+from data_management_app.models import PurchaseType
 
 PURCHASE_TYPES = [
     'VGoods',

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Add Expense Object{% endblock %}
+
+{% block content %}
+<div class="form-namespace">
+    <div class="page-header">
+        <a href="{% url 'expense_object_list' %}" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to Expense Objects
+        </a>
+        <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Expense Object</h1>
+        <p>Set up account title / expense object details below</p>
+    </div>
+
+    <div class="form-page-card">
+        <div class="form-card-header">
+            <div class="form-card-header-icon">
+                <i class="bi bi-tags"></i>
+            </div>
+            <div class="form-card-header-text">
+                <h5>Expense Object Information</h5>
+                <p>Fields marked <span style="color:#ef4444;">*</span> are required</p>
+            </div>
+        </div>
+
+        <div class="form-card-body">
+            <form method="post" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Expense Object"
+                  data-confirm-message="Please review the expense object information before saving."
+                  data-confirm-text="Save Expense Object"
+                  data-confirm-type="success"
+                  data-confirm-icon="🧾">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {% if form.errors %}
+                    <div class="form-error">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Please correct the errors below.
+                    </div>
+                {% endif %}
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-info-circle" style="color:var(--accent);"></i>
+                        General Info
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-upc"></i>
+                                Code <span class="required">*</span>
+                            </label>
+                            {{ form.code }}
+                            {{ form.code.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-card-text"></i>
+                                Name <span class="required">*</span>
+                            </label>
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                <i class="bi bi-journal-text"></i>
+                                Description
+                            </label>
+                            {{ form.description }}
+                            {{ form.description.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label d-block">
+                                <i class="bi bi-toggle-on"></i>
+                                Active Status
+                            </label>
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active
+                                </label>
+                            </div>
+                            {{ form.is_active.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <div class="form-card-footer-hint">
+                        <i class="bi bi-shield-lock"></i>
+                        All data is encrypted and securely stored.
+                    </div>
+                    <div class="form-card-footer-actions">
+                        <a href="{% url 'expense_object_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Expense Object
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

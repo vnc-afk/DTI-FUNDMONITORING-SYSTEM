@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Archived Bank Statements — DTI Fund Monitoring{% endblock %}
+
+{% block page_title %}Archived Statements{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="archived-page-header">
+    <div class="container-fluid archived-container-wrapper">
+        <h1 class="archived-page-title"><i class="bi bi-safe"></i> Archived Bank Statements</h1>
+        <p class="archived-page-subtitle">Browse and restore archived bank statement records safely stored from previous years</p>
+    </div>
+</div>
+
+<div class="container-fluid archived-main-container">
+
+    <!-- Search Area -->
+    <div class="archived-search-area">
+        <p class="archived-search-instructions"><i class="bi bi-search"></i> <strong>Search archived records</strong></p>
+        <form method="get">
+            <input type="text" name="q" class="form-control flex-grow-1" 
+                   placeholder="Find by description, check #, or date..." 
+                   value="{{ search_query }}" autocomplete="off">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search
+            </button>
+            {% if search_query %}
+            <a href="{% url 'archived_statements' %}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+            {% endif %}
+            <a href="{% url 'archive_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Archive
+            </a>
+        </form>
+    </div>
+
+    <!-- Summary -->
+    {% if total_records > 0 %}
+    <div class="archived-summary-box">
+        <div class="archived-summary-item">
+            <span class="archived-summary-label"><i class="bi bi-receipt"></i> Total Records</span>
+            <span class="archived-summary-value">{{ total_records }}</span>
+        </div>
+        <div class="archived-summary-item">
+            <span class="archived-summary-label"><i class="bi bi-cash"></i> Total Amount</span>
+            <span class="archived-summary-value">₱{{ total_debit|floatformat:2|intcomma }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search Results Info -->
+    {% if search_query %}
+    <div class="archived-search-result-info">
+        <i class="bi bi-info-circle archived-search-result-icon"></i>
+        <div>
+            <strong>Search results for:</strong> "{{ search_query }}" <br>
+            <small>Found {{ total_records }} record{{ total_records|pluralize }}</small>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bank Statements Table -->
+    {% if page_obj %}
+    <div class="archived-table">
+            <div class="archived-table-card">
+                <div class="archived-toolbar">
+                    <div class="archived-toolbar-title">
+                        <i class="bi bi-bank"></i> Archived Bank Statements
+                        <span class="archived-toolbar-count">{{ total_records }}</span>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="archived-col-expand"></th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Check Number</th>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                            <th class="archived-col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for statement in page_obj %}
+                        <tr class="archived-expandable-row" onclick="toggleExpand(this)">
+                            <td class="archived-cell-center">
+                                <span class="archived-expand-icon">
+                                    <i class="bi bi-chevron-down"></i>
+                                </span>
+                            </td>
+                            <td>{{ statement.date|date:"M d, Y" }}</td>
+                            <td><strong>{{ statement.description }}</strong></td>
+                            <td class="archived-cell-center">{{ statement.check_number|default:"—" }}</td>
+                            <td class="archived-amount-debit">
+                                {% if statement.debit %}₱{{ statement.debit|floatformat:2|intcomma }}{% else %}—{% endif %}
+                            </td>
+                            <td class="archived-amount-credit">
+                                {% if statement.credit %}₱{{ statement.credit|floatformat:2|intcomma }}{% else %}—{% endif %}
+                            </td>
+                            <td class="archived-cell-center">
+                                <form method="post" action="{% url 'unarchive_statement' statement.pk %}" class="archived-unarchive-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="archived-act-btn archived-act-restore" title="Restore Statement">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <!-- Detail Row -->
+                        <tr class="archived-detail-row">
+                            <td colspan="7">
+                                <div class="archived-detail-inner">
+                                    <div class="archived-detail-content">
+                                        <!-- Statement Basic Info Section -->
+                                        <div class="archived-detail-section">
+                                            <h4><i class="bi bi-receipt"></i> Statement Info</h4>
+                                            <div class="archived-detail-grid">
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Statement Date</span>
+                                                    <span class="archived-detail-value">{{ statement.date|date:"M d, Y" }}</span>
+                                                </div>
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Archived Date</span>
+                                                    <span class="archived-detail-value">{{ statement.archived_at|date:"M d, Y" }}</span>
+                                                </div>
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Balance</span>
+                                                    <span class="archived-detail-value"><strong>₱{{ statement.balance|floatformat:2|intcomma }}</strong></span>
+                                                </div>
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Status</span>
+                                                    <span class="archived-detail-value"><span class="badge archived-badge-primary">Archived</span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Transaction Totals Section -->
+                                        <div class="archived-detail-section">
+                                            <h4><i class="bi bi-calculator"></i> Totals</h4>
+                                            <div class="archived-detail-grid">
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Total Debit</span>
+                                                    <span class="archived-detail-value archived-amount-debit"><strong>₱{{ statement.debit|floatformat:2|intcomma }}</strong></span>
+                                                </div>
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Total Credit</span>
+                                                    <span class="archived-detail-value archived-amount-credit"><strong>₱{{ statement.credit|floatformat:2|intcomma }}</strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Description Section -->
+                                        <div class="archived-detail-section">
+                                            <h4><i class="bi bi-file-text"></i> Description</h4>
+                                            <div class="archived-detail-grid">
+                                                <div class="archived-detail-item">
+                                                    <span class="archived-detail-label">Details</span>
+                                                    <span class="archived-detail-value">{{ statement.description }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+    </div>
+
+    <script>
+        function toggleExpand(row) {
+            const detailRow = row.nextElementSibling;
+            if (detailRow.classList.contains('archived-detail-row')) {
+                detailRow.classList.toggle('archived-open');
+                row.classList.toggle('archived-expanded');
+            }
+        }
+    </script>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="archived-pagination-container">
+                {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <button class="btn btn-sm btn-primary" disabled>{{ num }}</button>
+                    {% elif num|add:'-3' <= page_obj.number and num|add:'3' >= page_obj.number %}
+                    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-primary">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+                {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="archived-table">
+        <div class="archived-empty-state">
+                <div class="archived-empty-state-icon"><i class="bi bi-inbox"></i></div>
+                <h4>No Archived Bank Statements Found</h4>
+                <p class="archived-empty-state-text">
+                    {% if search_query %}
+                    No results for <strong>"{{ search_query }}"</strong><br>
+                    <small>Try a different search term or clear filters</small>
+                    <br><br>
+                    <a href="{% url 'archived_statements' %}" class="btn btn-sm btn-outline-primary archived-empty-state-link">
+                        <i class="bi bi-arrow-counterclockwise"></i> Clear Search
+                    </a>
+                    {% else %}
+                    You haven't archived any bank statements yet<br>
+                    <small>Archived records from completed years will appear here</small>
+                    <br><br>
+                    <a href="{% url 'archive_dashboard' %}" class="btn btn-sm btn-primary archived-empty-state-link">
+                        <i class="bi bi-arrow-left"></i> Go to Archive Dashboard
+                    </a>
+                    {% endif %}
+                </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Info Box at Bottom -->
+    <div class="archived-info-box">
+        <i class="bi bi-lightbulb"></i>
+        <div class="archived-info-box-content">
+            <strong>What are archived bank statements?</strong><br>
+            <small>Archived records are safely stored for reference but hidden from your main dashboard. You can restore any statement using the restore button, and it will reappear in your active records.</small>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/archive-confirmations.js' %}"></script>
+{% endblock %}

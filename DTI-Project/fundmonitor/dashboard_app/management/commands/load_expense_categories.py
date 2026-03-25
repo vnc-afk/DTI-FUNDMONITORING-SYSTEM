@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from dashboard_app.models import ExpenseCategory
+from data_management_app.models import ExpenseCategory
 
 # Color palette for categories
 COLORS = [

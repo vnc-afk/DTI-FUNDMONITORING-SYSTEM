@@ -1,13 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════════
-// CHART CONFIGURATION — DARK THEME
+// CHART CONFIGURATION — RESPONSIVE TO DARK & LIGHT THEME
 // ══════════════════════════════════════════════════════════════════════════
 
 // Debug: Check if data is available
 console.log('Dashboard data available:', !!window.dashboardData, window.dashboardData);
 
-// Prevent "already declared" errors by checking if colors already defined
-if (typeof C === 'undefined') {
-    var C = {
+// Function to get CSS variable colors (adapts to current theme)
+function getThemeColors() {
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    
+    return {
         teal:    '#3b82f6',
         blue:    '#3b82f6',
         amber:   '#f59e0b',
@@ -21,9 +24,14 @@ if (typeof C === 'undefined') {
         bg:      'rgba(0,0,0,0)',
         plotBg:  'rgba(255,255,255,0.02)',
         grid:    'rgba(255,255,255,0.05)',
-        text:    '#8b90a8',
-        textPri: '#f0f2f8',
+        text:    computedStyle.getPropertyValue('--text-secondary').trim(),
+        textPri: computedStyle.getPropertyValue('--text-primary').trim(),
     };
+}
+
+// Prevent "already declared" errors by checking if colors already defined
+if (typeof C === 'undefined') {
+    var C = getThemeColors();
 }
 
 const palette = [C.teal, C.blue, C.amber, C.rose, C.violet, C.sky, C.lime, C.orange, C.green, C.pink];
@@ -520,7 +528,7 @@ function safeInitializeDashboardCharts() {
             }, config);
         } else {
             showEmptyState('bankChart', 'No bank statement data available for the selected period');
-            console.warn('⚠️  No bank statement data to display');
+            console.warn('[WARNING] No bank statement data to display');
         }
 
     } catch (error) {
@@ -548,5 +556,41 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             this.submit();
         });
+    }
+    
+    // Watch for theme changes using MutationObserver
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            // Check if class attribute changed (theme toggle usually changes html/body class)
+            if (mutation.type === 'attributes' && 
+                (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme')) {
+                console.log('[THEME] Theme changed - updating charts...');
+                C = getThemeColors();
+                safeInitializeDashboardCharts();
+            }
+        });
+    });
+    
+    // Observe html element for class/theme attribute changes
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'data-theme'],
+        subtree: false
+    });
+});
+
+// Listen for custom theme-changed events and re-render charts
+document.addEventListener('theme-changed', () => {
+    console.log('[THEME] Theme changed event - updating charts...');
+    C = getThemeColors();
+    safeInitializeDashboardCharts();
+});
+
+// Watch for localStorage changes (theme toggle from other tabs)
+window.addEventListener('storage', (e) => {
+    if (e.key === 'theme' || e.key === 'isDarkMode') {
+        console.log('[THEME] Theme preference changed - updating charts...');
+        C = getThemeColors();
+        safeInitializeDashboardCharts();
     }
 });

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Tax Entry{% endblock %}
+
+{% block content %}
+    <div class="form-namespace">
+    <div class="page-header">
+        <a href="{% url 'tax_table' %}" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to Tax Table
+        </a>
+        <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Tax Entry</h1>
+        <p>Provide the tax code details below</p>
+    </div>
+
+    <div class="form-page-card">
+        <div class="form-card-header">
+            <div class="form-card-header-icon">
+                <i class="bi bi-percent"></i>
+            </div>
+            <div class="form-card-header-text">
+                <h5>Tax Information</h5>
+                <p>Fields marked <span style="color:#ef4444;">*</span> are required</p>
+            </div>
+        </div>
+
+        <div class="form-card-body">
+            <form method="post" novalidate
+                  data-form-submit-confirm
+                  data-confirm-title="Save Tax Entry"
+                  data-confirm-message="Please review the tax information before saving."
+                  data-confirm-text="Save Entry"
+                  data-confirm-type="success"
+                  data-confirm-icon="📊">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {% if form.errors %}
+                    <div class="form-error">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Please correct the errors below.
+                    </div>
+                {% endif %}
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-info-circle" style="color:var(--accent);"></i>
+                        Details
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Purchase Type <span class="required">*</span>
+                            </label>
+                            {{ form.purchase_type }}
+                            {{ form.purchase_type.errors }}
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-percent" style="color:var(--accent);"></i>
+                        VAT <span style="font-size: 0.85em; font-weight: normal;">20201010-00-01-02</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Goods (5%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_goods_5 }}
+                                <span class="formula-result" data-field="vat_goods_5"></span>
+                            </div>
+                            {{ form.vat_goods_5.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Services (5%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_services_5 }}
+                                <span class="formula-result" data-field="vat_services_5"></span>
+                            </div>
+                            {{ form.vat_services_5.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-percent" style="color:var(--accent);"></i>
+                        PT <span style="font-size: 0.85em; font-weight: normal;">20201010-00-01-03</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Goods &amp; Services (3%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_goods_services_3 }}
+                                <span class="formula-result" data-field="vat_goods_services_3"></span>
+                            </div>
+                            {{ form.vat_goods_services_3.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-percent" style="color:var(--accent);"></i>
+                        EWT <span style="font-size: 0.85em; font-weight: normal;">20201010-00-01-04</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Goods (1%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_goods_1 }}
+                                <span class="formula-result" data-field="vat_goods_1"></span>
+                            </div>
+                            {{ form.vat_goods_1.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Services (2%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_services_2 }}
+                                <span class="formula-result" data-field="vat_services_2"></span>
+                            </div>
+                            {{ form.vat_services_2.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Rental (5%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_rental_5 }}
+                                <span class="formula-result" data-field="vat_rental_5"></span>
+                            </div>
+                            {{ form.vat_rental_5.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Prof. Fee (10%)</label>
+                            <div class="formula-wrapper">
+                                {{ form.vat_prof_fee_10 }}
+                                <span class="formula-result" data-field="vat_prof_fee_10"></span>
+                            </div>
+                            {{ form.vat_prof_fee_10.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <div class="form-card-footer-hint">
+                        <i class="bi bi-shield-lock"></i>
+                        All data is encrypted and securely stored.
+                    </div>
+                    <div class="form-card-footer-actions">
+                        <a href="{% url 'tax_table' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Entry
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+{% endblock %}

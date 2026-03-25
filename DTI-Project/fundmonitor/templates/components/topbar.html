@@ -1,0 +1,250 @@
+<!-- TOPBAR COMPONENT -->
+<header class="topbar">
+    <div class="topbar-left">
+        <!-- Mobile toggle -->
+        <button class="topbar-btn d-md-none" aria-label="Toggle sidebar navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-custom">
+            <span>DTI APO</span>
+            <i class="bi bi-chevron-right" style="font-size: 0.6rem;"></i>
+            <span class="page-title">{{ page_title|default:"Dashboard" }}</span>
+        </div>
+    </div>
+    <div class="topbar-right">
+        <button class="topbar-btn">
+            <i class="bi bi-search"></i>
+        </button>
+
+        <!-- Notifications -->
+        <div class="dropdown">
+            <button class="topbar-btn" id="notificationBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                <i class="bi bi-bell"></i>
+                {% if topbar_unread_notification_count > 0 %}
+                    <span class="notif-dot" id="notifDot"></span>
+                    <span class="notif-badge" id="notifBadge">{{ topbar_unread_notification_count }}</span>
+                {% else %}
+                    <span class="notif-dot d-none" id="notifDot"></span>
+                    <span class="notif-badge d-none" id="notifBadge">0</span>
+                {% endif %}
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-end notification-menu" id="notificationMenu" style="min-width: 360px;">
+                <div class="notification-header">
+                    <span>Notifications</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="markAllNotificationsRead">Mark all as read</button>
+                </div>
+                <div class="notification-list" id="notificationList">
+                    {% if topbar_notifications %}
+                        {% for notif in topbar_notifications %}
+                            <button
+                                type="button"
+                                class="notification-item {% if not notif.is_read %}is-unread{% endif %}"
+                                data-notification-id="{{ notif.id }}"
+                                aria-label="Mark notification as read"
+                            >
+                                <div class="notification-item-title-row">
+                                    <span class="notification-item-title">{{ notif.title }}</span>
+                                    {% if not notif.is_read %}
+                                        <span class="notification-unread-dot"></span>
+                                    {% endif %}
+                                </div>
+                                <div class="notification-item-message">{{ notif.message }}</div>
+                                <div class="notification-item-time">{{ notif.created_at|timesince }} ago</div>
+                            </button>
+                        {% endfor %}
+                    {% else %}
+                        <div class="notification-empty" id="notificationEmptyState">No notifications yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="dropdown">
+            <button class="avatar dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
+                {% if request.user.first_name and request.user.last_name %}
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                {% else %}
+                    {{ request.user.username|first|upper }}
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><span class="dropdown-header">{{ request.user.get_full_name|default:request.user.username }}</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'user_settings' %}">
+                    <i class="bi bi-gear"></i> Settings & Preferences
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<script>
+    (function() {
+        function getCookie(name) {
+            const value = '; ' + document.cookie;
+            const parts = value.split('; ' + name + '=');
+            if (parts.length === 2) {
+                return parts.pop().split(';').shift();
+            }
+            return '';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateNotificationBadge(unreadCount) {
+            const notifDot = document.getElementById('notifDot');
+            const notifBadge = document.getElementById('notifBadge');
+            if (!notifDot || !notifBadge) {
+                return;
+            }
+
+            if (unreadCount > 0) {
+                notifDot.classList.remove('d-none');
+                notifBadge.classList.remove('d-none');
+                notifBadge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+            } else {
+                notifDot.classList.add('d-none');
+                notifBadge.classList.add('d-none');
+            }
+        }
+
+        function renderNotifications(items) {
+            const listElement = document.getElementById('notificationList');
+            if (!listElement) {
+                return;
+            }
+
+            if (!items || items.length === 0) {
+                listElement.innerHTML = '<div class="notification-empty" id="notificationEmptyState">No notifications yet.</div>';
+                return;
+            }
+
+            listElement.innerHTML = items.map(function(notif) {
+                const unreadClass = notif.is_read ? '' : 'is-unread';
+                const unreadDot = notif.is_read ? '' : '<span class="notification-unread-dot"></span>';
+                return [
+                    '<button type="button" class="notification-item ' + unreadClass + '" data-notification-id="' + notif.id + '" aria-label="Mark notification as read">',
+                    '  <div class="notification-item-title-row">',
+                    '    <span class="notification-item-title">' + escapeHtml(notif.title) + '</span>',
+                    '    ' + unreadDot,
+                    '  </div>',
+                    '  <div class="notification-item-message">' + escapeHtml(notif.message) + '</div>',
+                    '  <div class="notification-item-time">' + escapeHtml(notif.created_display) + '</div>',
+                    '</button>'
+                ].join('');
+            }).join('');
+        }
+
+        function loadNotifications() {
+            fetch('/api/notifications/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Failed to load notifications');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                renderNotifications(data.notifications || []);
+                updateNotificationBadge(data.unread_count || 0);
+            })
+            .catch(function() {
+                // Intentionally silent in topbar to avoid interrupting user flow.
+            });
+        }
+
+        function markNotificationAsRead(notificationId) {
+            fetch('/api/notifications/' + notificationId + '/read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Failed to update notification');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                updateNotificationBadge(data.unread_count || 0);
+                loadNotifications();
+            })
+            .catch(function() {
+                // Intentionally silent in topbar to avoid interrupting user flow.
+            });
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/api/notifications/read-all/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Failed to mark notifications as read');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                updateNotificationBadge(data.unread_count || 0);
+                loadNotifications();
+            })
+            .catch(function() {
+                // Intentionally silent in topbar to avoid interrupting user flow.
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            const item = event.target.closest('.notification-item[data-notification-id]');
+            if (!item) {
+                return;
+            }
+
+            const notificationId = item.getAttribute('data-notification-id');
+            if (notificationId) {
+                markNotificationAsRead(notificationId);
+            }
+        });
+
+        const markAllButton = document.getElementById('markAllNotificationsRead');
+        if (markAllButton) {
+            markAllButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                markAllNotificationsRead();
+            });
+        }
+
+        const notificationBell = document.getElementById('notificationBell');
+        if (notificationBell) {
+            notificationBell.addEventListener('click', function() {
+                loadNotifications();
+            });
+        }
+
+        setInterval(loadNotifications, 30000);
+    })();
+</script>
+

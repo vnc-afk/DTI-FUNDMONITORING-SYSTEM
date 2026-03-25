@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from dashboard_app.models import ExpenseObject
+from data_management_app.models import ExpenseObject
 
 # Color palette for objects
 COLORS = [
@@ -12,6 +12,7 @@ COLORS = [
 EXPENSE_OBJECTS = [
     ('5020101000', 'Traveling Expenses - Local'),
     ('5020201000', 'Training Expenses'),
+    ('3010101000', 'Accumulated Surplus/(Deficit)'),
     ('5020301000', 'Office Supplies Expenses'),
     ('5020302000', 'Accountable Forms Expenses'),
     ('5020309000', 'Fuel, Oil and Lubricants Expenses'),

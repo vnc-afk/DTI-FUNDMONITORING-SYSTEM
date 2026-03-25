@@ -3,7 +3,8 @@
 import re
 from django.http import JsonResponse
 from django.db.models import Sum
-from dashboard_app.models import Supplier, TaxTable, FundSource, MasterFundMonitoring, BreakdownCategory, FundSourceBreakdown
+from data_management_app.models import Supplier, TaxTable, FundSource, BreakdownCategory, FundSourceBreakdown
+from mater_fundmonitor_app.models import MasterFundMonitoring
 
 
 def get_supplier_data(request, supplier_id):
@@ -193,3 +194,158 @@ def get_mooe_budget(request):
         return JsonResponse(data)
     except BreakdownCategory.DoesNotExist:
         return JsonResponse({'error': 'MOOE category not found'}, status=404)
+
+
+# ============================================================================
+# DASHBOARD DATA API ENDPOINTS - For AJAX loading without full page reload
+# ============================================================================
+
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
+from decimal import Decimal
+import json
+
+
+@login_required
+def get_dashboard_kpis(request):
+    """
+    API endpoint to get dashboard KPI data without rendering full page
+    Returns: JSON with KPI summary cards data
+    """
+    # Get filter parameters from request
+    filters = {}
+    year = request.GET.get('year')
+    filters['date__year'] = int(year) if year and year.isdigit() else now().year
+    
+    if request.GET.get('fund_source'):
+        filters['fund_source_id'] = request.GET.get('fund_source')
+    if request.GET.get('division'):
+        filters['division_id'] = request.GET.get('division')
+    if request.GET.get('district'):
+        filters['nc__district_id'] = request.GET.get('district')
+    if request.GET.get('expense_class'):
+        filters['expense_classification_id'] = request.GET.get('expense_class')
+    if request.GET.get('supplier'):
+        filters['payee_id'] = request.GET.get('supplier')
+    
+    transaction_qs = MasterFundMonitoring.objects.filter(**filters)
+    
+    total_budget = FundSource.objects.aggregate(total=Sum('annual_budget'))['total'] or Decimal(0)
+    all_fund_sources = FundSource.objects.all()
+    active_funds = all_fund_sources.filter(annual_budget__gt=0)
+    
+    disbursement_qs = transaction_qs.filter(transaction_type='Disbursement')
+    total_disbursement = disbursement_qs.aggregate(total=Sum('payments'))['total'] or Decimal(0)
+    
+    downloads_qs = transaction_qs.filter(transaction_type='Downloads')
+    total_downloads = downloads_qs.aggregate(total=Sum('payments'))['total'] or Decimal(0)
+    
+    refund_qs = transaction_qs.filter(transaction_type='Refund')
+    total_refunds = refund_qs.aggregate(total=Sum('payments'))['total'] or Decimal(0)
+    
+    adjustment_qs = transaction_qs.filter(transaction_type='Adjustment')
+    total_adjustments = adjustment_qs.aggregate(total=Sum('payments'))['total'] or Decimal(0)
+    
+    remaining_balance = total_budget - total_disbursement - total_downloads - total_adjustments + total_refunds
+    net_disbursement = total_disbursement + total_downloads + total_adjustments - total_refunds
+    budget_util_rate = (float(net_disbursement) / float(total_budget) * 100) if total_budget > 0 else 0
+    
+    return JsonResponse({
+        'totalBudget': float(total_budget),
+        'activeFunds': active_funds.count(),
+        'activeBudget': float(active_funds.aggregate(total=Sum('annual_budget'))['total'] or 0),
+        'totalDisbursement': float(total_disbursement),
+        'totalDownloads': float(total_downloads),
+        'totalRefunds': float(total_refunds),
+        'totalAdjustments': float(total_adjustments),
+        'remainingBalance': float(remaining_balance),
+        'budgetUtilizationRate': budget_util_rate,
+        'totalTransactions': transaction_qs.count(),
+        'totalSuppliersPaid': transaction_qs.values('payee').distinct().count(),
+    })
+
+
+@login_required
+def get_dashboard_charts(request):
+    """
+    API endpoint to get all dashboard chart data
+    Returns: JSON with all chart data (monthly trends, fund breakdown, etc.)
+    """
+    from django.db.models import Count, Q, F
+    
+    # Get filter parameters
+    filters = {}
+    year = request.GET.get('year')
+    filters['date__year'] = int(year) if year and year.isdigit() else now().year
+    
+    if request.GET.get('fund_source'):
+        filters['fund_source_id'] = request.GET.get('fund_source')
+    if request.GET.get('division'):
+        filters['division_id'] = request.GET.get('division')
+    if request.GET.get('district'):
+        filters['nc__district_id'] = request.GET.get('district')
+    if request.GET.get('expense_class'):
+        filters['expense_classification_id'] = request.GET.get('expense_class')
+    if request.GET.get('supplier'):
+        filters['payee_id'] = request.GET.get('supplier')
+    
+    transaction_qs = MasterFundMonitoring.objects.filter(**filters)
+    
+    # Monthly trends
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    monthly_data = {}
+    for month in range(1, 13):
+        month_sum = transaction_qs.filter(
+            date__month=month,
+            transaction_type__in=['Disbursement', 'Downloads', 'Adjustment']
+        ).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+        monthly_data[month_names[month - 1]] = float(month_sum)
+    
+    # Fund source breakdown
+    fund_remaining = []
+    for fs in FundSource.objects.all():
+        disbursed = transaction_qs.filter(fund_source=fs, transaction_type__in=['Disbursement', 'Downloads', 'Adjustment']).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+        refunded = transaction_qs.filter(fund_source=fs, transaction_type='Refund').aggregate(total=Sum('payments'))['total'] or Decimal(0)
+        downloads_amt = transaction_qs.filter(fund_source=fs).aggregate(total=Sum('downloads'))['total'] or Decimal(0)
+        net_disbursed = disbursed - refunded
+        remaining = fs.annual_budget + downloads_amt - net_disbursed
+        if remaining > 0:
+            fund_remaining.append({'name': fs.name, 'remaining': float(remaining)})
+    
+    fund_remaining.sort(key=lambda x: x['remaining'], reverse=True)
+    
+    # Expense classification breakdown
+    from data_management_app.models import ExpenseCategory
+    expense_breakdown = []
+    for exp_cat in ExpenseCategory.objects.all():
+        total = transaction_qs.filter(expense_category=exp_cat).aggregate(total=Sum('payments'))['total'] or Decimal(0)
+        if total > 0:
+            expense_breakdown.append({'name': exp_cat.name, 'value': float(total)})
+    
+    expense_breakdown.sort(key=lambda x: x['value'], reverse=True)
+    
+    return JsonResponse({
+        'monthlyData': monthly_data,
+        'fundBreakdown': [f['name'] for f in fund_remaining],
+        'fundValues': [f['remaining'] for f in fund_remaining],
+        'expenseLabels': [e['name'] for e in expense_breakdown],
+        'expenseValues': [e['value'] for e in expense_breakdown],
+    })
+
+
+@login_required
+def get_dashboard_filters(request):
+    """
+    API endpoint to get available filter options
+    Returns: JSON with all filter dropdown options
+    """
+    from data_management_app.models import District, Division, ExpenseCategory
+    
+    return JsonResponse({
+        'years': sorted(set(MasterFundMonitoring.objects.values_list('date__year', flat=True))),
+        'fundSources': [{'id': fs.id, 'name': fs.name} for fs in FundSource.objects.all()],
+        'divisions': [{'id': d.id, 'name': d.name} for d in Division.objects.all()],
+        'districts': [{'id': d.id, 'name': d.name} for d in District.objects.all()],
+        'expenseCategories': [{'id': ec.id, 'name': ec.name} for ec in ExpenseCategory.objects.all()],
+        'suppliers': [{'id': s.id, 'name': s.name} for s in Supplier.objects.all().order_by('name')[:1000]],
+    })

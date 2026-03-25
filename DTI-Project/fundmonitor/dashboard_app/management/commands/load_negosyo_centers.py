@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from dashboard_app.models import District, NegosyoCenter
+from data_management_app.models import District, NegosyoCenter
 
 
 class Command(BaseCommand):
