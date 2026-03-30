@@ -91,12 +91,8 @@ WSGI_APPLICATION = 'fundmonitor.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fundmonitor_db',
-        'USER': 'postgres',       
-        'PASSWORD': 'dti', 
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

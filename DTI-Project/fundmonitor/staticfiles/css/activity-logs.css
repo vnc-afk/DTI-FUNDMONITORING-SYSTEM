@@ -8,10 +8,12 @@
 /* ── ACTIVITY LOGS NAMESPACE ── */
 .activity-namespace {
     --activity-surface: var(--bg-card);
+    --activity-surface-soft: var(--bg-card-hover);
     --activity-text: var(--text-primary);
     --activity-text-secondary: var(--text-secondary);
     --activity-text-muted: var(--text-muted);
     --activity-border: var(--border);
+    --activity-border-strong: var(--border-strong);
     --activity-accent: var(--accent);
     --activity-success: #10b981;
     --activity-warning: #f59e0b;
@@ -48,6 +50,106 @@
 .activity-namespace .page-header-actions {
     display: flex;
     gap: 12px;
+}
+
+.activity-namespace .activity-heading-icon {
+    margin-right: 10px;
+}
+
+.activity-namespace .activity-header-btn {
+    display: inline-flex;
+    gap: 8px;
+    padding: 10px 20px;
+}
+
+.activity-namespace .activity-col-details {
+    text-align: center;
+    width: 120px;
+}
+
+.activity-namespace .activity-cell-center {
+    text-align: center;
+}
+
+.activity-namespace .activity-time-primary {
+    color: var(--activity-text-secondary);
+}
+
+.activity-namespace .activity-time-secondary {
+    color: var(--activity-text-muted);
+}
+
+.activity-namespace .activity-model-link {
+    color: var(--activity-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.activity-namespace .activity-plain-link {
+    color: var(--activity-text);
+    text-decoration: none;
+}
+
+.activity-namespace .activity-model-text {
+    color: var(--activity-text);
+    font-weight: 600;
+}
+
+.activity-namespace .activity-inline-code {
+    color: var(--activity-text-secondary);
+}
+
+.activity-namespace .activity-na-text {
+    color: var(--activity-text-muted);
+}
+
+.activity-namespace .activity-empty-icon {
+    font-size: 2.5rem;
+}
+
+.activity-namespace .activity-prewrap-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.activity-namespace .activity-no-data {
+    text-align: center;
+    color: var(--activity-text-muted);
+    padding: 24px;
+    margin: 0;
+}
+
+.activity-namespace .activity-row-spaced {
+    margin-top: 20px;
+}
+
+.activity-namespace .activity-progress {
+    background: var(--bg-input);
+    border: 1px solid var(--activity-border);
+}
+
+.activity-namespace .activity-progress-lg {
+    height: 20px;
+}
+
+.activity-namespace .activity-progress-sm {
+    height: 15px;
+}
+
+.activity-namespace .activity-progress-bar {
+    width: 0;
+}
+
+.activity-namespace .activity-progress-bar-accent {
+    background: var(--activity-accent);
+}
+
+.activity-namespace .activity-progress-bar-info {
+    background: var(--activity-info);
+}
+
+.activity-namespace .activity-progress-bar-success {
+    background: var(--activity-success);
 }
 
 /* ── FILTER CARD ── */
@@ -502,12 +604,13 @@
     border: 1px solid var(--activity-border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-xl);
+    overflow: hidden;
 }
 
 .activity-namespace .modal-header {
     padding: 20px 24px;
     border-bottom: 1px solid var(--activity-border);
-    background: var(--bg-card-hover);
+    background: linear-gradient(180deg, var(--activity-surface-soft) 0%, var(--activity-surface) 100%);
 }
 
 .activity-namespace .modal-header .modal-title {
@@ -522,9 +625,52 @@
     color: var(--activity-text);
 }
 
+.activity-namespace .activity-modal-body {
+    background: var(--activity-surface);
+}
+
+.activity-namespace .activity-modal-object-panel {
+    background: var(--activity-surface-soft);
+    border: 1px solid var(--activity-border);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+}
+
+.activity-namespace .activity-modal-object-panel p:last-child {
+    margin-bottom: 0;
+}
+
+.activity-namespace .activity-modal-info-grid {
+    background: var(--activity-surface-soft);
+    border: 1px solid var(--activity-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+}
+
+.activity-namespace .activity-modal-info-grid p {
+    margin-bottom: 10px;
+}
+
+.activity-namespace .activity-modal-info-grid p:last-child {
+    margin-bottom: 0;
+}
+
+.activity-namespace .activity-modal-info-grid strong {
+    color: var(--activity-text-secondary);
+    font-weight: 700;
+}
+
+.activity-namespace .activity-modal-body .small code {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
 .activity-namespace .modal-body hr {
     border-color: var(--activity-border);
-    margin: 16px 0;
+    margin: 18px 0;
 }
 
 .activity-namespace .modal-body h6 {
@@ -545,26 +691,45 @@
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 0.8rem;
+    color: var(--activity-text-secondary);
 }
 
 .activity-namespace .modal-body table {
     width: 100%;
     border-collapse: collapse;
+    border: 1px solid var(--activity-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
 }
 
 .activity-namespace .modal-body table th {
-    background: var(--bg-card-hover);
+    background: var(--activity-surface-soft);
     padding: 10px;
     text-align: left;
     font-weight: 600;
     font-size: 0.8rem;
     border-bottom: 1px solid var(--activity-border);
+    color: var(--activity-text-secondary);
 }
 
 .activity-namespace .modal-body table td {
     padding: 10px;
     border-bottom: 1px solid var(--activity-border);
     font-size: 0.85rem;
+    vertical-align: top;
+}
+
+.activity-namespace .modal-body table tbody tr:nth-child(even) {
+    background: rgba(148, 163, 184, 0.04);
+}
+
+.activity-namespace .modal-header .btn-close {
+    filter: invert(0.95) grayscale(1);
+    opacity: 0.85;
+}
+
+.activity-namespace .modal-header .btn-close:hover {
+    opacity: 1;
 }
 
 .activity-namespace .modal-body .bg-light {
@@ -582,10 +747,12 @@
 /* ── LIGHT THEME OVERRIDES ── */
 [data-theme="light"] {
     --activity-surface: #ffffff;
+    --activity-surface-soft: #f8fafc;
     --activity-text: #1e293b;
     --activity-text-secondary: #475569;
-    --activity-text-muted: #94a3b8;
+    --activity-text-muted: #475569;
     --activity-border: #e2e8f0;
+    --activity-border-strong: #cbd5e1;
 }
 
 [data-theme="light"] .activity-namespace .filter-header {
@@ -604,6 +771,14 @@
     font-weight: 700;
 }
 
+[data-theme="light"] .activity-namespace .modal-header .btn-close {
+    filter: none;
+}
+
+[data-theme="light"] .activity-namespace .modal-body table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .activity-namespace .page-header {
@@ -620,6 +795,12 @@
 
     .activity-namespace .activity-table {
         font-size: 0.8rem;
+        min-width: 860px;
+    }
+
+    .activity-namespace .activity-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .activity-namespace .activity-table thead th,
@@ -637,5 +818,38 @@
 
     .activity-namespace .filter-actions .btn {
         width: 100%;
+    }
+
+    .activity-namespace .modal-dialog {
+        margin: 0.75rem;
+    }
+
+    .activity-namespace .modal-body {
+        padding: 16px;
+    }
+
+    .activity-namespace .modal-body table {
+        min-width: 520px;
+    }
+}
+
+@media (max-width: 480px) {
+    .activity-namespace .filter-header,
+    .activity-namespace .filter-body {
+        padding: 14px;
+    }
+
+    .activity-namespace .results-summary {
+        font-size: 0.82rem;
+        padding: 12px 14px;
+    }
+
+    .activity-namespace .stat-card {
+        padding: 14px;
+    }
+
+    .activity-namespace .modal-header,
+    .activity-namespace .modal-body {
+        padding: 14px;
     }
 }

@@ -13,7 +13,7 @@
       <p>Fund Source Budget Breakdown</p>
     </div>
     <div class="page-header-right">
-      <a href="{% url 'fund_sources' %}" class="btn btn-secondary">
+      <a href="{% url 'fund_sources' %}" class="btn-add">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"/>
           <polyline points="12 19 5 12 12 5"/>
@@ -97,10 +97,10 @@
                 </a>
                 <button class="act-btn act-delete" 
                   type="button"
-                  data-confirm-delete
-                  data-delete-url="{% url 'fund_source_breakdown_delete' breakdown.id %}"
-                  data-item-name="Breakdown"
-                  data-item-label="{{ breakdown.category }}"
+                  data-confirm-action="delete"
+                  data-action-url="{% url 'fund_source_breakdown_delete' breakdown.id %}"
+                  data-action-name="Breakdown"
+                  data-action-label="{{ breakdown.category }}"
                   data-redirect-url="{% url 'fund_source_detail' fund.id %}"
                   title="Delete breakdown">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

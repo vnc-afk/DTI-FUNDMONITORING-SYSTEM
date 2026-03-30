@@ -187,7 +187,19 @@ function loadPageAjax(url) {
 
 // toggle the responsive sidebar (used by the mobile button)
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    sidebar.classList.toggle('show');
+    document.body.classList.toggle('sidebar-open', sidebar.classList.contains('show'));
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    sidebar.classList.remove('show');
+    document.body.classList.remove('sidebar-open');
 }
 
 // tab switching logic for reports (disbursement / downloads etc.)
@@ -262,7 +274,39 @@ function initApp() {
 
     // bind sidebar toggle button (if not using inline onclick)
     const sidebarBtn = document.querySelector('.topbar-btn.d-md-none');
-    if (sidebarBtn) sidebarBtn.addEventListener('click', toggleSidebar);
+    if (sidebarBtn) {
+        sidebarBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            toggleSidebar();
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.querySelector('.topbar-btn.d-md-none');
+        if (!sidebar || window.innerWidth > 768 || !sidebar.classList.contains('show')) {
+            return;
+        }
+
+        const clickedInsideSidebar = sidebar.contains(event.target);
+        const clickedToggle = sidebarToggle && sidebarToggle.contains(event.target);
+
+        if (!clickedInsideSidebar && !clickedToggle) {
+            closeSidebar();
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            closeSidebar();
+        }
+    });
 
     // bind sidebar navigation links (AJAX) - ONLY ONCE
     bindSidebarNavigation();

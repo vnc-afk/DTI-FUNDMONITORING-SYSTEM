@@ -208,6 +208,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 .breadcrumb-custom {
@@ -216,6 +217,10 @@ body {
     gap: 8px;
     font-size: 0.8rem;
     color: var(--text-secondary);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .breadcrumb-custom .page-title {
@@ -228,6 +233,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .topbar-btn {
@@ -298,6 +304,7 @@ body {
     flex: 1;
     padding: 32px;
     font-family: var(--font-body);
+    min-width: 0;
 }
 
 /* ── Page Header ── */
@@ -362,6 +369,8 @@ body {
 ══════════════════════════════ */
 @media (max-width: 768px) {
     .sidebar {
+        width: min(86vw, 320px);
+        z-index: 200;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
@@ -371,21 +380,86 @@ body {
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
     }
 
+    .main-wrapper::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 120;
+    }
+
+    .sidebar.show ~ .main-wrapper::before {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
     .main-wrapper {
         margin-left: 0;
     }
 
     .page-content {
-        padding: 20px;
+        padding: 16px;
     }
 
     .topbar {
-        padding: 0 16px;
+        padding: 0 12px;
         height: 60px;
+    }
+
+    .topbar-left {
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .breadcrumb-custom {
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb-custom .page-title {
+        max-width: 34vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .topbar-right {
         gap: 8px;
+    }
+
+    .topbar-btn {
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .topbar {
+        padding: 0 10px;
+    }
+
+    .topbar-right {
+        gap: 6px;
+    }
+
+    .topbar-btn {
+        padding: 7px 9px;
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-custom > span:first-child,
+    .breadcrumb-custom > i {
+        display: none;
+    }
+
+    .breadcrumb-custom .page-title {
+        max-width: 42vw;
+        font-size: 0.85rem;
     }
 }
 

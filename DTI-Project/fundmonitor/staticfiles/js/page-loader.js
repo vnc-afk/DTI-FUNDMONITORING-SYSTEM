@@ -8,7 +8,7 @@ class PageLoader {
         this.cache = cache; // Use global CacheManager instance
         this.isLoading = false;
         this.currentUrl = window.location.href;
-        this.loadingTimeout = 10000; // 10 second timeout for network requests
+        this.loadingTimeout = 20000; // 20 second timeout for network requests
         this.useCache = true; // Can be disabled for bypass
     }
 
@@ -35,7 +35,7 @@ class PageLoader {
         this.isLoading = true;
         const pageContent = document.querySelector('.page-content');
         
-        if (showSpinner) {
+        if (showSpinner && pageContent) {
             pageContent.style.opacity = '0.6';
             pageContent.style.pointerEvents = 'none';
         }
@@ -57,18 +57,16 @@ class PageLoader {
             onProgress && onProgress('fetching_network');
 
             // Step 2: Fetch from network with timeout
-            const fetchPromise = fetch(normalizedUrl, {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(normalizedUrl, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-Load-Type': 'ajax',
-                }
+                },
+                signal: controller.signal,
             });
-
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Network timeout')), timeout)
-            );
-
-            const response = await Promise.race([fetchPromise, timeoutPromise]);
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -85,11 +83,17 @@ class PageLoader {
             }
 
             onProgress && onProgress('rendering');
-            this.renderPageContent(html, normalizedUrl);
+            const rendered = this.renderPageContent(html, normalizedUrl);
+            if (!rendered) {
+                const fallbackUrl = response.redirected ? response.url : normalizedUrl;
+                this.fallbackNavigate(fallbackUrl, 'missing-page-content-shell');
+                return { source: 'full_reload', url: fallbackUrl };
+            }
 
             return { source: 'network', url: normalizedUrl };
         } catch (error) {
-            console.error('Page load error:', error);
+            const isAbort = error && error.name === 'AbortError';
+            console.error('Page load error:', isAbort ? `Network timeout after ${timeout}ms` : error);
             onProgress && onProgress('error');
             
             // If cache exists, use it as fallback even if expired
@@ -97,17 +101,22 @@ class PageLoader {
                 const cachedHtml = await this.cache.getPageContent(normalizedUrl);
                 if (cachedHtml) {
                     console.warn('⚠️ Using expired cache as fallback');
-                    this.renderPageContent(cachedHtml, normalizedUrl);
-                    return { source: 'cache_expired', url: normalizedUrl };
+                    const rendered = this.renderPageContent(cachedHtml, normalizedUrl);
+                    if (rendered) {
+                        return { source: 'cache_expired', url: normalizedUrl };
+                    }
                 }
             }
 
             // Ultimate fallback: full page reload
-            window.location.href = normalizedUrl;
-            return null;
+            this.fallbackNavigate(
+                normalizedUrl,
+                isAbort ? 'network-timeout' : `load-error:${error && error.message ? error.message : 'unknown'}`
+            );
+            return { source: 'full_reload', url: normalizedUrl };
         } finally {
             this.isLoading = false;
-            if (showSpinner) {
+            if (showSpinner && pageContent) {
                 pageContent.style.opacity = '1';
                 pageContent.style.pointerEvents = 'auto';
             }
@@ -124,11 +133,13 @@ class PageLoader {
         // Extract page content
         const newContent = newDoc.querySelector('.page-content');
         if (!newContent) {
-            window.location.href = url;
-            return;
+            return false;
         }
 
         const pageContent = document.querySelector('.page-content');
+        if (!pageContent) {
+            return false;
+        }
         
         // Get title
         const newTitle = newDoc.querySelector('title');
@@ -185,6 +196,13 @@ class PageLoader {
 
         // Scroll to top
         window.scrollTo(0, 0);
+
+        return true;
+    }
+
+    fallbackNavigate(url, reason) {
+        console.warn(`[PageLoader fallback] ${reason} -> full reload`, url);
+        window.location.href = url;
     }
 
     /**
@@ -239,6 +257,7 @@ class PageLoader {
         if (sidebar && sidebar.classList.contains('show')) {
             sidebar.classList.remove('show');
         }
+        document.body.classList.remove('sidebar-open');
     }
 
     /**

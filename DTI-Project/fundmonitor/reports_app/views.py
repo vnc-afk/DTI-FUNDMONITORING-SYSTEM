@@ -7,22 +7,34 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.timezone import now
 
-from data_management_app.models import ExpenseObject, District, FundSource, NegosyoCenter
+from data_management_app.models import District, FundSource, NegosyoCenter
 from mater_fundmonitor_app.models import MasterFundMonitoring
 
 
 def expense_report(request):
-	"""Generate expense report with monthly breakdown."""
-	objects = ExpenseObject.objects.filter(is_active=True).values('id', 'code', 'name', 'color')
+	"""Generate expense report grouped by classification or object of expense."""
+	from data_management_app.models import ExpenseCategory, ExpenseObject
+
+	group_by = request.GET.get('group_by', 'classification')
+	is_object_grouping = group_by == 'object'
+
+	if is_object_grouping:
+		groups = ExpenseObject.objects.filter(is_active=True).values('id', 'code', 'name', 'color')
+		group_fk = 'account_title_id'
+		group_label = 'Object of Expense'
+		search_placeholder = 'Search object of expense...'
+	else:
+		groups = ExpenseCategory.objects.filter(is_active=True).values('id', 'name', 'color')
+		group_fk = 'expense_classification_id'
+		group_label = 'Expense Category'
+		search_placeholder = 'Search expense category...'
 
 	current_year = now().year
 	expense_data = []
 
-	for cat in objects:
-		expenses = MasterFundMonitoring.objects.filter(
-			account_title_id=cat['id'],
-			date__year=current_year,
-		).values_list('date', 'payments')
+	for group in groups:
+		filter_kwargs = {group_fk: group['id'], 'date__year': current_year}
+		expenses = MasterFundMonitoring.objects.filter(**filter_kwargs).values_list('date', 'payments')
 
 		q1 = [Decimal(0), Decimal(0), Decimal(0)]
 		q2 = [Decimal(0), Decimal(0), Decimal(0)]
@@ -46,8 +58,47 @@ def expense_report(request):
 
 		expense_data.append(
 			{
-				'name': f"({cat['code']}) {cat['name']}",
-				'color': cat['color'],
+				'name': f"({group['code']}) {group['name']}" if is_object_grouping else group['name'],
+				'color': group['color'],
+				'q1': [float(x) for x in q1],
+				'q2': [float(x) for x in q2],
+				'q3': [float(x) for x in q3],
+				'q4': [float(x) for x in q4],
+			}
+		)
+
+	# Include transactions with no selected grouping value so they are not excluded.
+	unclassified_filter = {'date__year': current_year}
+	unclassified_filter['account_title__isnull' if is_object_grouping else 'expense_classification__isnull'] = True
+	unclassified_expenses = MasterFundMonitoring.objects.filter(
+		**unclassified_filter,
+	).values_list('date', 'payments')
+
+	if unclassified_expenses:
+		q1 = [Decimal(0), Decimal(0), Decimal(0)]
+		q2 = [Decimal(0), Decimal(0), Decimal(0)]
+		q3 = [Decimal(0), Decimal(0), Decimal(0)]
+		q4 = [Decimal(0), Decimal(0), Decimal(0)]
+
+		for date, payment in unclassified_expenses:
+			if date and payment:
+				month = date.month - 1
+				quarter_idx = month // 3
+				month_in_quarter = month % 3
+
+				if quarter_idx == 0:
+					q1[month_in_quarter] += Decimal(str(payment))
+				elif quarter_idx == 1:
+					q2[month_in_quarter] += Decimal(str(payment))
+				elif quarter_idx == 2:
+					q3[month_in_quarter] += Decimal(str(payment))
+				elif quarter_idx == 3:
+					q4[month_in_quarter] += Decimal(str(payment))
+
+		expense_data.append(
+			{
+				'name': 'Unclassified / Not Assigned',
+				'color': '#6c757d',
 				'q1': [float(x) for x in q1],
 				'q2': [float(x) for x in q2],
 				'q3': [float(x) for x in q3],
@@ -61,6 +112,10 @@ def expense_report(request):
 		request,
 		'reports_app/reports/expenses_report.html',
 		{
+			'current_year': current_year,
+			'group_by': 'object' if is_object_grouping else 'classification',
+			'group_label': group_label,
+			'search_placeholder': search_placeholder,
 			'report_data': expense_data,
 			'expense_json': expense_json,
 		},
@@ -194,7 +249,7 @@ def mooe_report(request):
 	}
 
 	context = {
-		'mooe_report_json': json.dumps(mooe_report_data),
+		'mooe_report_data': mooe_report_data, 
 		'grand_total_budget': float(grand_total_budget),
 		'grand_total_disbursed': float(grand_total_disbursed),
 		'grand_balance': float(grand_balance),
@@ -212,24 +267,13 @@ def nc_report(request):
 	districts = District.objects.prefetch_related('negosyo_centers').order_by('order', 'name')
 
 	month_names = [
-		'January',
-		'February',
-		'March',
-		'April',
-		'May',
-		'June',
-		'July',
-		'August',
-		'September',
-		'October',
-		'November',
-		'December',
+		'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December',
 	]
 
 	districts_data = []
 	total_disbursement = 0.0
 	total_downloads = 0.0
-	report_nc_ids = []  # Track NCs included in this report
 
 	for district in districts:
 		negosyo_centers = district.negosyo_centers.filter(is_active=True).order_by('name')
@@ -237,20 +281,20 @@ def nc_report(request):
 			continue
 
 		nc_ids = list(negosyo_centers.values_list('id', flat=True))
-		report_nc_ids.extend(nc_ids)  # Add to report's NC list
 		transactions = MasterFundMonitoring.objects.filter(
 			nc_id__in=nc_ids,
 			date__year=current_year,
 		).order_by('nc__name', 'date')
 
+		# Use str(id) as keys throughout
 		monthly_data = {m: {} for m in range(1, 13)}
 		for nc in negosyo_centers:
 			for month_num in range(1, 13):
-				monthly_data[month_num][nc.id] = 0.0
+				monthly_data[month_num][str(nc.id)] = 0.0  # ← str()
 
 		for transaction in transactions:
 			month_num = transaction.date.month
-			nc_id = transaction.nc_id
+			nc_id = str(transaction.nc_id)  # ← str()
 			payment = float(transaction.payments or 0)
 			monthly_data[month_num][nc_id] += payment
 			total_disbursement += payment
@@ -277,33 +321,28 @@ def nc_report(request):
 				}
 
 				for nc in negosyo_centers:
-					amount = monthly_data[month_num].get(nc.id, 0.0)
-					month_row['nc_data'][nc.id] = amount
+					amount = monthly_data[month_num].get(str(nc.id), 0.0)  # ← str()
+					month_row['nc_data'][str(nc.id)] = amount  # ← str()
 					month_row['month_total'] += amount
 					qtr_total += amount
 
 				qtr_months.append(month_row)
 
-			quarters.append(
-				{
-					'label': qtr_config['label'],
-					'range': qtr_config['range'],
-					'months': qtr_months,
-					'total': qtr_total,
-				}
-			)
+			quarters.append({
+				'label': qtr_config['label'],
+				'range': qtr_config['range'],
+				'months': qtr_months,
+				'total': qtr_total,
+			})
 
-		districts_data.append(
-			{
-				'name': district.name,
-				'order': district.order,
-				'negosyo_centers': [{'id': nc.id, 'name': nc.name} for nc in negosyo_centers],
-				'quarters': quarters,
-				'district_total': sum(q['total'] for q in quarters),
-			}
-		)
+		districts_data.append({
+			'name': district.name,
+			'order': district.order,
+			'negosyo_centers': [{'id': str(nc.id), 'name': nc.name} for nc in negosyo_centers],  # ← str()
+			'quarters': quarters,
+			'district_total': sum(q['total'] for q in quarters),
+		})
 
-	# Get annual budget from Fund Source entries named for Negosyo Center.
 	annual_budget = FundSource.objects.filter(
 		name__icontains='negosyo center'
 	).aggregate(total=Sum('annual_budget'))['total'] or Decimal(0)
@@ -321,7 +360,7 @@ def nc_report(request):
 	}
 
 	context = {
-		'nc_report_json': json.dumps(nc_report_data),
+		'nc_report_data': nc_report_data,
 		'annual_budget': annual_budget,
 		'total_disbursement': total_disbursement,
 		'total_downloads': total_downloads,
@@ -419,8 +458,8 @@ def fund_report(request):
 				or 0
 			)
 
-			disbursement_data[month_num][fund.id] = float(month_disbursement)
-			downloads_data[month_num][fund.id] = float(month_downloads)
+			disbursement_data[month_num][str(fund.id)] = float(month_disbursement) 
+			downloads_data[month_num][str(fund.id)] = float(month_downloads)  
 
 	def calc_row_total(data_dict, codes):
 		return sum(data_dict.get(code, 0) for code in codes)
@@ -452,8 +491,8 @@ def fund_report(request):
 		)
 
 	fund_report_data = {
-		'funds': [{'id': f.id, 'name': f.name} for f in fund_sources],
-		'budgetData': budget_data,
+		'funds': [{'id': str(f.id), 'name': f.name} for f in fund_sources],  
+		'budgetData': {str(k): v for k, v in budget_data.items()},   
 		'disbursementBreakdown': disbursement_breakdown,
 		'downloadsBreakdown': downloads_breakdown,
 		'grandTotalBudget': grand_total_budget,
@@ -467,7 +506,7 @@ def fund_report(request):
 		request,
 		'reports_app/reports/fund_report.html',
 		{
-			'fund_report_json': json.dumps(fund_report_data),
+			'fund_report_data': fund_report_data,
 			'grand_total_budget': grand_total_budget,
 			'grand_total_disbursed': grand_total_disbursed,
 			'grand_total_downloads': grand_total_downloads,

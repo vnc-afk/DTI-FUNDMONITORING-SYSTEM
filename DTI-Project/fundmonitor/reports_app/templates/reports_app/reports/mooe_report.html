@@ -100,9 +100,14 @@
   </div>
 
 </div><!-- /.report -->
+{% endblock %}
 
-{% load static %}
+{% block scripts %}
+{{ mooe_report_data|json_script:"mooe-data" }}
 <script>
-  const MOOE_REPORT_DATA = JSON.parse('{{ mooe_report_json|escapejs }}');
+  const MOOE_REPORT_DATA = JSON.parse(document.getElementById('mooe-data').textContent);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="{% static 'reports_app/js/report-export.js' %}"></script>
+<script src="{% static 'reports_app/js/mooe-report-render.js' %}"></script>
 {% endblock %}

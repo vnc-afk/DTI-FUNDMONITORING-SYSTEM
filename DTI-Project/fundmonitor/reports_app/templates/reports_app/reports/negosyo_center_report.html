@@ -69,9 +69,14 @@
   <div class="accordion" id="districts-accordion"></div>
 
 </div><!-- /.report -->
+{% endblock %}
 
-{% load static %}
+{% block scripts %}
+{{ nc_report_data|json_script:"nc-data" }}
 <script>
-  const NC_REPORT_DATA = JSON.parse('{{ nc_report_json|escapejs }}');
+  const NC_REPORT_DATA = JSON.parse(document.getElementById('nc-data').textContent);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="{% static 'reports_app/js/report-export.js' %}"></script>
+<script src="{% static 'reports_app/js/negosyo-center-report-render.js' %}"></script>
 {% endblock %}

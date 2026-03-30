@@ -569,6 +569,91 @@
   .table-namespace .page-header { flex-direction: column; }
 }
 
+@media (max-width: 1024px) {
+  .table-namespace .toolbar-right {
+    flex-wrap: wrap !important;
+  }
+
+  .table-namespace .search-input {
+    width: 190px;
+  }
+
+  .table-namespace .search-input:focus {
+    width: 210px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-namespace .page-header {
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .table-namespace .btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-namespace .toolbar {
+    padding: 12px 14px;
+  }
+
+  .table-namespace .toolbar-left,
+  .table-namespace .toolbar-right {
+    width: 100%;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .table-namespace .search-wrap {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .table-namespace .search-input,
+  .table-namespace .search-input:focus {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .table-namespace .table-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-namespace table {
+    min-width: 860px;
+  }
+
+  .table-namespace .table-footer {
+    padding: 10px 14px;
+  }
+
+  .table-namespace .pagination {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-namespace .toolbar-title {
+    font-size: 0.84rem;
+  }
+
+  .table-namespace .toolbar-count {
+    font-size: 0.68rem;
+  }
+
+  .table-namespace .icon-btn,
+  .table-namespace .filter-select {
+    padding: 7px 9px;
+    font-size: 0.74rem;
+  }
+
+  .table-namespace .summary-card {
+    padding: 14px;
+  }
+}
+
 /* ── EXPANDABLE ROW STYLES ── */
 .expandable-row {
   cursor: pointer;

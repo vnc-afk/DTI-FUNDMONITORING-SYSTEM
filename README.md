@@ -1,237 +1,217 @@
 # DTI Fund Monitoring System
 
-A comprehensive Django-based web application for monitoring and managing fund allocation, tracking expenses, and managing suppliers and financial transactions for the Department of Trade and Industry (DTI).
+A Django-based financial monitoring platform for the Department of Trade and Industry (DTI), designed to manage fund sources, monitor expenses, reconcile bank records, and generate operational dashboards.
 
 ## Overview
 
-The DTI Fund Monitoring System is designed to streamline financial management processes by providing:
-- **Fund Source Management**: Track and manage various funding sources
-- **Expense Tracking**: Monitor expenses with proper categorization and classification
-- **Supplier Management**: Maintain supplier information with VAT status and categorization
-- **Bank Statement Processing**: Import and reconcile bank statements
-- **Dashboard Analytics**: Real-time insights into fund allocation and spending patterns
-- **Staff Management**: Manage staff information and access control
+The system centralizes financial operations across multiple modules:
 
-## Tech Stack
+- Fund source and allocation tracking
+- Expense recording with classification and reporting support
+- Supplier profiling and transaction monitoring
+- Bank statement import and reconciliation workflows
+- Role-aware dashboards and activity logging
+- User and staff account management
 
-- **Backend**: Django 6.0.2
-- **Database**: PostgreSQL (with SQLite for development)
-- **Task Queue**: Celery with Redis
-- **Data Processing**: Pandas, NumPy
-- **File Handling**: OpenpyXL for Excel operations
-- **Server**: ASGI/WSGI compatible
-- **Frontend**: Django Templates
+## Technology Stack
 
-## Project Structure
+- Backend framework: Django 6.0.2
+- Database: PostgreSQL (configured as default)
+- Async/background processing: Celery 5.6.2 with Redis
+- Data tools: Pandas 3.0.1 and NumPy 2.4.2
+- Excel processing: OpenPyXL 3.1.5
+- Production serving: Waitress (via batch launcher)
+- Frontend: Django templates + static assets
 
-```
-DTI-Project/
-├── fundmonitor/              # Django project configuration
-│   ├── settings.py          # Project settings
-│   ├── urls.py              # URL routing
-│   ├── wsgi.py              # WSGI configuration
-│   └── asgi.py              # ASGI configuration
-├── core/                     # Core application
-│   ├── models.py            # Core data models
-│   ├── views.py             # Core views
-│   └── migrations/          # Database migrations
-├── dashboard_app/           # Main dashboard application
-│   ├── models/              # Data models (bank, supplier, funds, etc.)
-│   ├── views/               # Dashboard views
-│   ├── forms/               # Form definitions
-│   ├── templates/           # HTML templates
-│   ├── static/              # CSS, JS, images
-│   └── migrations/          # Database migrations
-└── db.sqlite3               # SQLite database (development)
+## Repository Structure
+
+```text
+DTI-FUNDMONITORING-SYSTEM/
+|-- README.md
+|-- requirements.txt
+|-- start_fundmonitor.bat
+`-- DTI-Project/
+    `-- fundmonitor/
+        |-- manage.py
+        |-- fundmonitor/               # project settings, urls, wsgi, asgi
+        |-- dashboard_app/             # dashboard, middleware, utilities
+        |-- mater_fundmonitor_app/     # core fund monitoring workflows
+        |-- bank_statement_app/        # bank statement handling
+        |-- data_management_app/       # data maintenance and admin workflows
+        |-- reports_app/               # report generation and exports
+        |-- user_app/                  # authentication and user management
+        |-- templates/                 # shared templates
+        |-- static/                    # project-level static files
+        `-- staticfiles/               # collected static output
 ```
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10+
 - PostgreSQL 12+
-- Redis (for Celery task queue)
-- pip (Python package manager)
+- Redis (required for Celery worker/beat)
+- pip
 
-## Installation
+## Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/DTI-FUNDMONITORING-SYSTEM.git
-   cd DTI-FUNDMONITORING-SYSTEM
-   ```
+### 1. Clone the repository
 
-2. **Create a virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+```bash
+git clone https://github.com/your-org/DTI-FUNDMONITORING-SYSTEM.git
+cd DTI-FUNDMONITORING-SYSTEM
+```
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Create and activate a virtual environment
 
-4. **Configure environment variables** (if needed)
-   - Copy `.env.example` to `.env`
-   - Update database credentials and other settings
+Windows PowerShell:
 
-5. **Run migrations**
-   ```bash
-   cd DTI-Project/fundmonitor
-   python manage.py migrate
-   ```
+```powershell
+py -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-6. **Create a superuser**
-   ```bash
-   python manage.py createsuperuser
-   ```
+Linux/macOS:
 
-7. **Collect static files**
-   ```bash
-   python manage.py collectstatic
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate
+```
 
-## Running the Application
+### 3. Install dependencies
 
-### Development Server
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure database settings
+
+Edit `DTI-Project/fundmonitor/fundmonitor/settings.py` and update `DATABASES['default']` for your local PostgreSQL instance.
+
+### 5. Apply migrations
+
 ```bash
 cd DTI-Project/fundmonitor
-python manage.py runserver
+py manage.py migrate
 ```
 
-The application will be available at `http://localhost:8000`
+### 6. Create an admin user
 
-### Production Server
 ```bash
-python run_server.py
+py manage.py createsuperuser
 ```
 
-### Running Celery (for background tasks)
+### 7. Collect static files
+
+```bash
+py manage.py collectstatic --noinput
+```
+
+## Running the System
+
+### Development mode
+
+From `DTI-Project/fundmonitor`:
+
+```bash
+py manage.py runserver
+```
+
+Default URL: `http://127.0.0.1:8000`
+
+### Production-style launcher (Windows)
+
+From repository root:
+
+```bat
+start_fundmonitor.bat
+```
+
+This starts Waitress on `0.0.0.0:8000` and auto-restarts if the process exits.
+
+### Celery worker
+
+From `DTI-Project/fundmonitor`:
+
 ```bash
 celery -A fundmonitor worker -l info
 ```
 
-### Running Celery Beat (for scheduled tasks)
+### Celery beat
+
+From `DTI-Project/fundmonitor`:
+
 ```bash
 celery -A fundmonitor beat -l info
 ```
 
-## Key Features
+## Main Application Areas
 
-### Fund Management
-- Create and track multiple fund sources
-- Monitor fund allocation across projects
-- Generate fund utilization reports
+- `dashboard_app`: executive and operational dashboards, notifications, activity logs
+- `mater_fundmonitor_app`: core fund and transaction domain workflows
+- `bank_statement_app`: statement upload and reconciliation support
+- `data_management_app`: maintenance of reference and transactional data
+- `reports_app`: summary and printable/exportable reporting
+- `user_app`: login, account lifecycle, and access management
 
-### Expense Management
-- Categorize expenses with proper classification
-- Track expense objects and accounting codes
-- Generate expense analysis reports
+## URL Routing
 
-### Supplier Management
-- Maintain comprehensive supplier database
-- Track supplier categories and VAT status
-- Monitor supplier transactions
+URL patterns are composed in `fundmonitor/urls.py` and include app-level routes from:
 
-### Bank Reconciliation
-- Import bank statements
-- Automatic reconciliation matching
-- Transaction verification and validation
+- `user_app`
+- `dashboard_app`
+- `mater_fundmonitor_app`
+- `bank_statement_app`
+- `data_management_app`
+- `reports_app`
 
-### Dashboard Analytics
-- Real-time fund monitoring
-- Expense trend analysis
-- Supplier performance metrics
-- Interactive charts and visualizations
+Admin portal: `/admin/`
 
-## Database Management
+## Configuration Notes
 
-### Initial Setup
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+Important settings file:
 
-### Running Verification Scripts
-```bash
-python check_nulls.py          # Check for NULL values in database
-python verify_transaction_type.py  # Verify transaction types
-python migrate_files.py         # Migrate file uploads
-```
+- `DTI-Project/fundmonitor/fundmonitor/settings.py`
 
-## API Endpoints
+Review these before deployment:
 
-The system is built with Django and follows standard RESTful patterns. Main endpoints include:
-- `/admin` - Django admin interface
-- `/dashboard` - Main dashboard
-- `/suppliers` - Supplier management
-- `/funds` - Fund management
-- `/expenses` - Expense tracking
-- `/bank-statements` - Bank reconciliation
-
-## Configuration
-
-Key settings in `fundmonitor/settings.py`:
-- `DEBUG`: Set to `False` in production
-- `ALLOWED_HOSTS`: Configure for your domain
-- `DATABASES`: PostgreSQL connection settings
-- `CELERY_BROKER_URL`: Redis connection for Celery
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- `DEBUG`
+- `SECRET_KEY`
+- `ALLOWED_HOSTS`
+- `DATABASES`
+- `SESSION_COOKIE_SECURE`
 
 ## Troubleshooting
 
-### Database Connection Issues
-- Ensure PostgreSQL is running
-- Verify database credentials in settings
-- Check database exists: `createdb fundmonitor`
+### App cannot connect to database
 
-### Static Files Not Loading
-- Run `python manage.py collectstatic`
-- Check `STATIC_ROOT` and `STATIC_URL` in settings
+- Confirm PostgreSQL service is running
+- Verify `HOST`, `PORT`, `NAME`, `USER`, and `PASSWORD` in `settings.py`
+- Ensure the target database already exists
 
-### Celery Tasks Not Running
-- Ensure Redis is running
-- Check Celery worker logs
-- Verify `CELERY_BROKER_URL` in settings
+### Static files are missing or outdated
 
-## Security Considerations
+- Run `py manage.py collectstatic --noinput`
+- Verify `STATIC_URL`, `STATICFILES_DIRS`, and `STATIC_ROOT`
 
-- Always use a strong `SECRET_KEY` in production
-- Set `DEBUG = False` in production
-- Use environment variables for sensitive data
-- Configure HTTPS and CSRF protection
-- Regularly update dependencies
+### Celery commands fail
 
-## Performance Optimization
+- Confirm Redis is running and reachable
+- Ensure the virtual environment is active
+- Run commands from `DTI-Project/fundmonitor`
 
-- Enable caching with Redis
-- Use database indexes on frequently queried fields
-- Implement pagination for large datasets
-- Use Celery for long-running tasks
+## Security Checklist for Deployment
 
-## License
+- Set `DEBUG = False`
+- Move secrets and credentials out of source code
+- Use a strong, private `SECRET_KEY`
+- Restrict `ALLOWED_HOSTS` to trusted domains/IPs
+- Enable HTTPS and secure session/cookie settings
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Contributors
 
-## Support
-
-For issues and feature requests, please open an issue on the GitHub repository.
-
-## Authors
-
-Vince & Nard & VNard & Nardince & Levince
-
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Core fund monitoring functionality
-- Dashboard and reporting features
-- Bank reconciliation system
+- Vince
+- Nard
+- VNard
+- Nardince
+- Levince
+- Si workfromhome

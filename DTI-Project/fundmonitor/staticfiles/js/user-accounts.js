@@ -11,6 +11,7 @@
 window.userAccountManager = {
   deleteButtonClass: 'delete-user-btn',
   toggleStatusClass: 'toggle-status-btn',
+  modalOpen: false, // Prevent multiple modals from opening simultaneously
 };
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -28,6 +29,14 @@ window.userAccountManager = {
  */
 window.showConfirmation = function(title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'warning') {
   return new Promise((resolve) => {
+    // Prevent multiple modals from opening at the same time
+    if (window.userAccountManager.modalOpen) {
+      resolve(false);
+      return;
+    }
+    
+    window.userAccountManager.modalOpen = true;
+
     // Create backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'confirmation-modal-backdrop';
@@ -105,6 +114,7 @@ window.showConfirmation = function(title, message, confirmText = 'Confirm', canc
       backdrop.removeEventListener('click', backdropClick);
       document.removeEventListener('keydown', handleKeyDown);
       backdrop.remove();
+      window.userAccountManager.modalOpen = false;
       resolve(confirmed);
     }
 
@@ -243,7 +253,7 @@ document.addEventListener('click', async function(e) {
   }
   
   // Handle Delete Account Button
-  if (action.includes('delete') && button.classList.contains('user-accounts-action-delete')) {
+  if (action.includes('delete') && (button.classList.contains('action-delete') || button.classList.contains('delete-user-btn'))) {
     e.preventDefault();
     e.stopPropagation();
     
@@ -260,4 +270,4 @@ document.addEventListener('click', async function(e) {
     }
     return;
   }
-});
+}, false); // Use capture phase: false (bubble phase)
