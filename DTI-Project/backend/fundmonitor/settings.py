@@ -178,11 +178,11 @@ SESSION_COOKIE_SAMESITE = "Lax"  # CSRF protection
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    os.getenv("FRONTEND_URL", "http://localhost:5173"),
+    os.getenv("https://dti-fundmonitoring-system.vercel.app/"),
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    os.getenv("FRONTEND_URL", "http://localhost:5173"),
+    os.getenv("https://dti-fundmonitoring-system.vercel.app/"),
 ]
 
 # Django REST Framework defaults for API-first endpoints.
