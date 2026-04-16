@@ -1,0 +1,121 @@
+/* Archive Dashboard Page Styles */
+
+/* === STAT CARD VARIANTS === */
+.stat-card--success {
+  --stat-accent: var(--status-success-text);
+}
+
+.stat-card--warning {
+  --stat-accent: var(--brand-gold-400);
+}
+
+/* === QUICK LINK CARD === */
+.quick-link-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.quick-link-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.quick-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--brand-navy-50);
+  color: var(--brand-navy-600);
+  flex-shrink: 0;
+}
+
+.quick-link-content {
+  flex: 1;
+}
+
+.quick-link-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.quick-link-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: var(--space-1) 0 0 0;
+}
+
+/* === ARCHIVE INFO BANNER === */
+.archive-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--brand-navy-600);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+}
+
+.archive-info-banner-icon {
+  flex-shrink: 0;
+  color: var(--brand-navy-600);
+  margin-top: 2px;
+}
+
+.archive-info-banner p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+/* === ARCHIVE STEP CARD === */
+.archive-step-card {
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.archive-step-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.archive-step-number {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-navy-600);
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-tight);
+}
+
+.archive-step-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.archive-step-description {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}

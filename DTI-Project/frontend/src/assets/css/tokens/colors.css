@@ -1,0 +1,180 @@
+/* DTI Financial Monitoring — Color Tokens
+   Government-grade: authoritative navy, crisp gold, clean data surfaces
+*/
+
+:root {
+  color-scheme: light;
+  /* === Brand Core === */
+  --brand-navy-950: #0a0f1e;
+  --brand-navy-900: #0f1a2e;
+  --brand-navy-800: #162440;
+  --brand-navy-700: #1e3156;
+  --brand-navy-600: #274069;
+  --brand-navy-500: #2e5080;
+  --brand-navy-400: #3d6699;
+  --brand-navy-300: #6189b5;
+  --brand-navy-200: #a0bdd4;
+  --brand-navy-100: #d4e4f0;
+  --brand-navy-50:  #edf4f9;
+
+  --brand-gold-900: #4a2d00;
+  --brand-gold-800: #7a4d00;
+  --brand-gold-700: #a86a00;
+  --brand-gold-600: #cc8800;
+  --brand-gold-500: #e6a200;
+  --brand-gold-400: #f5b800;
+  --brand-gold-300: #ffc933;
+  --brand-gold-200: #ffd966;
+  --brand-gold-100: #fff0b3;
+  --brand-gold-50:  #fffae6;
+
+  /* === Semantic === */
+  --color-primary:        var(--brand-navy-700);
+  --color-primary-hover:  var(--brand-navy-600);
+  --color-primary-light:  var(--brand-navy-50);
+  --color-accent:         var(--brand-gold-400);
+  --color-accent-text:    var(--brand-gold-800);
+
+  /* === Surfaces === */
+  --surface-page:       #f0f3f7;
+  --surface-base:       #ffffff;
+  --surface-raised:     #ffffff;
+  --surface-overlay:    #ffffff;
+  --surface-sidebar:    var(--brand-navy-900);
+  --surface-sidebar-hover: var(--brand-navy-800);
+  --surface-header:     var(--brand-navy-950);
+  --surface-subtle:     #f5f7fa;
+  --surface-sunken:     #e8edf3;
+
+  /* === Text === */
+  --text-primary:   #0d1421;
+  --text-secondary: #4a5568;
+  --text-tertiary:  #718096;
+  --text-muted:     #a0aec0;
+  --text-inverse:   #ffffff;
+  --text-brand:     var(--brand-navy-700);
+  --text-accent:    var(--brand-gold-700);
+
+  /* === Borders === */
+  --border-subtle:   rgba(0, 0, 0, 0.06);
+  --border-default:  rgba(0, 0, 0, 0.10);
+  --border-strong:   rgba(0, 0, 0, 0.18);
+  --border-brand:    var(--brand-navy-300);
+
+  /* === Status === */
+  --status-success-bg:   #e8f5e9;
+  --status-success-text: #1b5e20;
+  --status-success-border: #a5d6a7;
+
+  --status-warning-bg:   #fff8e1;
+  --status-warning-text: #e65100;
+  --status-warning-border: #ffe082;
+
+  --status-danger-bg:    #fce4ec;
+  --status-danger-text:  #b71c1c;
+  --status-danger-border: #f48fb1;
+
+  --status-info-bg:      var(--brand-navy-50);
+  --status-info-text:    var(--brand-navy-700);
+  --status-info-border:  var(--brand-navy-200);
+
+  --status-neutral-bg:   #f5f5f5;
+  --status-neutral-text: #424242;
+  --status-neutral-border: #bdbdbd;
+
+  /* === Data Visualization === */
+  --chart-1: var(--brand-navy-600);
+  --chart-2: var(--brand-gold-500);
+  --chart-3: #2e7d6e;
+  --chart-4: #8e44ad;
+  --chart-5: #c0392b;
+  --chart-positive: #2e7d32;
+  --chart-negative: #c62828;
+}
+
+/* Dark mode — sidebar always dark, main content adapts */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --surface-page:    #0d1117;
+    --surface-base:    #161b22;
+    --surface-raised:  #1c2333;
+    --surface-subtle:  #1a2030;
+    --surface-sunken:  #0d1117;
+
+    --text-primary:   #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-tertiary:  #64748b;
+    --text-muted:     #475569;
+
+    --border-subtle:   rgba(255,255,255,0.05);
+    --border-default:  rgba(255,255,255,0.09);
+    --border-strong:   rgba(255,255,255,0.15);
+
+    --status-success-bg:   #0d2818;
+    --status-success-text: #6fcf97;
+    --status-warning-bg:   #2d1f00;
+    --status-warning-text: #f6c344;
+    --status-danger-bg:    #2d0a0a;
+    --status-danger-text:  #fc8181;
+    --status-info-bg:      #0f1e35;
+    --status-info-text:    var(--brand-navy-200);
+  }
+}
+
+/* Explicit theme overrides (take precedence over OS preference) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-page:    #0d1117;
+  --surface-base:    #161b22;
+  --surface-raised:  #1c2333;
+  --surface-subtle:  #1a2030;
+  --surface-sunken:  #0d1117;
+
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-tertiary:  #64748b;
+  --text-muted:     #475569;
+
+  --border-subtle:   rgba(255,255,255,0.05);
+  --border-default:  rgba(255,255,255,0.09);
+  --border-strong:   rgba(255,255,255,0.15);
+
+  --status-success-bg:   #0d2818;
+  --status-success-text: #6fcf97;
+  --status-warning-bg:   #2d1f00;
+  --status-warning-text: #f6c344;
+  --status-danger-bg:    #2d0a0a;
+  --status-danger-text:  #fc8181;
+  --status-info-bg:      #0f1e35;
+  --status-info-text:    var(--brand-navy-200);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-page:       #f0f3f7;
+  --surface-base:       #ffffff;
+  --surface-raised:     #ffffff;
+  --surface-overlay:    #ffffff;
+  --surface-subtle:     #f5f7fa;
+  --surface-sunken:     #e8edf3;
+
+  --text-primary:   #0d1421;
+  --text-secondary: #4a5568;
+  --text-tertiary:  #718096;
+  --text-muted:     #a0aec0;
+
+  --border-subtle:   rgba(0, 0, 0, 0.06);
+  --border-default:  rgba(0, 0, 0, 0.10);
+  --border-strong:   rgba(0, 0, 0, 0.18);
+
+  --status-success-bg:   #e8f5e9;
+  --status-success-text: #1b5e20;
+  --status-warning-bg:   #fff8e1;
+  --status-warning-text: #e65100;
+  --status-danger-bg:    #fce4ec;
+  --status-danger-text:  #b71c1c;
+  --status-info-bg:      var(--brand-navy-50);
+  --status-info-text:    var(--brand-navy-700);
+}

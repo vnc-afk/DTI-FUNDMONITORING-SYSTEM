@@ -1,0 +1,27 @@
+/* DTI Financial Monitoring System — Design System Entry Point
+   Import order is intentional: tokens → foundations → components → patterns
+*/
+
+/* 1. Tokens */
+@import '@/assets/css/tokens/typography.css';
+@import '@/assets/css/tokens/colors.css';
+@import '@/assets/css/tokens/spacing.css';
+
+/* 2. Foundations */
+@import '@/assets/css/foundations/base.css';
+
+/* 3. Components */
+@import '@/assets/css/components/components.css';
+
+/* 4. Patterns */
+@import '@/assets/css/patterns/auth.css';
+@import '@/assets/css/patterns/sidebar.css';
+@import '@/assets/css/patterns/layouts.css';
+@import '@/assets/css/patterns/reports.css';
+@import '@/assets/css/patterns/settings.css';
+@import '@/assets/css/patterns/list-pages.css';
+@import '@/assets/css/patterns/form-pages.css';
+@import '@/assets/css/patterns/password-change.css';
+
+/* 5. Utilities */
+@import '@/assets/css/utils/utils.css';

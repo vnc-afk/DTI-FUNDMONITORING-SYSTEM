@@ -15,41 +15,42 @@ The system centralizes financial operations across multiple modules:
 
 ## Technology Stack
 
-- Backend framework: Django 6.0.2
-- Database: PostgreSQL (configured as default)
-- Async/background processing: Celery 5.6.2 with Redis
-- Data tools: Pandas 3.0.1 and NumPy 2.4.2
-- Excel processing: OpenPyXL 3.1.5
-- Production serving: Waitress (via batch launcher)
-- Frontend: Django templates + static assets
+- Backend framework: Django
+- Frontend framework: Vue 3 + Vite
+- Database (default): SQLite (`DTI-Project/backend/db.sqlite3`)
+- Optional database: PostgreSQL (configure in Django settings)
+- Async/background processing: Celery + Redis (optional, if enabled)
+- Data tools: Pandas and NumPy
+- Excel processing/export: OpenPyXL (backend) and ExcelJS (frontend)
 
 ## Repository Structure
 
 ```text
 DTI-FUNDMONITORING-SYSTEM/
 |-- README.md
-|-- requirements.txt
-|-- start_fundmonitor.bat
 `-- DTI-Project/
-    `-- fundmonitor/
-        |-- manage.py
-        |-- fundmonitor/               # project settings, urls, wsgi, asgi
-        |-- dashboard_app/             # dashboard, middleware, utilities
-        |-- mater_fundmonitor_app/     # core fund monitoring workflows
-        |-- bank_statement_app/        # bank statement handling
-        |-- data_management_app/       # data maintenance and admin workflows
-        |-- reports_app/               # report generation and exports
-        |-- user_app/                  # authentication and user management
-        |-- templates/                 # shared templates
-        |-- static/                    # project-level static files
-        `-- staticfiles/               # collected static output
+    |-- backend/
+    |   |-- manage.py
+    |   |-- requirements.txt
+    |   |-- fundmonitor/               # project settings, urls, asgi, wsgi
+    |   |-- dashboard_app/
+    |   |-- mater_fundmonitor_app/
+    |   |-- bank_statement_app/
+    |   |-- data_management_app/
+    |   |-- reports_app/
+    |   `-- user_app/
+    `-- frontend/
+        |-- package.json
+        |-- vite.config.js
+        `-- src/
 ```
 
 ## Prerequisites
 
 - Python 3.10+
-- PostgreSQL 12+
-- Redis (required for Celery worker/beat)
+- Node.js 18+
+- npm
+- Redis (only if running Celery worker/beat)
 - pip
 
 ## Setup
@@ -80,17 +81,27 @@ source venv/bin/activate
 ### 3. Install dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r DTI-Project/backend/requirements.txt
+```
+
+Install frontend dependencies:
+
+```bash
+cd DTI-Project/frontend
+npm install
+cd ../..
 ```
 
 ### 4. Configure database settings
 
-Edit `DTI-Project/fundmonitor/fundmonitor/settings.py` and update `DATABASES['default']` for your local PostgreSQL instance.
+Default database is SQLite and works out of the box.
+
+To use PostgreSQL, edit `DTI-Project/backend/fundmonitor/settings.py` and update `DATABASES['default']`.
 
 ### 5. Apply migrations
 
 ```bash
-cd DTI-Project/fundmonitor
+cd DTI-Project/backend
 py manage.py migrate
 ```
 
@@ -108,9 +119,9 @@ py manage.py collectstatic --noinput
 
 ## Running the System
 
-### Development mode
+### Backend (Django API/app)
 
-From `DTI-Project/fundmonitor`:
+From `DTI-Project/backend`:
 
 ```bash
 py manage.py runserver
@@ -118,19 +129,21 @@ py manage.py runserver
 
 Default URL: `http://127.0.0.1:8000`
 
-### Production-style launcher (Windows)
+### Frontend (Vue + Vite)
 
-From repository root:
+From `DTI-Project/frontend`:
 
-```bat
-start_fundmonitor.bat
+```bash
+npm run dev
 ```
 
-This starts Waitress on `0.0.0.0:8000` and auto-restarts if the process exits.
+Default URL: `http://localhost:5173`
+
+The frontend is configured to call backend endpoints served by Django.
 
 ### Celery worker
 
-From `DTI-Project/fundmonitor`:
+From `DTI-Project/backend`:
 
 ```bash
 celery -A fundmonitor worker -l info
@@ -138,7 +151,7 @@ celery -A fundmonitor worker -l info
 
 ### Celery beat
 
-From `DTI-Project/fundmonitor`:
+From `DTI-Project/backend`:
 
 ```bash
 celery -A fundmonitor beat -l info
@@ -170,7 +183,7 @@ Admin portal: `/admin/`
 
 Important settings file:
 
-- `DTI-Project/fundmonitor/fundmonitor/settings.py`
+- `DTI-Project/backend/fundmonitor/settings.py`
 
 Review these before deployment:
 
@@ -197,7 +210,13 @@ Review these before deployment:
 
 - Confirm Redis is running and reachable
 - Ensure the virtual environment is active
-- Run commands from `DTI-Project/fundmonitor`
+- Run commands from `DTI-Project/backend`
+
+### Frontend cannot start
+
+- Confirm you are in `DTI-Project/frontend`
+- Run `npm install` before `npm run dev`
+- Ensure `package.json`, `index.html`, and `vite.config.js` exist in the frontend folder
 
 ## Security Checklist for Deployment
 
