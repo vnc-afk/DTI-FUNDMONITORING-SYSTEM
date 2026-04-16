@@ -111,7 +111,13 @@ class MasterFundMonitoringForm(forms.ModelForm):
 
     class Meta:
         model = MasterFundMonitoring
-        exclude = ["cheque_status"]
+        exclude = [
+            "cheque_status",
+            "is_cancelled",
+            "cancelled_at",
+            "cancelled_by",
+            "cancel_reason",
+        ]
         widgets = {
             "date": forms.DateInput(
                 attrs={
@@ -389,6 +395,9 @@ class MasterFundMonitoringForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        if self.instance.pk and self.instance.is_cancelled:
+            raise ValidationError("Cancelled records cannot be edited. Uncancel the record first.")
+
         date = cleaned_data.get("date")
         cleared_date = cleaned_data.get("cleared_date")
         fund_source = cleaned_data.get("fund_source")

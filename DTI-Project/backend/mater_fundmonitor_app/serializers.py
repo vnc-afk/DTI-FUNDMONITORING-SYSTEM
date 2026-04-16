@@ -17,6 +17,12 @@ class MasterFundMonitoringSerializer(serializers.ModelSerializer):
     class Meta:
         model = MasterFundMonitoring
         fields = "__all__"
+        read_only_fields = (
+            "is_cancelled",
+            "cancelled_at",
+            "cancelled_by",
+            "cancel_reason",
+        )
 
     def get_division_name(self, obj):
         return obj.division.name if obj.division else None

@@ -23,6 +23,26 @@ def unarchive_selected(modeladmin, request, queryset):
 unarchive_selected.short_description = "Unarchive selected records"
 
 
+def cancel_selected(modeladmin, request, queryset):
+    count = queryset.count()
+    for obj in queryset.filter(is_cancelled=False):
+        obj.cancel(user=request.user, reason="Cancelled via admin")
+    modeladmin.message_user(request, f"{count} record(s) cancelled successfully.")
+
+
+cancel_selected.short_description = "Cancel selected records"
+
+
+def uncancel_selected(modeladmin, request, queryset):
+    count = queryset.count()
+    for obj in queryset.filter(is_cancelled=True):
+        obj.uncancel()
+    modeladmin.message_user(request, f"{count} record(s) uncancelled successfully.")
+
+
+uncancel_selected.short_description = "Uncancel selected records"
+
+
 @admin.register(MasterFundMonitoring)
 class MasterFundMonitoringAdmin(admin.ModelAdmin):
     list_display = (
@@ -31,12 +51,31 @@ class MasterFundMonitoringAdmin(admin.ModelAdmin):
         "payments",
         "transaction_type",
         "cheque_status",
+        "is_cancelled",
         "is_archived",
     )
-    list_filter = ("date", "transaction_type", "cheque_status", "is_archived")
+    list_filter = (
+        "date",
+        "transaction_type",
+        "cheque_status",
+        "is_cancelled",
+        "is_archived",
+    )
     search_fields = ("payee__supplier", "dv_number", "cheque_number")
-    readonly_fields = ("archived_at", "archived_by", "created_at", "updated_at")
-    actions = [archive_selected, unarchive_selected]
+    readonly_fields = (
+        "archived_at",
+        "archived_by",
+        "cancelled_at",
+        "cancelled_by",
+        "created_at",
+        "updated_at",
+    )
+    actions = [
+        archive_selected,
+        unarchive_selected,
+        cancel_selected,
+        uncancel_selected,
+    ]
 
     fieldsets = (
         (
@@ -56,6 +95,18 @@ class MasterFundMonitoringAdmin(admin.ModelAdmin):
                     "archived_at",
                     "archived_by",
                     "archive_reason",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Cancellation Information",
+            {
+                "fields": (
+                    "is_cancelled",
+                    "cancelled_at",
+                    "cancelled_by",
+                    "cancel_reason",
                 ),
                 "classes": ("collapse",),
             },

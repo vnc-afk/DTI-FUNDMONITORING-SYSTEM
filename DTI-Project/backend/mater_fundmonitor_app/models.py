@@ -247,6 +247,16 @@ class MasterFundMonitoring(ArchivableModel):
         choices=[("Pending", "Pending"), ("Cleared", "Cleared")],
         default="Pending",
     )
+    is_cancelled = models.BooleanField(default=False, db_index=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    cancelled_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="master_fundmonitor_cancelled_records",
+    )
+    cancel_reason = models.TextField(blank=True, default="")
     staff = models.ForeignKey(
         Staff,
         on_delete=models.SET_NULL,
@@ -330,6 +340,42 @@ class MasterFundMonitoring(ArchivableModel):
                     "cleared_date": "Cleared date must be on or after the transaction date."
                 }
             )
+
+    def cancel(self, user=None, reason=""):
+        if self.is_cancelled:
+            return
+
+        self.is_cancelled = True
+        self.cancelled_at = timezone.now()
+        self.cancelled_by = user
+        self.cancel_reason = reason
+        self.save(
+            update_fields=[
+                "is_cancelled",
+                "cancelled_at",
+                "cancelled_by",
+                "cancel_reason",
+                "updated_at",
+            ]
+        )
+
+    def uncancel(self):
+        if not self.is_cancelled:
+            return
+
+        self.is_cancelled = False
+        self.cancelled_at = None
+        self.cancelled_by = None
+        self.cancel_reason = ""
+        self.save(
+            update_fields=[
+                "is_cancelled",
+                "cancelled_at",
+                "cancelled_by",
+                "cancel_reason",
+                "updated_at",
+            ]
+        )
 
     def save(self, *args, **kwargs):
         self.full_clean()

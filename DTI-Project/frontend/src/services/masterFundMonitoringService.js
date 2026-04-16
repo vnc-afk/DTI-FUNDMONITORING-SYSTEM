@@ -49,12 +49,39 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
   }
 }
 
-export async function fetchMasterFundMonitoringRecords({ page = 1 } = {}) {
+export async function fetchMasterFundMonitoringRecords({
+  page = 1,
+  includeCancelled = false,
+  chequeStatus = '',
+} = {}) {
+  const params = { page }
+  if (includeCancelled) {
+    params.include_cancelled = true
+  }
+  if (chequeStatus && chequeStatus !== 'Cancelled') {
+    params.cheque_status = chequeStatus
+  }
+
   const response = await apiClient.get('/api/mater-fundmonitor-app/master-fund-monitoring/', {
-    params: { page },
+    params,
   })
 
   return normalizePaginatedResponse(response.data, page)
+}
+
+export async function cancelMasterFundMonitoringRecord(id, reason = '') {
+  const response = await apiClient.post(
+    `/api/mater-fundmonitor-app/master-fund-monitoring/${id}/cancel/`,
+    { reason },
+  )
+  return response.data
+}
+
+export async function uncancelMasterFundMonitoringRecord(id) {
+  const response = await apiClient.post(
+    `/api/mater-fundmonitor-app/master-fund-monitoring/${id}/uncancel/`,
+  )
+  return response.data
 }
 
 export async function deleteMasterFundMonitoringRecord(id) {

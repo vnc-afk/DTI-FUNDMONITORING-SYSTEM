@@ -156,7 +156,7 @@
         <tbody>
           <template v-for="record in sortedRecords" :key="record.id">
             <!-- Main Data Row -->
-            <tr class="data-row" :data-id="record.id" :data-status="chequeStatusTag(record.cheque_status)">
+            <tr class="data-row" :data-id="record.id" :data-status="rowStatusTag(record)">
               <td class="expand-cell">
                 <button
                   type="button"
@@ -197,20 +197,37 @@
               </td>
               <td>
                 <UiBadge
-                  :text="record.cheque_status"
-                  :variant="record.cheque_status === 'Cleared' ? 'success' : 'warning'"
+                  :text="statusBadgeText(record)"
+                  :variant="statusBadgeVariant(record)"
                   size="sm"
                 />
               </td>
               <td v-if="canManageRecords">
                 <div class="action-buttons">
                   <ActionButton
+                    v-if="!isRecordCancelled(record)"
                     tag="router-link"
                     variant="primary"
                     :to="`/master-fund-monitoring/${record.id}/edit`"
                     title="Edit record"
                   >
                     <ui-icon name="edit" size="18" />
+                  </ActionButton>
+                  <ActionButton
+                    v-if="isRecordCancelled(record)"
+                    variant="success"
+                    title="Uncancel record"
+                    @click="uncancelRecord(record)"
+                  >
+                    <ui-icon name="undo-2" size="18" />
+                  </ActionButton>
+                  <ActionButton
+                    v-else
+                    variant="secondary"
+                    title="Cancel record"
+                    @click="cancelRecord(record)"
+                  >
+                    <ui-icon name="x-circle" size="18" />
                   </ActionButton>
                   <ActionButton
                     variant="danger"
@@ -382,7 +399,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import UiPageHeader from '@/components/ui/UiPageHeader.vue'
 import UiSummaryCards from '@/components/ui/UiSummaryCards.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
@@ -401,9 +418,11 @@ import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import {
+  cancelMasterFundMonitoringRecord,
   bulkDeleteMasterFundMonitoringRecords,
   deleteMasterFundMonitoringRecord,
   fetchMasterFundMonitoringRecords,
+  uncancelMasterFundMonitoringRecord,
 } from '@/services/masterFundMonitoringService'
 
 const notificationsStore = useNotificationsStore()
@@ -438,6 +457,7 @@ const pageSize = 20
 const chequeStatusFilterOptions = [
   { value: 'Pending', label: 'Pending' },
   { value: 'Cleared', label: 'Cleared' },
+  { value: 'Cancelled', label: 'Cancelled' },
 ]
 const primaryTaxFields = [
   { key: 'goods_5_percent', label: 'Goods 5%' },
@@ -463,7 +483,11 @@ const filteredRecords = computed(() => {
   const q = query.value.toLowerCase().trim()
 
   return records.value.filter((record) => {
-    const statusMatches = !chequeStatusFilter.value || record.cheque_status === chequeStatusFilter.value
+    const isCancelled = Boolean(record.is_cancelled)
+    const selectedStatus = chequeStatusFilter.value
+    const statusMatches = selectedStatus === 'Cancelled'
+      ? isCancelled
+      : (!selectedStatus ? !isCancelled : (!isCancelled && record.cheque_status === selectedStatus))
 
     if (!statusMatches) return false
     if (!q) return true
@@ -555,7 +579,12 @@ function pushSuccessToast(message) {
 async function loadRecords(targetPage = 1) {
   loading.value = true
   try {
-    const response = await fetchMasterFundMonitoringRecords({ page: targetPage })
+    const includeCancelled = chequeStatusFilter.value === 'Cancelled'
+    const response = await fetchMasterFundMonitoringRecords({
+      page: targetPage,
+      includeCancelled,
+      chequeStatus: chequeStatusFilter.value,
+    })
     records.value = response.records || []
     page.value = response.pagination?.page || targetPage
     totalPages.value = response.pagination?.pages || 1
@@ -612,6 +641,23 @@ function handleClear() {
 
 function refreshCurrentPage() {
   loadRecords(page.value)
+}
+
+function isRecordCancelled(record) {
+  return Boolean(record?.is_cancelled)
+}
+
+function statusBadgeText(record) {
+  if (isRecordCancelled(record)) {
+    return 'Cancelled'
+  }
+  return record?.cheque_status || 'Pending'
+}
+
+function statusBadgeVariant(record) {
+  if (isRecordCancelled(record)) return 'warning'
+  if (record?.cheque_status === 'Cleared') return 'success'
+  return 'info'
 }
 
 async function exportRecords() {
@@ -766,6 +812,26 @@ async function bulkDelete() {
   }
 }
 
+async function cancelRecord(record) {
+  try {
+    await cancelMasterFundMonitoringRecord(record.id)
+    await loadRecords(page.value)
+    pushSuccessToast('Record cancelled successfully.')
+  } catch (error) {
+    pushErrorToast(error.message || 'Failed to cancel record.')
+  }
+}
+
+async function uncancelRecord(record) {
+  try {
+    await uncancelMasterFundMonitoringRecord(record.id)
+    await loadRecords(page.value)
+    pushSuccessToast('Record uncancelled successfully.')
+  } catch (error) {
+    pushErrorToast(error.message || 'Failed to uncancel record.')
+  }
+}
+
 // Display utilities
 function displayValue(value) {
   if (value === null || value === undefined || value === '') return '—'
@@ -798,6 +864,11 @@ function chequeStatusTag(status) {
   if (status === 'Cleared') return 'cleared'
   if (status === 'Pending') return 'pending'
   return 'unknown'
+}
+
+function rowStatusTag(record) {
+  if (isRecordCancelled(record)) return 'cancelled'
+  return chequeStatusTag(record.cheque_status)
 }
 
 function getSortValue(record, column) {
@@ -855,6 +926,14 @@ onMounted(() => {
     loadRecords(page.value)
   })
 })
+
+watch(
+  () => chequeStatusFilter.value,
+  () => {
+    page.value = 1
+    loadRecords(1)
+  },
+)
 
 onBeforeUnmount(() => {
   if (unsubscribeArchiveUpdates) {

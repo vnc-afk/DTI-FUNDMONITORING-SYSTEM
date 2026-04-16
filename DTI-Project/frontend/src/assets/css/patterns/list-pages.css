@@ -470,6 +470,18 @@
   white-space: nowrap;
 }
 
+.master-fund-monitoring-page .data-row[data-status='cancelled'] td {
+  background: color-mix(in srgb, var(--brand-gold-200) 34%, var(--surface-base));
+}
+
+.master-fund-monitoring-page .data-row[data-status='cancelled']:hover td {
+  background: color-mix(in srgb, var(--brand-gold-300) 40%, var(--surface-base));
+}
+
+.master-fund-monitoring-page .data-row[data-status='cancelled'] td:first-child {
+  border-left: 4px solid var(--brand-gold-500);
+}
+
 /* ── Tax Table Page (Legend + Multi-row Header) ─────────────────────────── */
 
 .tax-table-page .legend-container {
