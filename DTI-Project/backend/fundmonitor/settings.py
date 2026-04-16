@@ -12,8 +12,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import importlib.util
 import os
+import dj_database_url
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,16 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ibik)x33zg)svk(3alylixrw2eu(f!x^%btq5j3x%32wz(j$i4"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "0.0.0.0",
-    "192.168.0.137",
+    ".vercel.app",
+    ".onrender.com",
 ]
 
 
@@ -97,12 +101,14 @@ WSGI_APPLICATION = "fundmonitor.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+    )
 }
+
 
 
 # Password validation
@@ -170,21 +176,14 @@ SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing session cook
 SESSION_COOKIE_SAMESITE = "Lax"  # CSRF protection
 
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://192.168.0.137:5173",
-]
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://192.168.0.137:5173",
+    os.getenv("FRONTEND_URL", "http://localhost:5173"),
 ]
 
-if DEBUG:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+):\d+$",
-    ]
+CSRF_TRUSTED_ORIGINS = [
+    os.getenv("FRONTEND_URL", "http://localhost:5173"),
+]
 
 # Django REST Framework defaults for API-first endpoints.
 REST_FRAMEWORK = {
@@ -216,23 +215,4 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
-USE_IN_MEMORY_CHANNEL_LAYER = os.environ.get("USE_IN_MEMORY_CHANNEL_LAYER", "0") == "1"
-
-if USE_IN_MEMORY_CHANNEL_LAYER or (
-    DEBUG and importlib.util.find_spec("channels_redis") is None
-):
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        }
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [REDIS_URL],
-            },
-        }
-    }
+USE_IN_MEMORY_CHANNEL_LAYER = True
