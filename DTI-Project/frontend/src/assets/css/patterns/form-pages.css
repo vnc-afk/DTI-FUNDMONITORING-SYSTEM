@@ -44,7 +44,7 @@
 }
 
 .status-card.active {
-  background: var(--brand-navy-50);
+  background: var(--brand-navy-600);
   border-color: var(--brand-navy-600);
 }
 
@@ -571,7 +571,7 @@
 
 .transaction-radio:checked + .transaction-label {
   border-color: var(--brand-navy-600);
-  background: var(--brand-navy-50);
+  background: var(--brand-navy-200);
   color: var(--brand-navy-600);
   font-weight: var(--weight-semibold);
   box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
@@ -771,7 +771,7 @@
 }
 
 .override-switch input:checked + .switch-slider {
-  background: var(--status-success-bg);
+  background: var(--status-success-text);
 }
 
 .switch-slider::after {

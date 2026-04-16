@@ -38,7 +38,7 @@
                 @click="confirm"
               >
                 <ui-icon v-if="isLoading" name="loader" size="16" class="spinner-icon" />
-                {{ isLoading ? 'Deleting...' : confirmLabel }}
+                {{ isLoading ? loadingLabel : confirmLabel }}
               </button>
             </div>
           </div>
@@ -57,6 +57,7 @@ defineProps({
   message: { type: String, required: true },
   details: { type: String, default: '' },
   confirmLabel: { type: String, default: 'Delete' },
+  loadingLabel: { type: String, default: 'Deleting...' },
   cancelLabel: { type: String, default: 'Cancel' },
   isLoading: { type: Boolean, default: false },
 })

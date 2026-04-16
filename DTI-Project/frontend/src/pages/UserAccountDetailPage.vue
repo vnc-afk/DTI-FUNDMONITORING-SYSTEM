@@ -24,6 +24,19 @@
         </div>
       </div>
 
+      <DeleteConfirmModal
+        ref="confirmModal"
+        :title="confirmModalTitle"
+        :message="confirmModalMessage"
+        :details="confirmModalDetails"
+        :confirm-label="confirmModalConfirmLabel"
+        :loading-label="confirmModalLoadingLabel"
+        :is-loading="actionLoading"
+        cancel-label="Cancel"
+        @confirm="confirmPendingAction"
+        @close="resetConfirmModal"
+      />
+
       <!-- Main Content -->
       <div class="detail-content">
         <!-- Header Card with User Info -->
@@ -132,7 +145,7 @@
               <UiButton
                 variant="secondary"
                 :disabled="actionLoading"
-                @click="resetPassword"
+                @click="openResetPasswordModal"
               >
                 <UiIcon name="key" size="16" />
                 Reset Password
@@ -141,7 +154,7 @@
               <UiButton
                 variant="danger"
                 :disabled="actionLoading"
-                @click="deleteAccount"
+                @click="openDeleteAccountModal"
               >
                 <UiIcon name="trash-2" size="16" />
                 Delete Account
@@ -168,6 +181,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 import UiPageHeader from '@/components/ui/UiPageHeader.vue'
+import DeleteConfirmModal from '@/components/ui/DeleteConfirmModal.vue'
 import {
   deleteUserAccount,
   fetchCurrentUserProfile,
@@ -196,6 +210,13 @@ const currentUserId = ref(null)
 const actionLoading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const confirmModal = ref(null)
+const pendingAction = ref('')
+const confirmModalTitle = ref('Confirm Action')
+const confirmModalMessage = ref('')
+const confirmModalDetails = ref('')
+const confirmModalConfirmLabel = ref('Confirm')
+const confirmModalLoadingLabel = ref('Processing...')
 
 const displayName = computed(() => {
   const fullName = [viewedUser.value.first_name, viewedUser.value.last_name].filter(Boolean).join(' ').trim()
@@ -345,12 +366,51 @@ async function toggleStatus() {
   }
 }
 
-async function resetPassword() {
-  const confirmed = window.confirm('Reset this user account password?')
-  if (!confirmed) {
+function openResetPasswordModal() {
+  pendingAction.value = 'resetPassword'
+  confirmModalTitle.value = 'Reset Password'
+  confirmModalMessage.value = 'Reset this user account password?'
+  confirmModalDetails.value = viewedUser.value.username || ''
+  confirmModalConfirmLabel.value = 'Reset Password'
+  confirmModalLoadingLabel.value = 'Resetting...'
+  if (confirmModal.value) {
+    confirmModal.value.open()
+  }
+}
+
+function openDeleteAccountModal() {
+  pendingAction.value = 'deleteAccount'
+  confirmModalTitle.value = 'Delete Account'
+  confirmModalMessage.value = `Delete account ${viewedUser.value.username || ''}?`
+  confirmModalDetails.value = 'This action cannot be undone.'
+  confirmModalConfirmLabel.value = 'Delete Account'
+  confirmModalLoadingLabel.value = 'Deleting...'
+  if (confirmModal.value) {
+    confirmModal.value.open()
+  }
+}
+
+function resetConfirmModal() {
+  pendingAction.value = ''
+  confirmModalTitle.value = 'Confirm Action'
+  confirmModalMessage.value = ''
+  confirmModalDetails.value = ''
+  confirmModalConfirmLabel.value = 'Confirm'
+  confirmModalLoadingLabel.value = 'Processing...'
+}
+
+function confirmPendingAction() {
+  if (pendingAction.value === 'resetPassword') {
+    resetPassword()
     return
   }
 
+  if (pendingAction.value === 'deleteAccount') {
+    deleteAccount()
+  }
+}
+
+async function resetPassword() {
   actionLoading.value = true
   errorMessage.value = ''
   successMessage.value = ''
@@ -358,6 +418,9 @@ async function resetPassword() {
   try {
     const data = await resetUserAccountPassword(viewedUser.value.id)
     successMessage.value = data?.message || 'Password reset successfully.'
+    if (confirmModal.value) {
+      confirmModal.value.close()
+    }
   } catch (error) {
     errorMessage.value = error.message || 'Failed to reset password.'
   } finally {
@@ -366,11 +429,6 @@ async function resetPassword() {
 }
 
 async function deleteAccount() {
-  const confirmed = window.confirm(`Delete account ${viewedUser.value.username || ''}?`)
-  if (!confirmed) {
-    return
-  }
-
   actionLoading.value = true
   errorMessage.value = ''
 
