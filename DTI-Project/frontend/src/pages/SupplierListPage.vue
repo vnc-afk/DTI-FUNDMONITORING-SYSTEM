@@ -6,7 +6,7 @@
       description="Manage suppliers and vendor information across all procurement records"
       eyebrow="Procurement"
     >
-      <UiButton tag="router-link" to="/suppliers/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/suppliers/new" variant="primary">
         <ui-icon name="plus" size="16" />
          Add Supplier
       </UiButton>
@@ -57,7 +57,7 @@
       </UiButton>
 
       <UiButton
-        v-if="filteredSuppliers.length"
+        v-if="canManageRecords && filteredSuppliers.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -89,7 +89,7 @@
       description="Start by adding your first supplier or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/suppliers/new" variant="primary">Add Supplier</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/suppliers/new" variant="primary">Add Supplier</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -128,7 +128,7 @@
           />
         </template>
 
-        <template #cell-actions="{ row }">
+        <template v-if="canManageRecords" #cell-actions="{ row }">
           <div class="action-buttons">
             <ActionButton
               tag="router-link"
@@ -179,11 +179,13 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChips from '@/components/ui/FilterChips.vue'
 import ExcelJS from 'exceljs'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import { bulkDeleteSuppliers, deleteSupplier, fetchSuppliers } from '@/services/supplierService'
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const loading = ref(false)
 const query = ref('')
@@ -277,14 +279,19 @@ const summaryCards = computed(() => [
   },
 ])
 
-const tableColumns = computed(() => [
-  { id: 'supplier', label: 'Supplier Name', width: 'flex' },
-  { id: 'tin', label: 'TIN', width: '130px' },
-  { id: 'propprietor', label: 'Proprietor', width: '160px' },
-  { id: 'contact_number', label: 'Contact No.', width: '130px' },
-  { id: 'vat_status', label: 'VAT Status', width: '110px' },
-  { id: 'actions', label: 'Actions', width: '110px' },
-])
+const tableColumns = computed(() => {
+  const columns = [
+    { id: 'supplier', label: 'Supplier Name', width: 'flex' },
+    { id: 'tin', label: 'TIN', width: '130px' },
+    { id: 'propprietor', label: 'Proprietor', width: '160px' },
+    { id: 'contact_number', label: 'Contact No.', width: '130px' },
+    { id: 'vat_status', label: 'VAT Status', width: '110px' },
+  ]
+  if (canManageRecords) {
+    columns.push({ id: 'actions', label: 'Actions', width: '110px' })
+  }
+  return columns
+})
 
 const tableRows = computed(() =>
   filteredSuppliers.value.map((supplier) => ({

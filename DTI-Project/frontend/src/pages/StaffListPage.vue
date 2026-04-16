@@ -7,7 +7,7 @@
       eyebrow="Personnel"
     >
 
-      <UiButton tag="router-link" to="/staff/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/staff/new" variant="primary">
         <ui-icon name="plus" size="16" />
          Add Staff
       </UiButton>
@@ -58,7 +58,7 @@
       </UiButton>
 
       <UiButton
-        v-if="filteredStaff.length"
+        v-if="canManageRecords && filteredStaff.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -90,7 +90,7 @@
       description="Start by adding your first staff member or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/staff/new" variant="primary">Add Staff</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/staff/new" variant="primary">Add Staff</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -113,7 +113,7 @@
           <span :class="value === '—' ? 'text-muted' : 'cell-division'">{{ value }}</span>
         </template>
 
-        <template #cell-actions="{ row }">
+        <template v-if="canManageRecords" #cell-actions="{ row }">
           <div class="action-buttons">
             <ActionButton
               tag="router-link"
@@ -163,6 +163,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChips from '@/components/ui/FilterChips.vue'
 import ExcelJS from 'exceljs'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import {
   bulkDeleteStaffMembers,
@@ -173,6 +174,7 @@ import {
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const loading = ref(false)
 const query = ref('')
@@ -275,11 +277,16 @@ const normalizedDivisionPills = computed(() =>
     .filter((option) => option.value)
 )
 
-const tableColumns = computed(() => [
-  { id: 'full_name', label: 'Staff Name', width: 'flex' },
-  { id: 'division_name', label: 'Division', width: '160px' },
-  { id: 'actions', label: 'Actions', width: '110px' },
-])
+const tableColumns = computed(() => {
+  const columns = [
+    { id: 'full_name', label: 'Staff Name', width: 'flex' },
+    { id: 'division_name', label: 'Division', width: '160px' },
+  ]
+  if (canManageRecords) {
+    columns.push({ id: 'actions', label: 'Actions', width: '110px' })
+  }
+  return columns
+})
 
 const tableRows = computed(() =>
   filteredStaff.value.map((staff) => ({

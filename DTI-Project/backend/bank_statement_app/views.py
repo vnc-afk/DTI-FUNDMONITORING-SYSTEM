@@ -6,6 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from user_app.permissions import (
+    IsAuthenticatedReadOnlyOrStaff,
+    IsStaffOrSuperuser,
+)
 from user_app.utils import get_items_per_page
 
 from .forms import BankStatementForm
@@ -14,7 +18,7 @@ from .serializers import BankStatementSerializer
 
 
 class BankStatementListCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
     def get(self, request):
         query = (request.query_params.get("q") or "").strip()
@@ -121,7 +125,7 @@ class BankStatementListCreateAPIView(APIView):
 
 
 class BankStatementDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
     def get(self, request, pk):
         statement = get_object_or_404(BankStatement, pk=pk)
@@ -171,7 +175,7 @@ class BankStatementDetailAPIView(APIView):
 
 
 class BankStatementStatusUpdateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsStaffOrSuperuser]
 
     def post(self, request, pk):
         statement = get_object_or_404(BankStatement, pk=pk)
@@ -188,7 +192,7 @@ class BankStatementStatusUpdateAPIView(APIView):
 
 
 class BankStatementBulkDeleteAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsStaffOrSuperuser]
 
     def post(self, request):
         ids = request.data.get("ids") or []

@@ -6,7 +6,7 @@
       description="Track all fund monitoring records and transactions"
       eyebrow="Financial Tracking"
     >
-      <UiButton tag="router-link" to="/master-fund-monitoring/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/master-fund-monitoring/new" variant="primary">
         <ui-icon name="plus" size="16" />
         Add Record
       </UiButton>
@@ -57,7 +57,7 @@
       </UiButton>
 
       <UiButton
-        v-if="filteredRecords.length"
+        v-if="canManageRecords && filteredRecords.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -89,7 +89,7 @@
       description="Start by adding your first record or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/master-fund-monitoring/new" variant="primary">Add Record</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/master-fund-monitoring/new" variant="primary">Add Record</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -150,7 +150,7 @@
                 <span class="sort-indicator">{{ sortIndicator('cheque_status') }}</span>
               </button>
             </th>
-            <th width="110px">Actions</th>
+            <th v-if="canManageRecords" width="110px">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -202,7 +202,7 @@
                   size="sm"
                 />
               </td>
-              <td>
+              <td v-if="canManageRecords">
                 <div class="action-buttons">
                   <ActionButton
                     tag="router-link"
@@ -225,7 +225,7 @@
 
             <!-- Detail Row (Expandable Section) -->
             <tr v-if="expandedRows.has(record.id)" class="detail-row" :data-id="record.id">
-              <td :colspan="9">
+              <td :colspan="canManageRecords ? 9 : 8">
                 <div class="detail-inner">
                   <div class="detail-content">
                     <!-- Transaction Details Section -->
@@ -397,6 +397,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChips from '@/components/ui/FilterChips.vue'
 import ExcelJS from 'exceljs'
 import { subscribeToArchiveUpdates } from '@/utils/archiveRefresh'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import {
@@ -407,6 +408,7 @@ import {
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 // Core state
 const loading = ref(false)

@@ -39,7 +39,7 @@
       </UiButton>
 
       <UiButton
-        v-if="!allCategoriesAllocated"
+        v-if="canManageRecords && !allCategoriesAllocated"
         tag="router-link"
         :to="`/fund-sources/${fundId}/breakdowns/new`"
         variant="primary"
@@ -49,7 +49,7 @@
         Add Breakdown
       </UiButton>
 
-      <span v-else class="all-allocated-badge">
+      <span v-else-if="canManageRecords" class="all-allocated-badge">
         <ui-icon name="check" size="14" />
         All Categories Allocated
       </span>
@@ -81,7 +81,7 @@
       <p>Add budget breakdowns to allocate this fund source across expense categories.</p>
       <div class="empty-actions">
         <UiButton
-          v-if="!allCategoriesAllocated"
+          v-if="canManageRecords && !allCategoriesAllocated"
           tag="router-link"
           :to="`/fund-sources/${fundId}/breakdowns/new`"
           variant="primary"
@@ -120,7 +120,7 @@
           </div>
         </template>
 
-        <template #cell-actions="{ row }">
+        <template v-if="canManageRecords" #cell-actions="{ row }">
           <div class="action-buttons">
             <UiButton
               tag="router-link"
@@ -183,6 +183,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 import DeleteConfirmModal from '@/components/ui/DeleteConfirmModal.vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import {
   deleteFundSourceBreakdown,
   fetchBreakdownCategories,
@@ -193,6 +194,7 @@ import {
 const route = useRoute()
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const fundId = computed(() => Number(route.params.id))
 
@@ -296,12 +298,17 @@ const breakdownCountText = computed(
   () => `${breakdownRows.value.length} breakdown${breakdownRows.value.length === 1 ? '' : 's'}`
 )
 
-const tableColumns = computed(() => [
-  { id: 'category', label: 'Category', width: 'flex' },
-  { id: 'budget_amount', label: 'Budget Amount', width: '160px', align: 'right' },
-  { id: 'percentage', label: 'Percentage', width: '150px', align: 'right' },
-  { id: 'actions', label: 'Actions', width: '110px' },
-])
+const tableColumns = computed(() => {
+  const columns = [
+    { id: 'category', label: 'Category', width: 'flex' },
+    { id: 'budget_amount', label: 'Budget Amount', width: '160px', align: 'right' },
+    { id: 'percentage', label: 'Percentage', width: '150px', align: 'right' },
+  ]
+  if (canManageRecords) {
+    columns.push({ id: 'actions', label: 'Actions', width: '110px' })
+  }
+  return columns
+})
 
 const tableRows = computed(() =>
   breakdownRows.value.map((item) => ({

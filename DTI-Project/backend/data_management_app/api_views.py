@@ -1,4 +1,6 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
+
+from user_app.permissions import IsAuthenticatedReadOnlyOrStaff
 
 from .models import (
     BreakdownCategory,
@@ -33,7 +35,7 @@ from .serializers import (
 class DivisionViewSet(viewsets.ModelViewSet):
     queryset = Division.objects.all().order_by("name")
     serializer_class = DivisionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class StaffViewSet(viewsets.ModelViewSet):
@@ -43,25 +45,25 @@ class StaffViewSet(viewsets.ModelViewSet):
         .order_by("last_name", "first_name")
     )
     serializer_class = StaffSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all().order_by("supplier")
     serializer_class = SupplierSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class FundSourceViewSet(viewsets.ModelViewSet):
     queryset = FundSource.objects.all().order_by("name")
     serializer_class = FundSourceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class BreakdownCategoryViewSet(viewsets.ModelViewSet):
     queryset = BreakdownCategory.objects.all().order_by("order", "code")
     serializer_class = BreakdownCategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class FundSourceBreakdownViewSet(viewsets.ModelViewSet):
@@ -71,25 +73,25 @@ class FundSourceBreakdownViewSet(viewsets.ModelViewSet):
         .order_by("fund_source__name", "category__order", "category__code")
     )
     serializer_class = FundSourceBreakdownSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class ExpenseObjectViewSet(viewsets.ModelViewSet):
     queryset = ExpenseObject.objects.all().order_by("code")
     serializer_class = ExpenseObjectSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class ExpenseCategoryViewSet(viewsets.ModelViewSet):
     queryset = ExpenseCategory.objects.all().order_by("name")
     serializer_class = ExpenseCategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
     queryset = District.objects.all().order_by("order", "name")
     serializer_class = DistrictSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class NegosyoCenterViewSet(viewsets.ModelViewSet):
@@ -99,13 +101,13 @@ class NegosyoCenterViewSet(viewsets.ModelViewSet):
         .order_by("district__order", "district__name", "name")
     )
     serializer_class = NegosyoCenterSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class PurchaseTypeViewSet(viewsets.ModelViewSet):
     queryset = PurchaseType.objects.all().order_by("name")
     serializer_class = PurchaseTypeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 class TaxTableViewSet(viewsets.ModelViewSet):
@@ -115,7 +117,7 @@ class TaxTableViewSet(viewsets.ModelViewSet):
         .order_by("purchase_type__name")
     )
     serializer_class = TaxTableSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
 
 
 __all__ = [

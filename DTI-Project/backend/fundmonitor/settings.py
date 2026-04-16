@@ -198,14 +198,14 @@ CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOWED_ORIGINS = get_list_env(
     "CORS_ALLOWED_ORIGINS",
     [
-        "https://dti-fund-monitoring.vercel.app",
+        "https://dti-apo-fund-monitor.vercel.app",
     ],
 )
 
 CSRF_TRUSTED_ORIGINS = get_list_env(
     "CSRF_TRUSTED_ORIGINS",
     [
-        "https://dti-fund-monitoring.vercel.app",
+        "https://dti-apo-fund-monitor.vercel.app",
     ],
 )
 

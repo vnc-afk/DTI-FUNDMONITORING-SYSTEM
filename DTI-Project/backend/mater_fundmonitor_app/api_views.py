@@ -1,4 +1,6 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
+
+from user_app.permissions import IsAuthenticatedReadOnlyOrStaff
 
 from .models import MasterFundMonitoring
 from .serializers import MasterFundMonitoringSerializer
@@ -6,7 +8,7 @@ from .serializers import MasterFundMonitoringSerializer
 
 class MasterFundMonitoringViewSet(viewsets.ModelViewSet):
     serializer_class = MasterFundMonitoringSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedReadOnlyOrStaff]
     queryset = (
         MasterFundMonitoring.objects.select_related(
             "division",

@@ -6,7 +6,7 @@
       description="Manage and classify expense categories used across transactions"
       eyebrow="Financial Records"
     >
-      <UiButton tag="router-link" to="/expense-categories/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/expense-categories/new" variant="primary">
         <ui-icon name="plus" size="16" />
         Add Expense Category
       </UiButton>
@@ -57,7 +57,7 @@
       </UiButton>
 
       <UiButton
-        v-if="filteredCategories.length"
+        v-if="canManageRecords && filteredCategories.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -89,7 +89,7 @@
       description="Start by adding your first expense category or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/expense-categories/new" variant="primary">Add Category</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/expense-categories/new" variant="primary">Add Category</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -120,7 +120,7 @@
           />
         </template>
 
-        <template #cell-actions="{ row }">
+        <template v-if="canManageRecords" #cell-actions="{ row }">
           <div class="action-buttons">
             <ActionButton
               tag="router-link"
@@ -171,6 +171,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChips from '@/components/ui/FilterChips.vue'
 import ExcelJS from 'exceljs'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import {
   bulkDeleteExpenseCategories,
@@ -180,6 +181,7 @@ import {
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const loading = ref(false)
 const query = ref('')
@@ -268,12 +270,17 @@ const summaryCards = computed(() => [
   },
 ])
 
-const tableColumns = computed(() => [
-  { id: 'name', label: 'Name', width: '200px' },
-  { id: 'description', label: 'Description', width: 'flex' },
-  { id: 'status', label: 'Status', width: '100px' },
-  { id: 'actions', label: 'Actions', width: '110px' },
-])
+const tableColumns = computed(() => {
+  const columns = [
+    { id: 'name', label: 'Name', width: '200px' },
+    { id: 'description', label: 'Description', width: 'flex' },
+    { id: 'status', label: 'Status', width: '100px' },
+  ]
+  if (canManageRecords) {
+    columns.push({ id: 'actions', label: 'Actions', width: '110px' })
+  }
+  return columns
+})
 
 const tableRows = computed(() =>
   filteredCategories.value.map((category) => ({

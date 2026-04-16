@@ -321,6 +321,52 @@ const router = createRouter({
   },
 })
 
+const SUPERUSER_ONLY_ROUTE_NAMES = new Set([
+  'user-accounts',
+  'user-accounts-detail',
+  'user-accounts-new',
+  'user-accounts-edit',
+  'activity-logs',
+  'activity-summary',
+  'model-activity-logs',
+])
+
+const STAFF_OR_SUPERUSER_ROUTE_NAMES = new Set([
+  'import-data',
+  'import-result',
+])
+
+function getCurrentUserFromStorage() {
+  try {
+    return JSON.parse(localStorage.getItem('current_user') || '{}')
+  } catch {
+    return {}
+  }
+}
+
+function isStaffOrSuperuser(user = {}) {
+  return Boolean(user?.is_staff || user?.is_superuser)
+}
+
+function isWriteRouteName(routeName = '') {
+  const name = String(routeName || '')
+  return name.endsWith('-new') || name.endsWith('-edit')
+}
+
+function canAccessUserActivityLogs(routeTo, user = {}) {
+  if (routeTo.name !== 'user-activity-logs') {
+    return true
+  }
+
+  if (isStaffOrSuperuser(user)) {
+    return true
+  }
+
+  const currentUserId = Number(user?.id || 0)
+  const targetUserId = Number(routeTo.params?.userId || 0)
+  return currentUserId > 0 && targetUserId > 0 && currentUserId === targetUserId
+}
+
 router.beforeEach((to) => {
   if (to.name === 'login') {
     return true
@@ -331,6 +377,24 @@ router.beforeEach((to) => {
       name: 'login',
       query: { redirect: to.fullPath },
     }
+  }
+
+  const currentUser = getCurrentUserFromStorage()
+  const routeName = String(to.name || '')
+
+  if (SUPERUSER_ONLY_ROUTE_NAMES.has(routeName) && !currentUser?.is_superuser) {
+    return { name: 'dashboard' }
+  }
+
+  if (
+    (STAFF_OR_SUPERUSER_ROUTE_NAMES.has(routeName) || isWriteRouteName(routeName))
+    && !isStaffOrSuperuser(currentUser)
+  ) {
+    return { name: 'dashboard' }
+  }
+
+  if (!canAccessUserActivityLogs(to, currentUser)) {
+    return { name: 'dashboard' }
   }
 
   return true

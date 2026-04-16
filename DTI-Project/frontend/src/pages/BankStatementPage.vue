@@ -6,7 +6,7 @@
       description="Track all debit, credit, and balance movements"
       eyebrow="Financial Records"
     >
-      <UiButton tag="router-link" to="/bank-statements/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/bank-statements/new" variant="primary">
         <ui-icon name="plus" size="16" />
         Add Statement
       </UiButton>
@@ -83,7 +83,7 @@
       description="Start by adding your first transaction or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/bank-statements/new" variant="primary">Add Statement</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/bank-statements/new" variant="primary">Add Statement</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -138,7 +138,7 @@
           />
         </template>
 
-        <template #cell-actions="{ row }">
+        <template v-if="canManageRecords" #cell-actions="{ row }">
           <div class="action-buttons">
             <ActionButton
               v-if="row.status !== 'Cleared'"
@@ -197,6 +197,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChips from '@/components/ui/FilterChips.vue'
 import ExcelJS from 'exceljs'
 import { subscribeToArchiveUpdates } from '@/utils/archiveRefresh'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import {
@@ -208,6 +209,7 @@ import {
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const loading = ref(false)
 const query = ref('')
@@ -302,16 +304,21 @@ const summaryCards = computed(() => [
 
 const pageSize = computed(() => 20)
 
-const tableColumns = computed(() => [
-  { id: 'date', label: 'Date', width: '120px' },
-  { id: 'description', label: 'Description', width: 'flex' },
-  { id: 'check_number', label: 'Check/Ref No.', width: '100px' },
-  { id: 'debit', label: 'Debit (Out)', width: '120px', align: 'right' },
-  { id: 'credit', label: 'Credit (In)', width: '120px', align: 'right' },
-  { id: 'balance', label: 'Balance', width: '130px', align: 'right' },
-  { id: 'status', label: 'Status', width: '100px' },
-  { id: 'actions', label: 'Actions', width: '110px' },
-])
+const tableColumns = computed(() => {
+  const columns = [
+    { id: 'date', label: 'Date', width: '120px' },
+    { id: 'description', label: 'Description', width: 'flex' },
+    { id: 'check_number', label: 'Check/Ref No.', width: '100px' },
+    { id: 'debit', label: 'Debit (Out)', width: '120px', align: 'right' },
+    { id: 'credit', label: 'Credit (In)', width: '120px', align: 'right' },
+    { id: 'balance', label: 'Balance', width: '130px', align: 'right' },
+    { id: 'status', label: 'Status', width: '100px' },
+  ]
+  if (canManageRecords) {
+    columns.push({ id: 'actions', label: 'Actions', width: '110px' })
+  }
+  return columns
+})
 
 const tableRows = computed(() => {
   return statements.value.map((statement) => ({

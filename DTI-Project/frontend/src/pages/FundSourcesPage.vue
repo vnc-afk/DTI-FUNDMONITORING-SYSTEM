@@ -6,7 +6,7 @@
       description="Manage and monitor available funding pools and annual budget allocations"
       eyebrow="Financial Records"
     >
-      <UiButton tag="router-link" to="/fund-sources/new" variant="primary">
+      <UiButton v-if="canManageRecords" tag="router-link" to="/fund-sources/new" variant="primary">
         <ui-icon name="plus" size="16" />
         Add Fund Source
       </UiButton>
@@ -76,7 +76,7 @@
       description="Start by adding your first fund source or clear your active filters to see matching records."
     >
       <template #actions>
-        <UiButton tag="router-link" to="/fund-sources/new" variant="primary">Add Fund Source</UiButton>
+        <UiButton v-if="canManageRecords" tag="router-link" to="/fund-sources/new" variant="primary">Add Fund Source</UiButton>
         <UiButton v-if="isSearching" variant="secondary" @click="handleClear">
           Clear Filters
         </UiButton>
@@ -112,6 +112,7 @@
               <ui-icon name="eye" size="18" />
             </ActionButton>
             <ActionButton
+              v-if="canManageRecords"
               tag="router-link"
               variant="primary"
               :to="`/fund-sources/${row.id}/edit`"
@@ -120,6 +121,7 @@
               <ui-icon name="edit" size="18" />
             </ActionButton>
             <ActionButton
+              v-if="canManageRecords"
               variant="danger"
               title="Delete fund source"
               @click="openDeleteModal(row)"
@@ -158,11 +160,13 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import DeleteConfirmModal from '@/components/ui/DeleteConfirmModal.vue'
 import ExcelJS from 'exceljs'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { canManageRecords as canManageRecordsAccess } from '@/utils/roleAccess'
 import { downloadWorkbook } from '@/utils/excelExport'
 import { bulkDeleteFundSources, deleteFundSource, fetchFundSources } from '@/services/fundSourceService'
 
 const notificationsStore = useNotificationsStore()
 const deleteModal = ref(null)
+const canManageRecords = canManageRecordsAccess()
 
 const loading = ref(false)
 const query = ref('')
