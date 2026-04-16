@@ -12,8 +12,9 @@ function resolveApiBaseUrl() {
 
   // `localhost` can resolve to IPv6 (::1) first on some systems.
   // Our dev servers are often bound to IPv4, so prefer 127.0.0.1.
-  const host = rawHost === 'localhost' || rawHost === '::1' ? '127.0.0.1' : (rawHost || '127.0.0.1')
-  return `${protocol}//${host}:8000`
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+return API_BASE_URL;
 }
 
 const API_BASE_URL = resolveApiBaseUrl()

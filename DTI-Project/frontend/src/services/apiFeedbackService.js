@@ -5,7 +5,7 @@ import { getAuthSessionState, refreshAuthSession } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.protocol + '//' + window.location.hostname + ':8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 const AUTH_ENDPOINTS = ['/api/user-app/auth/login/', '/api/user-app/auth/register/', '/api/user-app/auth/refresh/']
 

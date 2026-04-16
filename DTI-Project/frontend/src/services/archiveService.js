@@ -10,8 +10,8 @@ function resolveApiBaseUrl() {
 
   const protocol = window.location.protocol || 'http:'
   const rawHost = String(window.location.hostname || '').trim()
-  const host = rawHost === 'localhost' || rawHost === '::1' ? '127.0.0.1' : (rawHost || '127.0.0.1')
-  return `${protocol}//${host}:8000`
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  return API_BASE_URL;
 }
 
 const API_BASE_URL = resolveApiBaseUrl()

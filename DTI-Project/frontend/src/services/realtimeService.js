@@ -2,7 +2,7 @@ import { getAuthSessionState, refreshAuthSession } from '@/services/authService'
 
 const DEFAULT_RECONNECT_BASE_MS = 1000
 const DEFAULT_RECONNECT_MAX_MS = 15000
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.protocol + '//' + window.location.hostname + ':8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || API_BASE_URL
 
 class RealtimeService {
