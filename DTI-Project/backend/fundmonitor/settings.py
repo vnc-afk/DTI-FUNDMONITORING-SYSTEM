@@ -23,6 +23,19 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def get_bool_env(name, default=False):
+    raw_value = str(os.getenv(name, str(default))).strip().lower()
+    return raw_value in {"1", "true", "yes", "on"}
+
+
+def get_list_env(name, default_values=None):
+    default_values = default_values or []
+    raw_value = str(os.getenv(name, "")).strip()
+    if not raw_value:
+        return default_values
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -30,14 +43,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = get_bool_env("DEBUG", False)
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    ".vercel.app",
-    ".onrender.com",
-]
+ALLOWED_HOSTS = get_list_env(
+    "ALLOWED_HOSTS",
+    [
+        "localhost",
+        "127.0.0.1",
+        ".onrender.com",
+    ],
+)
 
 
 # Application definition
@@ -171,19 +186,28 @@ SESSION_COOKIE_AGE = 604800  # 1 week in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = (
     True  # Expire session when browser closes (unless remember_me checked)
 )
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing session cookie
 SESSION_COOKIE_SAMESITE = "Lax"  # CSRF protection
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = get_bool_env("SECURE_SSL_REDIRECT", not DEBUG)
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = False
 
-CORS_ALLOWED_ORIGINS = [
-    "https://dti-fund-monitoring.vercel.app",
-]
+CORS_ALLOWED_ORIGINS = get_list_env(
+    "CORS_ALLOWED_ORIGINS",
+    [
+        "https://dti-fund-monitoring.vercel.app",
+    ],
+)
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://dti-fund-monitoring.vercel.app",
-]
+CSRF_TRUSTED_ORIGINS = get_list_env(
+    "CSRF_TRUSTED_ORIGINS",
+    [
+        "https://dti-fund-monitoring.vercel.app",
+    ],
+)
 
 CORS_ALLOW_HEADERS = [
     "authorization",
@@ -201,7 +225,6 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "user_app.pagination.UserPreferencePageNumberPagination",
     "PAGE_SIZE": 25,
@@ -216,12 +239,28 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-USE_IN_MEMORY_CHANNEL_LAYER = True
+REDIS_URL = str(os.getenv("REDIS_URL", "")).strip()
+
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }

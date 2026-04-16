@@ -1,85 +1,58 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/services/http/clients'
 
-function getAccessToken() {
-  return localStorage.getItem('access_token') || localStorage.getItem('access') || ''
-}
+function extractErrorMessage(error) {
+  const fallback = 'Request failed.'
+  const payload = error?.response?.data || {}
 
-function buildHeaders(extraHeaders = {}) {
-  const token = getAccessToken()
-  const headers = {
-    'Content-Type': 'application/json',
-    ...extraHeaders,
+  if (typeof payload?.message === 'string' && payload.message.trim()) {
+    return payload.message
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
+  if (typeof payload?.detail === 'string' && payload.detail.trim()) {
+    return payload.detail
   }
 
-  return headers
-}
-
-async function handleResponse(response) {
-  if (!response.ok) {
-    let errorMessage = `Request failed (${response.status})`
-    try {
-      const errorData = await response.json()
-      if (errorData?.message) {
-        errorMessage = errorData.message
-      } else if (errorData?.detail) {
-        errorMessage = errorData.detail
-      }
-    } catch {
-      // Keep fallback error message.
-    }
-    throw new Error(errorMessage)
-  }
-
-  if (response.status === 204) {
-    return null
-  }
-
-  return response.json()
+  return fallback
 }
 
 export async function fetchBankStatements({ q = '', status = '', page = 1 } = {}) {
-  const params = new URLSearchParams()
-  if (q) params.append('q', q)
-  if (status) params.append('status', status)
-  params.append('page', String(page))
-
-  const response = await fetch(`${API_BASE_URL}/api/bank_statement/?${params.toString()}`, {
-    method: 'GET',
-    headers: buildHeaders(),
-  })
-
-  return handleResponse(response)
+  try {
+    const response = await apiClient.get('/api/bank_statement/', {
+      params: {
+        q: q || undefined,
+        status: status || undefined,
+        page,
+      },
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(extractErrorMessage(error))
+  }
 }
 
 export async function updateBankStatementStatus(id, payload) {
-  const response = await fetch(`${API_BASE_URL}/api/bank_statement/${id}/update_status/`, {
-    method: 'POST',
-    headers: buildHeaders(),
-    body: JSON.stringify(payload),
-  })
-
-  return handleResponse(response)
+  try {
+    const response = await apiClient.post(`/api/bank_statement/${id}/update_status/`, payload)
+    return response.data
+  } catch (error) {
+    throw new Error(extractErrorMessage(error))
+  }
 }
 
 export async function deleteBankStatement(id) {
-  const response = await fetch(`${API_BASE_URL}/api/bank_statement/${id}/`, {
-    method: 'DELETE',
-    headers: buildHeaders(),
-  })
-
-  return handleResponse(response)
+  try {
+    const response = await apiClient.delete(`/api/bank_statement/${id}/`)
+    return response.data || null
+  } catch (error) {
+    throw new Error(extractErrorMessage(error))
+  }
 }
 
 export async function bulkDeleteBankStatements(ids) {
-  const response = await fetch(`${API_BASE_URL}/api/bank_statement/bulk_delete/`, {
-    method: 'POST',
-    headers: buildHeaders(),
-    body: JSON.stringify({ ids }),
-  })
-
-  return handleResponse(response)
+  try {
+    const response = await apiClient.post('/api/bank_statement/bulk_delete/', { ids })
+    return response.data
+  } catch (error) {
+    throw new Error(extractErrorMessage(error))
+  }
 }

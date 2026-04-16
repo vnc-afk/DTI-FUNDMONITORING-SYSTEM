@@ -1,13 +1,12 @@
-import axios from 'axios'
-
 import router from '@/router'
-import { getAuthSessionState, refreshAuthSession } from '@/services/authService'
-import { useAuthStore } from '@/stores/authStore'
+import { apiClient, publicClient } from '@/services/http/clients'
+import { clearAuthSession } from '@/services/http/authSession'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 const AUTH_ENDPOINTS = ['/api/user-app/auth/login/', '/api/user-app/auth/register/', '/api/user-app/auth/refresh/']
+
+let initialized = false
 
 function normalizeMessage(value, fallback) {
   const text = String(value || '').trim()
@@ -32,118 +31,81 @@ function extractErrorMessage(error) {
   return 'Request failed. Please try again.'
 }
 
-export function setupGlobalApiFeedback(pinia) {
-  const notificationsStore = useNotificationsStore(pinia)
-  const authStore = useAuthStore(pinia)
-  const originalCreate = axios.create.bind(axios)
+function isAuthEndpoint(url = '') {
+  return AUTH_ENDPOINTS.some((endpoint) => String(url).includes(endpoint))
+}
 
-  function isAuthEndpoint(url = '') {
-    return AUTH_ENDPOINTS.some((endpoint) => String(url).includes(endpoint))
+function redirectToLogin() {
+  if (window.location.pathname !== '/login') {
+    router.replace('/login').catch(() => {})
   }
+}
 
-  function redirectToLogin() {
-    if (window.location.pathname !== '/login') {
-      router.replace('/login').catch(() => {})
+function attachFeedbackInterceptors(client, notificationsStore) {
+  client.interceptors.request.use(
+    (config) => {
+      notificationsStore.beginApiCall()
+      return config
+    },
+    (error) => {
+      notificationsStore.endApiCall()
+      return Promise.reject(error)
     }
-  }
+  )
 
-  function attachInterceptors(client) {
-    client.interceptors.request.use(
-      async (config) => {
-        const requestUrl = String(config?.url || '')
+  client.interceptors.response.use(
+    (response) => {
+      notificationsStore.endApiCall()
 
-        if (!isAuthEndpoint(requestUrl)) {
-          const session = getAuthSessionState()
+      const method = String(response?.config?.method || 'get').toLowerCase()
+      if (MUTATING_METHODS.has(method) && !isAuthEndpoint(response?.config?.url || '')) {
+        notificationsStore.pushToast({
+          title: 'Success',
+          message: normalizeMessage(response?.data?.message, 'Changes saved successfully.'),
+          variant: 'success',
+          autoClose: true,
+          duration: 2400,
+        })
+      }
 
-          if (session.accessToken && !session.accessExpired) {
-            config.headers = config.headers || {}
-            config.headers.Authorization = `Bearer ${session.accessToken}`
-          } else if (session.canRefresh) {
-            const refreshed = await refreshAuthSession()
-            const refreshedSession = getAuthSessionState()
+      return response
+    },
+    (error) => {
+      notificationsStore.endApiCall()
 
-            if (refreshed?.access && refreshedSession.accessToken && !refreshedSession.accessExpired) {
-              config.headers = config.headers || {}
-              config.headers.Authorization = `Bearer ${refreshedSession.accessToken}`
-            } else {
-              authStore.clearAuth()
-              redirectToLogin()
-              return Promise.reject(new Error('Authentication required.'))
-            }
-          } else {
-            authStore.clearAuth()
-            redirectToLogin()
-            return Promise.reject(new Error('Authentication required.'))
-          }
-        }
+      const status = Number(error?.response?.status || 0)
+      const requestUrl = String(error?.config?.url || '')
 
-        notificationsStore.beginApiCall()
-        return config
-      },
-      (error) => {
-        notificationsStore.endApiCall()
+      if (status === 401 && !isAuthEndpoint(requestUrl)) {
+        clearAuthSession()
+        redirectToLogin()
         return Promise.reject(error)
       }
-    )
 
-    client.interceptors.response.use(
-      (response) => {
-        notificationsStore.endApiCall()
-
-        const method = String(response?.config?.method || 'get').toLowerCase()
-        if (MUTATING_METHODS.has(method)) {
-          notificationsStore.pushToast({
-            title: 'Success',
-            message: normalizeMessage(response?.data?.message, 'Changes saved successfully.'),
-            variant: 'success',
-            autoClose: true,
-            duration: 2400,
-          })
-        }
-
-        return response
-      },
-      async (error) => {
-        notificationsStore.endApiCall()
-
-        const status = Number(error?.response?.status || 0)
-        const requestUrl = String(error?.config?.url || '')
-
-        if (status === 401 && !isAuthEndpoint(requestUrl)) {
-          const originalRequest = error?.config || {}
-
-          if (!originalRequest._retry) {
-            originalRequest._retry = true
-            const refreshed = await refreshAuthSession()
-
-            if (refreshed?.access) {
-              return client(originalRequest)
-            }
-          }
-
-          authStore.clearAuth()
-          redirectToLogin()
-          return Promise.reject(error)
-        }
-
-        if (status === 401 && isAuthEndpoint(requestUrl)) {
-          return Promise.reject(error)
-        }
-
+      if (status !== 401) {
         notificationsStore.pushToast({
           title: 'Request Error',
           message: extractErrorMessage(error),
           variant: 'danger',
           autoClose: false,
         })
-        return Promise.reject(error)
       }
-    )
 
-    return client
+      return Promise.reject(error)
+    }
+  )
+}
+
+export function setupGlobalApiFeedback(pinia) {
+  if (initialized) {
+    return
   }
 
-  axios.create = (...args) => attachInterceptors(originalCreate(...args))
+  initialized = true
+  const notificationsStore = useNotificationsStore(pinia)
+
+  attachFeedbackInterceptors(apiClient, notificationsStore)
+  attachFeedbackInterceptors(publicClient, notificationsStore)
 
   const nativeFetch = window.fetch.bind(window)
   window.fetch = async (...args) => {
@@ -151,11 +113,7 @@ export function setupGlobalApiFeedback(pinia) {
     try {
       const response = await nativeFetch(...args)
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          return response
-        }
-
+      if (!response.ok && response.status !== 401) {
         notificationsStore.pushToast({
           title: 'Request Error',
           message: `Request failed (${response.status}).`,

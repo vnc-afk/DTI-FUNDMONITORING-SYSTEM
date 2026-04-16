@@ -1,9 +1,8 @@
 import { getAuthSessionState, refreshAuthSession } from '@/services/authService'
+import { buildSocketUrl } from '@/services/http/socketUrl'
 
 const DEFAULT_RECONNECT_BASE_MS = 1000
 const DEFAULT_RECONNECT_MAX_MS = 15000
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || API_BASE_URL
 
 class RealtimeService {
   constructor() {
@@ -45,6 +44,11 @@ class RealtimeService {
     this.closedByUser = false
 
     const wsUrl = this.buildSocketUrl(effectiveToken)
+    if (!wsUrl) {
+      this.emitConnection({ status: 'disabled' })
+      return
+    }
+
     this.socket = new WebSocket(wsUrl)
 
     this.socket.onopen = () => {
@@ -109,16 +113,7 @@ class RealtimeService {
   }
 
   buildSocketUrl(token) {
-    const url = new URL(WS_BASE_URL)
-    const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
-
-    // On some Windows setups, `localhost` resolves to IPv6 (`::1`) first.
-    // If the backend WebSocket server is only bound to IPv4, this can cause
-    // the browser WebSocket connection to fail before it falls back.
-    const hostname = url.hostname === 'localhost' ? '127.0.0.1' : url.hostname
-    const host = url.port ? `${hostname}:${url.port}` : hostname
-
-    return `${protocol}//${host}/ws/realtime/?token=${encodeURIComponent(token)}`
+    return buildSocketUrl('/ws/realtime/', { token })
   }
 
   async resolveToken(token) {

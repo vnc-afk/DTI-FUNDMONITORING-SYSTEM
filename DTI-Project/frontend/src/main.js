@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import '@/services/authAxiosBootstrap'
 import App from './App.vue'
 import router from '@/router'
 import pinia from '@/stores'
