@@ -93,6 +93,8 @@ class ArchivableModel(models.Model):
 
 
 class MasterFundMonitoring(ArchivableModel):
+    AUTO_CANCEL_REASON = "Auto-marked as cancelled from particulars"
+
     division = models.ForeignKey(
         Division,
         on_delete=models.PROTECT,
@@ -334,6 +336,26 @@ class MasterFundMonitoring(ArchivableModel):
     def clean(self):
         self.particulars = sanitize_string_input(self.particulars)
         validate_no_script_content(self.particulars)
+        particulars_text = (self.particulars or "").lower()
+        has_cancelled_keyword = "cancelled" in particulars_text or "canceled" in particulars_text
+
+        if has_cancelled_keyword and not self.is_cancelled:
+            self.is_cancelled = True
+            if not self.cancelled_at:
+                self.cancelled_at = timezone.now()
+            if not self.cancel_reason:
+                self.cancel_reason = self.AUTO_CANCEL_REASON
+
+        if (
+            not has_cancelled_keyword
+            and self.is_cancelled
+            and self.cancelled_by is None
+            and self.cancel_reason == self.AUTO_CANCEL_REASON
+        ):
+            self.is_cancelled = False
+            self.cancelled_at = None
+            self.cancel_reason = ""
+
         if self.cleared_date and self.cleared_date < self.date:
             raise ValidationError(
                 {

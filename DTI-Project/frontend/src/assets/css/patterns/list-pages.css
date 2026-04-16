@@ -463,6 +463,58 @@
   table-layout: fixed;
 }
 
+.master-fund-monitoring-page .data-table thead th,
+.master-fund-monitoring-page .data-table tbody td {
+  padding: 0.4rem 0.45rem;
+  font-size: var(--text-xs);
+}
+
+.master-fund-monitoring-page .data-table .sort-header {
+  gap: 0.2rem;
+  font-size: var(--text-xs);
+}
+
+.master-fund-monitoring-page .data-table .amount-debit,
+.master-fund-monitoring-page .data-table .amount-credit,
+.master-fund-monitoring-page .data-table .font-mono,
+.master-fund-monitoring-page .data-table .date-label,
+.master-fund-monitoring-page .data-table .desc-text {
+  font-size: 0.72rem;
+}
+
+.master-fund-monitoring-page .data-table .date-day,
+.master-fund-monitoring-page .data-table .text-muted {
+  font-size: 0.66rem;
+}
+
+.master-fund-monitoring-page .data-table .ui-badge {
+  padding: 0.12rem 0.42rem;
+  min-height: 18px;
+  font-size: 0.65rem;
+}
+
+.master-fund-monitoring-page .action-buttons {
+  justify-content: flex-end;
+  gap: 0.18rem;
+  flex-wrap: nowrap;
+}
+
+.master-fund-monitoring-page .action-buttons .action-btn {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0.18rem;
+}
+
+.master-fund-monitoring-page .action-buttons .action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.master-fund-monitoring-page .expand-btn {
+  width: 20px;
+  height: 20px;
+}
+
 .master-fund-monitoring-page .expand-cell {
   display: flex;
   align-items: center;

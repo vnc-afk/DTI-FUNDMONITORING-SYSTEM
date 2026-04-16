@@ -102,7 +102,7 @@
         <table class="data-table">
         <thead>
           <tr>
-            <th width="150px" :class="{ sorted: sortBy === 'date' }">
+            <th width="124px" :class="{ sorted: sortBy === 'date' }">
               <button type="button" class="sort-header" @click="setSort('date')">
                 Date
                 <span class="sort-indicator">{{ sortIndicator('date') }}</span>
@@ -126,31 +126,31 @@
                 <span class="sort-indicator">{{ sortIndicator('particulars') }}</span>
               </button>
             </th>
-            <th width="120px" class="text-right" :class="{ sorted: sortBy === 'payments' }">
+            <th width="104px" class="text-right" :class="{ sorted: sortBy === 'payments' }">
               <button type="button" class="sort-header sort-header-right" @click="setSort('payments')">
                 Payment
                 <span class="sort-indicator">{{ sortIndicator('payments') }}</span>
               </button>
             </th>
-            <th width="120px" class="text-right" :class="{ sorted: sortBy === 'downloads' }">
+            <th width="104px" class="text-right" :class="{ sorted: sortBy === 'downloads' }">
               <button type="button" class="sort-header sort-header-right" @click="setSort('downloads')">
                 Downloads
                 <span class="sort-indicator">{{ sortIndicator('downloads') }}</span>
               </button>
             </th>
-            <th width="100px" :class="{ sorted: sortBy === 'cheque_number' }">
+            <th width="88px" :class="{ sorted: sortBy === 'cheque_number' }">
               <button type="button" class="sort-header" @click="setSort('cheque_number')">
                 Cheque No.
                 <span class="sort-indicator">{{ sortIndicator('cheque_number') }}</span>
               </button>
             </th>
-            <th width="100px" :class="{ sorted: sortBy === 'cheque_status' }">
+            <th width="98px" :class="{ sorted: sortBy === 'cheque_status' }">
               <button type="button" class="sort-header" @click="setSort('cheque_status')">
                 Cheque Status
                 <span class="sort-indicator">{{ sortIndicator('cheque_status') }}</span>
               </button>
             </th>
-            <th v-if="canManageRecords" width="110px">Actions</th>
+            <th v-if="canManageRecords" width="120px">Actions</th>
           </tr>
         </thead>
         <tbody>
