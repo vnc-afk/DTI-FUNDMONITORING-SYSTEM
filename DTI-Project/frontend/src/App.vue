@@ -30,6 +30,7 @@ import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 import UiToast from '@/components/ui/UiToast.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { getAuthSessionState, clearAuthSession } from '@/services/http/authSession'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useSharedStore } from '@/stores/sharedStore'
 import realtimeService from '@/services/realtimeService'
@@ -71,7 +72,20 @@ function connectRealtime(token) {
 }
 
 onMounted(() => {
+
   authStore.initializeFromStorage()
+
+  // Check for expired token and force logout if needed
+  const session = getAuthSessionState()
+  if (session.accessExpired) {
+    clearAuthSession()
+    authStore.clearAuth()
+    // Redirect to login if not already there
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
+    }
+    return
+  }
 
   unsubscribeRealtime = realtimeService.subscribe(handleRealtimeEvent)
   unsubscribeConnection = realtimeService.onConnectionChange(({ status }) => {
