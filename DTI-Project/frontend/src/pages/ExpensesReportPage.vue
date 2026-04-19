@@ -7,7 +7,12 @@
     </template>
 
     <!-- Section: Summary Overview -->
+    <div class="report-year-total" aria-live="polite">
+      <span class="report-year-total-label">Total Expenses ({{ currentYear }})</span>
+      <strong class="report-year-total-value">{{ yearTotalDisplay }}</strong>
+    </div>
     <div class="section-title">Summary Overview</div>
+
     <div class="summary-cards">
       <div
         v-for="(item, index) in summaryCards"
@@ -240,6 +245,9 @@ const enrichedRows = computed(() => {
 })
 
 const grandTotal = computed(() => enrichedRows.value.reduce((acc, item) => acc + item.total, 0))
+const yearTotalDisplay = computed(() => (grandTotal.value > 0
+  ? formatMoney(grandTotal.value)
+  : '₱ 0.00'))
 
 const tableRows = computed(() => {
   return enrichedRows.value.map((item) => ({

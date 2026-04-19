@@ -25,39 +25,68 @@ function toResults(payload) {
   return []
 }
 
+async function fetchAllPages(path, params = {}) {
+  const items = []
+  let nextUrl = path
+  let isFirstRequest = true
+
+  while (nextUrl) {
+    const response = await apiClient.get(nextUrl, {
+      params: isFirstRequest ? params : undefined,
+    })
+    const payload = response.data
+
+    if (Array.isArray(payload)) {
+      items.push(...payload)
+      break
+    }
+
+    if (Array.isArray(payload?.results)) {
+      items.push(...payload.results)
+      nextUrl = payload.next || null
+      isFirstRequest = false
+      continue
+    }
+
+    break
+  }
+
+  return items
+}
+
 export async function fetchMasterFundMonitoringFormOptions() {
   const [
-    divisionsResponse,
-    fundSourcesResponse,
-    mooeResponse,
-    ncResponse,
-    suppliersResponse,
-    purchaseTypesResponse,
-    accountTitlesResponse,
-    expenseClassificationsResponse,
-    staffResponse,
+    divisions,
+    fundSources,
+    mooeCategories,
+    negosyoCenters,
+    suppliers,
+    purchaseTypes,
+    accountTitles,
+    expenseClassifications,
+    staffList,
   ] = await Promise.all([
-    apiClient.get('/api/data-management-app/divisions/'),
-    apiClient.get('/api/data-management-app/fund-sources/'),
-    apiClient.get('/api/data-management-app/breakdown-categories/'),
-    apiClient.get('/api/data-management-app/negosyo-centers/'),
-    apiClient.get('/api/data-management-app/suppliers/'),
-    apiClient.get('/api/data-management-app/purchase-types/'),
-    apiClient.get('/api/data-management-app/expense-objects/'),
-    apiClient.get('/api/data-management-app/expense-categories/'),
-    apiClient.get('/api/data-management-app/staff/'),
+    fetchAllPages('/api/data-management-app/divisions/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/fund-sources/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/breakdown-categories/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/negosyo-centers/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/suppliers/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/purchase-types/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/expense-objects/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/expense-categories/', { page_size: 200 }),
+    fetchAllPages('/api/data-management-app/staff/', { page_size: 200 }),
   ])
 
   return {
-    divisions: toResults(divisionsResponse.data),
-    fundSources: toResults(fundSourcesResponse.data),
-    mooeCategories: toResults(mooeResponse.data),
-    negosyoCenters: toResults(ncResponse.data),
-    suppliers: toResults(suppliersResponse.data),
-    purchaseTypes: toResults(purchaseTypesResponse.data),
-    accountTitles: toResults(accountTitlesResponse.data),
-    expenseClassifications: toResults(expenseClassificationsResponse.data),
-    staffList: toResults(staffResponse.data),
+    divisions,
+    fundSources,
+    mooeCategories,
+    negosyoCenters,
+    suppliers,
+    purchaseTypes,
+    accountTitles,
+    expenseClassifications,
+    staffList,
   }
 }
 

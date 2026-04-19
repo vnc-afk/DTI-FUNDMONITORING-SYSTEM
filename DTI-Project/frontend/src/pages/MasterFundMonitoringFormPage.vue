@@ -163,13 +163,19 @@
             <div v-if="fundBudgetInfo" class="budget-card">
               <div class="budget-label"><ui-icon name="wallet" size="18" /> Fund Budget</div>
               <div class="budget-amount">₱{{ formatCurrencyRaw(fundBudgetInfo.available || 0) }}</div>
-              <div class="budget-text">Available</div>
+              <div class="budget-text">Current Available</div>
+              <div v-if="paymentPreviewDelta !== 0" class="budget-text">
+                Live Preview: ₱{{ formatCurrencyRaw(fundAvailablePreview || 0) }}
+              </div>
             </div>
 
             <div v-if="mooeBudgetInfo" class="budget-card">
               <div class="budget-label"><ui-icon name="coin" size="18" /> MOOE Budget</div>
               <div class="budget-amount">₱{{ formatCurrencyRaw(mooeBudgetInfo.available || 0) }}</div>
-              <div class="budget-text">Available</div>
+              <div class="budget-text">Current Available</div>
+              <div v-if="paymentPreviewDelta !== 0" class="budget-text">
+                Live Preview: ₱{{ formatCurrencyRaw(mooeAvailablePreview || 0) }}
+              </div>
             </div>
           </div>
         </div>
@@ -382,8 +388,6 @@ const options = reactive({
 const transactionTypes = [
   { value: 'Disbursement', label: 'Disbursement', icon: 'arrow-right' },
   { value: 'Downloads', label: 'Downloads', icon: 'download' },
-  { value: 'Refund', label: 'Refund', icon: 'undo' },
-  { value: 'Adjustment', label: 'Adjustment', icon: 'repeat-1' },
 ]
 
 const automaticTaxFields = [
@@ -452,7 +456,7 @@ const fundSourceOptions = computed(() =>
 )
 
 const mooeCategories = computed(() =>
-  options.mooeCategories.map((item) => ({ value: item.id, label: `${item.code} - ${item.name}` }))
+  options.mooeCategories.map((item) => ({ value: item.id, label: `${item.code}` }))
 )
 
 const negosyoCenterOptions = computed(() =>
@@ -478,6 +482,34 @@ const expenseClassificationOptions = computed(() =>
 const staffOptions = computed(() =>
   options.staffList.map((item) => ({ value: item.id, label: `${item.first_name} ${item.last_name}` }))
 )
+
+const paymentPreviewDelta = computed(() => {
+  const paymentAmount = Number(form.payments || 0)
+
+  if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+    return 0
+  }
+
+  if (form.transaction_type === 'Refund') {
+    return paymentAmount
+  }
+
+  if (['Disbursement', 'Downloads'].includes(form.transaction_type)) {
+    return -paymentAmount
+  }
+
+  return 0
+})
+
+const fundAvailablePreview = computed(() => {
+  const currentAvailable = Number(fundBudgetInfo.value?.available || 0)
+  return currentAvailable + paymentPreviewDelta.value
+})
+
+const mooeAvailablePreview = computed(() => {
+  const currentAvailable = Number(mooeBudgetInfo.value?.available || 0)
+  return currentAvailable + paymentPreviewDelta.value
+})
 
 function clearErrors() {
   generalError.value = ''
@@ -684,6 +716,15 @@ watch(
   () => {
     if (form.purchase_type) {
       onPurchaseTypeChange()
+    }
+  },
+)
+
+watch(
+  () => form.payments,
+  (value) => {
+    if (Number(value || 0) > 0) {
+      form.transaction_type = 'Disbursement'
     }
   },
 )

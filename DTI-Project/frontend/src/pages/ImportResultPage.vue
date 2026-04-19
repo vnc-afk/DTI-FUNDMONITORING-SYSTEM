@@ -430,9 +430,6 @@ onMounted(() => {
   gap: var(--space-4);
   flex-wrap: wrap;
   padding: var(--space-6);
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
 }
 
 .btn {

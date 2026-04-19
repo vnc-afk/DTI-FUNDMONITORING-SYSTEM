@@ -44,8 +44,16 @@
 }
 
 .status-card.active {
-  background: var(--brand-navy-600);
+  background: var(--brand-navy-500);
   border-color: var(--brand-navy-600);
+}
+
+.status-card.active .status-label {
+  color: var(--text-inverse);
+}
+
+.status-card.active .status-desc {
+  color: color-mix(in srgb, var(--text-inverse) 80%, transparent);
 }
 
 .status-indicator {

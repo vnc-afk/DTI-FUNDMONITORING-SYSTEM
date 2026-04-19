@@ -8,7 +8,7 @@
     <div class="sidebar-brand">
       <router-link to="/" class="sidebar-brand-link" :aria-label="brandLabel" @click="handleNavigate">
         <div class="sidebar-brand-logo">
-          <span>FM</span>
+          <img :src="dtiLogo" alt="DTI logo" class="sidebar-brand-logo-image" />
         </div>
         <div class="sidebar-brand-text">
           <div class="sidebar-brand-name">FundMonitor</div>
@@ -117,6 +117,7 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import { fetchSidebarData } from '@/services/sidebarService'
 import UiIcon from '@/components/ui/UiIcon.vue'
+import dtiLogo from '@/assets/images/DTI_Logo_2019.png'
 
 const props = defineProps({
   apiEndpoint: { type: String, default: '' },
