@@ -23,6 +23,8 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
 
     return {
       suppliers: data.results,
+      vatCount: Number(data.vat_count || 0),
+      nonVatCount: Number(data.non_vat_count || 0),
       pagination: {
         page: currentPage,
         pages,
@@ -36,6 +38,8 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
 
   return {
     suppliers: [],
+    vatCount: 0,
+    nonVatCount: 0,
     pagination: {
       page: requestedPage,
       pages: 1,
@@ -47,9 +51,14 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
   }
 }
 
-export async function fetchSuppliers({ page = 1 } = {}) {
+export async function fetchSuppliers({ page = 1, query = '', vatStatus = '', pageSize = '' } = {}) {
   const response = await apiClient.get('/api/data-management-app/suppliers/', {
-    params: { page },
+    params: {
+      page,
+      search: query || undefined,
+      vat_status: vatStatus || undefined,
+      page_size: pageSize || undefined,
+    },
   })
   return normalizePaginatedResponse(response.data, page)
 }

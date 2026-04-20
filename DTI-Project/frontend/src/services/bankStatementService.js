@@ -15,13 +15,14 @@ function extractErrorMessage(error) {
   return fallback
 }
 
-export async function fetchBankStatements({ q = '', status = '', page = 1 } = {}) {
+export async function fetchBankStatements({ q = '', status = '', page = 1, pageSize = '' } = {}) {
   try {
     const response = await apiClient.get('/api/bank_statement/', {
       params: {
         q: q || undefined,
         status: status || undefined,
         page,
+        page_size: pageSize || undefined,
       },
     })
     return response.data

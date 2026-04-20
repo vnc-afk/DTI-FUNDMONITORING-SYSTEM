@@ -159,7 +159,7 @@
                     </div>
 
                     <div v-if="txn.tin || txn.tax_type || txn.purchase_type" class="archive-detail-section">
-                      <div class="archive-detail-section-title">Tax & supplier</div>
+                      <div class="archive-detail-section-title">Tax & Tin</div>
                       <div v-if="txn.tin" class="archive-detail-item"><span class="archive-detail-label">TIN</span><span class="archive-detail-value">{{ txn.tin }}</span></div>
                       <div v-if="txn.tax_type" class="archive-detail-item"><span class="archive-detail-label">Tax type</span><span class="archive-detail-value">{{ txn.tax_type }}</span></div>
                       <div v-if="txn.purchase_type" class="archive-detail-item"><span class="archive-detail-label">Purchase type</span><span class="archive-detail-value">{{ txn.purchase_type }}</span></div>

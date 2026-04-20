@@ -94,7 +94,7 @@
     <div v-else class="table-container">
       <UiTable
         :columns="tableColumns"
-        :rows="tableRows"
+      :rows="tableRows"
       >
         <template #cell-date="{ value }">
           <div class="cell-date">
@@ -215,10 +215,10 @@ const loading = ref(false)
 const query = ref('')
 const statusFilter = ref('')
 const page = ref(1)
-const toolbarResetToken = ref(0)
 
 const statements = ref([])
 const statementCount = ref(0)
+const currentPageSize = ref(20)
 const totalDebits = ref(0)
 const totalCredits = ref(0)
 const statusFilterOptions = ref([
@@ -226,8 +226,6 @@ const statusFilterOptions = ref([
   { value: 'Cleared', label: 'Cleared' },
 ])
 
-const hasNext = ref(false)
-const hasPrevious = ref(false)
 const totalPages = ref(1)
 const confirmBusy = ref(false)
 const pendingDeleteId = ref(null)
@@ -235,13 +233,10 @@ const deleteModalTitle = ref('Delete Bank Statement')
 const deleteModalMessage = ref('')
 const deleteModalDetails = ref('')
 let unsubscribeArchiveUpdates = null
-
 let searchDebounceTimer = null
 let skipNextAutoReload = false
 
 const isSearching = computed(() => Boolean(query.value.trim() || statusFilter.value))
-const toolbarKey = computed(() => `bank-toolbar-${toolbarResetToken.value}`)
-const toolbarCount = computed(() => `${statementCount.value} transaction${statementCount.value === 1 ? '' : 's'}`)
 const normalizedStatusPills = computed(() => {
   return statusFilterOptions.value
     .map((option) => ({
@@ -302,7 +297,7 @@ const summaryCards = computed(() => [
   },
 ])
 
-const pageSize = computed(() => 20)
+const pageSize = computed(() => currentPageSize.value)
 
 const tableColumns = computed(() => {
   const columns = [
@@ -372,32 +367,10 @@ function formatDay(dateValue) {
   return new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(date)
 }
 
-function statementStatusTag(status) {
-  if (status === 'Cleared') return 'cleared'
-  if (status === 'On Process') return 'on process'
-  return 'failed'
-}
-
-function handleSearchChange(value) {
-  query.value = String(value || '').trim()
-  loadStatements(1)
-}
-
-function handleFilterChange(value) {
-  statusFilter.value = String(value || '').trim()
-  loadStatements(1)
-}
-
-function setStatusFilter(value) {
-  statusFilter.value = String(value || '').trim()
-  loadStatements(1)
-}
-
 function handleClear() {
   skipNextAutoReload = true
   query.value = ''
   statusFilter.value = ''
-  toolbarResetToken.value += 1
   loadStatements(1)
 }
 
@@ -435,27 +408,6 @@ async function exportStatements() {
     pushErrorToast(error.message || 'Failed to export bank statements.')
   }
 }
-
-watch(
-  [query, statusFilter],
-  () => {
-    if (skipNextAutoReload) {
-      skipNextAutoReload = false
-      return
-    }
-
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer)
-    }
-
-    searchDebounceTimer = setTimeout(() => {
-      loadStatements(1)
-    }, 250)
-  },
-  { flush: 'post' }
-)
-
-
 
 function balanceBarWidth(statement) {
   const maxBalance = Number(maxVisibleBalance.value || 0)
@@ -514,10 +466,12 @@ async function loadStatements(targetPage = 1) {
       q: query.value,
       status: statusFilter.value,
       page: targetPage,
+      pageSize: pageSize.value,
     })
 
     statements.value = response.statements || []
     statementCount.value = response.statement_count || 0
+    currentPageSize.value = response.pagination?.page_size || currentPageSize.value
     totalDebits.value = Number(response.total_debits || 0)
     totalCredits.value = Number(response.total_credits || 0)
 
@@ -527,10 +481,12 @@ async function loadStatements(targetPage = 1) {
 
     page.value = response.pagination?.page || targetPage
     totalPages.value = response.pagination?.pages || 1
-    hasNext.value = Boolean(response.pagination?.has_next)
-    hasPrevious.value = Boolean(response.pagination?.has_previous)
   } catch (error) {
     pushErrorToast(error.message || 'Failed to fetch bank statements.')
+    statements.value = []
+    statementCount.value = 0
+    totalDebits.value = 0
+    totalCredits.value = 0
   } finally {
     loading.value = false
   }
@@ -551,7 +507,11 @@ async function markAsCleared(statement) {
 
   try {
     await updateBankStatementStatus(statement.id, { status: 'Cleared' })
-    statement.status = 'Cleared'
+    statements.value = statements.value.map((item) =>
+      item.id === statement.id
+        ? { ...item, status: 'Cleared' }
+        : item
+    )
     pushSuccessToast('Transaction was marked as cleared.')
   } catch (error) {
     pushErrorToast(error.message || 'Failed to update statement status.')
@@ -585,6 +545,21 @@ onMounted(() => {
   unsubscribeArchiveUpdates = subscribeToArchiveUpdates(() => {
     loadStatements(page.value)
   })
+})
+
+watch([() => query.value, () => statusFilter.value], () => {
+  if (skipNextAutoReload) {
+    skipNextAutoReload = false
+    return
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+  }
+
+  searchDebounceTimer = setTimeout(() => {
+    loadStatements(1)
+  }, 250)
 })
 
 onBeforeUnmount(() => {

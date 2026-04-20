@@ -9,8 +9,8 @@ from user_app.utils import get_items_per_page
 class UserPreferencePageNumberPagination(PageNumberPagination):
     """Use each authenticated user's saved items-per-page preference."""
 
-    page_size = 25
-    max_page_size = 200
+    page_size = 10000
+    max_page_size = 10000
 
     def get_page_size(self, request):
         try:

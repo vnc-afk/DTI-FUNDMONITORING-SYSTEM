@@ -1,29 +1,12 @@
 from django.core.management.base import BaseCommand
-
 from data_management_app.models import ExpenseObject
 
 # Color palette for objects
 COLORS = [
-    "#3498db",
-    "#e74c3c",
-    "#2ecc71",
-    "#f39c12",
-    "#9b59b6",
-    "#1abc9c",
-    "#34495e",
-    "#d35400",
-    "#8e44ad",
-    "#c0392b",
-    "#27ae60",
-    "#2980b9",
-    "#16a085",
-    "#7f8c8d",
-    "#f1c40f",
-    "#e67e22",
-    "#ff6b6b",
-    "#4ecdc4",
-    "#45b7d1",
-    "#96ceb4",
+    "#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6",
+    "#1abc9c", "#34495e", "#d35400", "#8e44ad", "#c0392b",
+    "#27ae60", "#2980b9", "#16a085", "#7f8c8d", "#f1c40f",
+    "#e67e22", "#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4",
 ]
 
 EXPENSE_OBJECTS = [
@@ -46,7 +29,7 @@ EXPENSE_OBJECTS = [
     ("50213040-01", "R & M-Building"),
     ("50213050-02", "R & M-Office Equipment"),
     ("50213050-03", "R & M-ICT Equipment"),
-    ("5021307000", "R & M-Furniture and Fixtures"),  # fixed double space
+    ("5021307000", "R & M-Furniture and Fixtures"),
     ("50213080-02", "R & M-Machinery and Equipment"),
     ("50213080-03", "R & M-Transportation Equipment"),
     ("50213090-02", "R & M-Leased Assets Improvements-Building"),

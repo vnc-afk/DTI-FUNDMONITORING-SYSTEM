@@ -1,6 +1,5 @@
 <template>
   <div class="suppliers-page">
-    <!-- Page Header -->
     <UiPageHeader
       title="Suppliers"
       description="Manage suppliers and vendor information across all procurement records"
@@ -12,17 +11,17 @@
       </UiButton>
     </UiPageHeader>
 
-    <!-- Summary Cards -->
     <UiSummaryCards
       v-if="summaryCards.length"
       :cards="summaryCards"
     />
 
-    <!-- Toolbar & Filtering -->
     <div class="search-toolbar">
       <SearchInput
         v-model="query"
         placeholder="Search suppliers..."
+        @search="loadSuppliers(1)"
+        @clear="handleClear"
       />
 
       <FilterChips
@@ -49,7 +48,7 @@
 
       <UiButton
         variant="secondary"
-        :disabled="loading || !filteredSuppliers.length"
+        :disabled="loading || !suppliers.length"
         @click="exportSuppliers"
       >
         <ui-icon name="download" size="14" />
@@ -57,7 +56,7 @@
       </UiButton>
 
       <UiButton
-        v-if="canManageRecords && filteredSuppliers.length"
+        v-if="canManageRecords && suppliers.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -65,7 +64,6 @@
       </UiButton>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <DeleteConfirmModal
       ref="deleteModal"
       :title="deleteModalTitle"
@@ -78,12 +76,10 @@
       @close="resetDeleteModal"
     />
 
-    <!-- Loading State -->
     <LoadingState v-if="loading" message="Loading suppliers..." />
 
-    <!-- Empty State -->
     <EmptyState
-      v-else-if="!filteredSuppliers.length"
+      v-else-if="!suppliers.length"
       icon="building-2"
       title="No suppliers found"
       description="Start by adding your first supplier or clear your active filters to see matching records."
@@ -96,7 +92,6 @@
       </template>
     </EmptyState>
 
-    <!-- Data Table -->
     <div v-else class="table-container">
       <UiTable
         :columns="tableColumns"
@@ -150,9 +145,8 @@
       </UiTable>
     </div>
 
-    <!-- Pagination Footer -->
     <UiTableFooter
-      v-if="filteredSuppliers.length"
+      v-if="suppliers.length"
       :current-page="page"
       :page-size="pageSize"
       :total-items="supplierCount"
@@ -163,7 +157,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import UiPageHeader from '@/components/ui/UiPageHeader.vue'
 import UiSummaryCards from '@/components/ui/UiSummaryCards.vue'
 import UiTable from '@/components/ui/UiTable.vue'
@@ -191,12 +185,13 @@ const loading = ref(false)
 const query = ref('')
 const vatStatusFilter = ref('')
 const page = ref(1)
-const toolbarResetToken = ref(0)
 
 const suppliers = ref([])
 const totalPages = ref(1)
 const totalSupplierCount = ref(0)
 const currentPageSize = ref(20)
+const vatCount = ref(0)
+const nonVatCount = ref(0)
 const confirmBusy = ref(false)
 const pendingDeleteId = ref(null)
 const pendingDeleteIds = ref([])
@@ -205,6 +200,8 @@ const deleteModalMessage = ref('')
 const deleteModalDetails = ref('')
 const deleteConfirmLabel = ref('Delete Supplier')
 const isBulkDelete = ref(false)
+let searchDebounceTimer = null
+let skipNextAutoReload = false
 
 const vatFilterOptions = ref([
   { value: 'V', label: 'VAT Registered' },
@@ -212,7 +209,6 @@ const vatFilterOptions = ref([
 ])
 
 const pageSize = computed(() => currentPageSize.value)
-
 const isSearching = computed(() => Boolean(query.value.trim() || vatStatusFilter.value))
 
 const normalizedVatPills = computed(() =>
@@ -224,33 +220,7 @@ const normalizedVatPills = computed(() =>
     .filter((option) => option.value)
 )
 
-const filteredSuppliers = computed(() => {
-  const q = query.value.toLowerCase().trim()
-
-  return suppliers.value.filter((supplier) => {
-    const vatMatches =
-      !vatStatusFilter.value || (supplier.vat_status || '—') === vatStatusFilter.value
-    if (!vatMatches) return false
-    if (!q) return true
-
-    const haystack = [
-      supplier.supplier,
-      supplier.tin,
-      supplier.propprietor,
-      supplier.contact_number,
-      supplier.vat_status || '—',
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
-
-    return haystack.includes(q)
-  })
-})
-
 const supplierCount = computed(() => totalSupplierCount.value)
-const vatCount = computed(() => suppliers.value.filter((item) => item.vat_status === 'V').length)
-const nonVatCount = computed(() => suppliers.value.filter((item) => item.vat_status === 'NV').length)
 
 const summaryCards = computed(() => [
   {
@@ -294,7 +264,7 @@ const tableColumns = computed(() => {
 })
 
 const tableRows = computed(() =>
-  filteredSuppliers.value.map((supplier) => ({
+  suppliers.value.map((supplier) => ({
     id: supplier.id,
     supplier: supplier.supplier,
     tin: supplier.tin,
@@ -333,14 +303,11 @@ function vatBadgeVariant(value) {
   return 'error'
 }
 
-function setVatStatusFilter(value) {
-  vatStatusFilter.value = String(value || '').trim()
-}
-
 function handleClear() {
+  skipNextAutoReload = true
   query.value = ''
   vatStatusFilter.value = ''
-  toolbarResetToken.value += 1
+  loadSuppliers(1)
 }
 
 function refreshCurrentPage() {
@@ -348,7 +315,7 @@ function refreshCurrentPage() {
 }
 
 async function exportSuppliers() {
-  if (!filteredSuppliers.value.length) {
+  if (!suppliers.value.length) {
     pushErrorToast('No suppliers to export.')
     return
   }
@@ -358,7 +325,7 @@ async function exportSuppliers() {
     const worksheet = workbook.addWorksheet('Suppliers')
 
     worksheet.addRow(['Supplier Name', 'TIN', 'Proprietor', 'Contact Number', 'VAT Status'])
-    filteredSuppliers.value.forEach((supplier) => {
+    suppliers.value.forEach((supplier) => {
       worksheet.addRow([
         supplier.supplier || '',
         supplier.tin || '',
@@ -396,7 +363,7 @@ function resetDeleteModal() {
 }
 
 function openBulkDeleteModal() {
-  const ids = filteredSuppliers.value.map((item) => item.id)
+  const ids = suppliers.value.map((item) => item.id)
   if (!ids.length) return
 
   pendingDeleteIds.value = ids
@@ -464,14 +431,25 @@ async function loadSuppliers(targetPage = 1) {
   loading.value = true
 
   try {
-    const data = await fetchSuppliers({ page: targetPage })
+    const data = await fetchSuppliers({
+      page: targetPage,
+      query: query.value,
+      vatStatus: vatStatusFilter.value,
+      pageSize: pageSize.value,
+    })
     suppliers.value = data.suppliers || []
     page.value = data.pagination?.page || targetPage
     totalPages.value = data.pagination?.pages || 1
     totalSupplierCount.value = data.pagination?.count || 0
     currentPageSize.value = data.pagination?.page_size || 20
+    vatCount.value = Number(data.vatCount || 0)
+    nonVatCount.value = Number(data.nonVatCount || 0)
   } catch (error) {
     pushErrorToast(error.message || 'Failed to fetch suppliers.')
+    suppliers.value = []
+    totalSupplierCount.value = 0
+    vatCount.value = 0
+    nonVatCount.value = 0
   } finally {
     loading.value = false
   }
@@ -482,10 +460,29 @@ function changePage(nextPage) {
   loadSuppliers(nextPage)
 }
 
-
-
 onMounted(() => {
   loadSuppliers(1)
 })
-</script>
 
+watch([() => query.value, () => vatStatusFilter.value], () => {
+  if (skipNextAutoReload) {
+    skipNextAutoReload = false
+    return
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+  }
+
+  searchDebounceTimer = setTimeout(() => {
+    loadSuppliers(1)
+  }, 250)
+})
+
+onBeforeUnmount(() => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+})
+</script>

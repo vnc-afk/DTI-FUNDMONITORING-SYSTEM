@@ -133,30 +133,29 @@
     <!-- Financial Details Section -->
     <BaseFormSection title="Financial Details">
       <div class="form-grid">
-        <UiCurrencyInput
-          v-model="form.payments"
-          label="Payments"
-          required
-          :error="fieldErrors.payments?.[0]"
-          hint="Payment amount"
-        />
+          <UiCurrencyInput
+            v-model="form.payments"
+            label="Payments"
+            required
+            :error="fieldErrors.payments?.[0]"
+            hint="Payment amount"
+          />
 
-        <UiInput
-          v-model="form.dv_number"
-          type="text"
-          label="DV No."
-          placeholder="Disbursement Voucher number"
-          :error="fieldErrors.dv_number?.[0]"
-          hint="Disbursement Voucher number"
-        />
+          <UiCurrencyInput
+            v-model="form.dv_number"
+            label="DV Amount"
+            required
+            :error="fieldErrors.dv_number?.[0]"
+            hint="DV amount"
+          />
 
-        <UiCurrencyInput
-          v-model="form.downloads"
-          label="Downloads"
-          required
-          :error="fieldErrors.downloads?.[0]"
-          hint="Downloads amount"
-        />
+          <UiCurrencyInput
+            v-model="form.downloads"
+            label="Downloads"
+            required
+            :error="fieldErrors.downloads?.[0]"
+            hint="Downloads amount"
+          />
 
         <div class="col-span-full">
           <div class="budget-info">

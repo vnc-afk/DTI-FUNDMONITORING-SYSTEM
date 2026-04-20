@@ -24,6 +24,8 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
 
     return {
       records: data.results,
+      totalPayments: Number(data.total_payments || 0),
+      totalDownloads: Number(data.total_downloads || 0),
       pagination: {
         page: currentPage,
         pages,
@@ -36,11 +38,13 @@ function normalizePaginatedResponse(data, requestedPage = 1) {
     }
   }
 
-  return {
-    records: [],
-    pagination: {
-      page: 1,
-      pages: 1,
+    return {
+      records: [],
+      totalPayments: 0,
+      totalDownloads: 0,
+      pagination: {
+        page: 1,
+        pages: 1,
       has_next: false,
       has_previous: false,
       count: 0,
@@ -53,13 +57,21 @@ export async function fetchMasterFundMonitoringRecords({
   page = 1,
   includeCancelled = false,
   chequeStatus = '',
+  pageSize = 10,
+  query = '',
 } = {}) {
   const params = { page }
   if (includeCancelled) {
     params.include_cancelled = true
   }
-  if (chequeStatus && chequeStatus !== 'Cancelled') {
+  if (chequeStatus) {
     params.cheque_status = chequeStatus
+  }
+  if (pageSize) {
+    params.page_size = pageSize
+  }
+  if (query) {
+    params.search = query
   }
 
   const response = await apiClient.get('/api/mater-fundmonitor-app/master-fund-monitoring/', {

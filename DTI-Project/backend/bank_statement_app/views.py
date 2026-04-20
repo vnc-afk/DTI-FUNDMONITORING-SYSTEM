@@ -23,7 +23,11 @@ class BankStatementListCreateAPIView(APIView):
     def get(self, request):
         query = (request.query_params.get("q") or "").strip()
         status_filter = (request.query_params.get("status") or "").strip()
-        page_size = get_items_per_page(request)
+        try:
+            page_size = int(request.query_params.get("page_size") or get_items_per_page(request))
+        except (TypeError, ValueError):
+            page_size = get_items_per_page(request)
+        page_size = max(page_size, 1)
 
         statements_qs = BankStatement.objects.all().order_by("-date", "-created_at")
 
@@ -60,8 +64,7 @@ class BankStatementListCreateAPIView(APIView):
             else 0
         )
 
-        per_page = statement_count if status_filter else page_size
-        paginator = Paginator(statements_qs, max(per_page, 1))
+        paginator = Paginator(statements_qs, page_size)
         page_obj = paginator.get_page(request.query_params.get("page"))
 
         serializer = BankStatementSerializer(page_obj.object_list, many=True)

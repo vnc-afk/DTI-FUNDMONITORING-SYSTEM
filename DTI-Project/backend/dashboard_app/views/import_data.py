@@ -832,14 +832,42 @@ def process_master_fund_monitoring_import(
     # Add column debug info
     result["debug"].append(f"Columns found: {list(df.columns)}")
 
+    def normalized_cell_text(value):
+        if pd.isna(value):
+            return ""
+
+        text = str(value).strip()
+        if text.lower() in {"nan", "none", "null", "<na>"}:
+            return ""
+
+        return text
+
     for idx, row in df.iterrows():
         try:
             row_num = idx + 2  # +2 for header and 0-indexing
 
-            # Skip empty rows
-            if pd.isna(row["payee"]) or str(row["payee"]).strip() == "":
-                result["skipped"] += 1
-                continue
+
+            # If payee is blank but particulars contains 'cancelled', use a placeholder payee
+            payee_name = normalized_cell_text(row["payee"])
+            particulars = normalized_cell_text(row["particulars"])
+            is_cancelled_row = "cancelled" in particulars.lower()
+
+            if not payee_name:
+                if is_cancelled_row:
+                    # Use or create a placeholder supplier for cancelled records
+                    payee_name = "CANCELLED"
+                else:
+                    result["skipped"] += 1
+                    continue
+
+            # Get or create payee (Supplier)
+            try:
+                payee = Supplier.objects.get(supplier=payee_name)
+            except Supplier.DoesNotExist:
+                payee = Supplier.objects.create(supplier=payee_name)
+
+            # Prepare monitoring data
+            # (particulars assignment and rest of logic continues below)
 
             # Parse date
             if pd.isna(row["date"]):
@@ -876,18 +904,9 @@ def process_master_fund_monitoring_import(
                     f"Invalid date format '{row['date']}'. Supported formats: YYYY-MM-DD, MM/DD/YYYY, MM/DD/YY"
                 )
 
-            # Get or create payee (Supplier)
-            payee_name = str(row["payee"]).strip()
-            try:
-                payee = Supplier.objects.get(supplier=payee_name)
-            except Supplier.DoesNotExist:
-                # Create supplier if not exists
-                payee = Supplier.objects.create(supplier=payee_name)
-
             # Prepare monitoring data
-            particulars = (
-                str(row["particulars"]).strip() if pd.notna(row["particulars"]) else ""
-            )
+
+            particulars = normalized_cell_text(row["particulars"])
 
             # Ensure particulars meets minimum 5 character requirement
             # If empty or too short, provide a default value
@@ -899,6 +918,11 @@ def process_master_fund_monitoring_import(
                 "payee": payee,
                 "particulars": particulars,
             }
+
+            # If particulars contains 'cancelled' (case-insensitive), force cheque_status and is_cancelled
+            if "cancelled" in particulars.lower():
+                mfm_data["cheque_status"] = "Cancelled"  # Always override, even if Excel says Pending
+                mfm_data["is_cancelled"] = True
 
             # Optional: Division
             if "division" in row and pd.notna(row["division"]):
@@ -1238,14 +1262,13 @@ def process_master_fund_monitoring_import(
                 "payee": mfm_data["payee"],
                 "particulars": mfm_data["particulars"],
             }
+            # Add additional fields to lookup if present and not blank/None
+            for field in ["payments", "downloads", "cheque_number", "fund_source", "mooe", "nc", "division"]:
+                value = mfm_data.get(field, None)
+                # For ForeignKey fields, value should be a model instance or None
+                if value is not None and value != "" and value != "—":
+                    lookup_fields[field] = value
 
-            # Add payments and downloads to lookup if they exist
-            if "payments" in mfm_data:
-                lookup_fields["payments"] = mfm_data["payments"]
-            if "downloads" in mfm_data:
-                lookup_fields["downloads"] = mfm_data["downloads"]
-            if "cheque_number" in mfm_data:
-                lookup_fields["cheque_number"] = mfm_data["cheque_number"]
 
             mfm, created = MasterFundMonitoring.objects.update_or_create(
                 **lookup_fields,

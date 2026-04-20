@@ -1,28 +1,12 @@
 from django.core.management.base import BaseCommand
-
 from data_management_app.models import ExpenseCategory
 
 # Color palette for categories
 COLORS = [
-    "#3498db",
-    "#e74c3c",
-    "#2ecc71",
-    "#f39c12",
-    "#9b59b6",
-    "#1abc9c",
-    "#34495e",
-    "#d35400",
-    "#8e44ad",
-    "#c0392b",
-    "#27ae60",
-    "#2980b9",
-    "#16a085",
-    "#7f8c8d",
-    "#f1c40f",
-    "#e67e22",
-    "#ff6b6b",
-    "#4ecdc4",
-    "#45b7d1",
+    "#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6",
+    "#1abc9c", "#34495e", "#d35400", "#8e44ad", "#c0392b",
+    "#27ae60", "#2980b9", "#16a085", "#7f8c8d", "#f1c40f",
+    "#e67e22", "#ff6b6b", "#4ecdc4", "#45b7d1",
 ]
 
 EXPENSE_CATEGORIES = [
@@ -32,10 +16,8 @@ EXPENSE_CATEGORIES = [
     "Communication Expense",
     "Electricity",
     "Gasoline",
-    "Government Accounts",
     "Honorarium",
     "Internet",
-    "Job Order",
     "Livelihood Kits",
     "Meals",
     "Office Supplies",

@@ -23,6 +23,8 @@
       <SearchInput
         v-model="query"
         placeholder="Search records..."
+        @search="loadRecords(1)"
+        @clear="handleClear"
       />
 
       <FilterChips
@@ -49,7 +51,7 @@
 
       <UiButton
         variant="secondary"
-        :disabled="loading || !sortedRecords.length"
+        :disabled="loading || !records.length"
         @click="exportRecords"
       >
         <ui-icon name="download" size="14" />
@@ -57,7 +59,7 @@
       </UiButton>
 
       <UiButton
-        v-if="canManageRecords && filteredRecords.length"
+        v-if="canManageRecords && records.length"
         variant="secondary"
         @click="openBulkDeleteModal"
       >
@@ -83,7 +85,7 @@
 
     <!-- Empty State -->
     <EmptyState
-      v-else-if="!filteredRecords.length"
+      v-else-if="!records.length"
       icon="credit-card"
       title="No records found"
       description="Start by adding your first record or clear your active filters to see matching records."
@@ -288,7 +290,9 @@
                       <div class="detail-grid">
                         <div class="detail-item">
                           <div class="detail-label">DV No.</div>
-                          <div class="detail-value">{{ displayValue(record.dv_number) }}</div>
+                          <div class="detail-value currency font-mono tabular-nums">
+                            {{ record.dv_number ? `₱ ${formatCurrencyRaw(record.dv_number)}` : '—' }}
+                          </div>
                         </div>
                         <div class="detail-item">
                           <div class="detail-label">Cleared Date</div>
@@ -440,6 +444,7 @@ const sortBy = ref('date')
 const sortDir = ref('desc')
 const totalRecords = ref(0)
 const totalPages = ref(1)
+const currentPageSize = ref(20)
 const confirmBusy = ref(false)
 
 // Delete modal state
@@ -451,9 +456,11 @@ const deleteModalDetails = ref('')
 const deleteConfirmLabel = ref('Delete Record')
 const isBulkDelete = ref(false)
 let unsubscribeArchiveUpdates = null
+let searchDebounceTimer = null
+let skipNextAutoReloadCount = 0
 
 // Constants
-const pageSize = 20
+const pageSize = computed(() => currentPageSize.value)
 const chequeStatusFilterOptions = [
   { value: 'Pending', label: 'Pending' },
   { value: 'Cleared', label: 'Cleared' },
@@ -478,40 +485,9 @@ const manualTaxFields = [
   { key: 'prof_fee_10_percent_2', label: 'Prof. Fee 10% (2)' },
 ]
 
-// Computed properties
-const filteredRecords = computed(() => {
-  const q = query.value.toLowerCase().trim()
-
-  return records.value.filter((record) => {
-    const isCancelled = Boolean(record.is_cancelled)
-    const selectedStatus = chequeStatusFilter.value
-    const statusMatches = selectedStatus === 'Cancelled'
-      ? isCancelled
-      : (!selectedStatus ? !isCancelled : (!isCancelled && record.cheque_status === selectedStatus))
-
-    if (!statusMatches) return false
-    if (!q) return true
-
-    const haystack = [
-      record.fund_source_name,
-      record.fund_source,
-      record.payee_name,
-      record.payee,
-      record.particulars,
-      record.cheque_number,
-      record.dv_number,
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
-
-    return haystack.includes(q)
-  })
-})
-
 const sortedRecords = computed(() => {
   const direction = sortDir.value === 'asc' ? 1 : -1
-  return [...filteredRecords.value].sort((left, right) => {
+  return [...records.value].sort((left, right) => {
     const leftValue = getSortValue(left, sortBy.value)
     const rightValue = getSortValue(right, sortBy.value)
     return direction * compareSortValues(leftValue, rightValue)
@@ -520,16 +496,8 @@ const sortedRecords = computed(() => {
 
 const isSearching = computed(() => Boolean(query.value.trim() || chequeStatusFilter.value))
 
-const totalPayments = computed(() => {
-  return records.value.reduce((sum, record) => sum + (Number(record.payments) || 0), 0)
-})
-
-const totalDownloads = computed(() => {
-  return records.value.reduce((sum, record) => sum + (Number(record.downloads) || 0), 0)
-})
-
-const hasNext = computed(() => page.value < totalPages.value)
-const hasPrevious = computed(() => page.value > 1)
+const totalPayments = ref(0)
+const totalDownloads = ref(0)
 
 const summaryCards = computed(() => [
   {
@@ -579,19 +547,28 @@ function pushSuccessToast(message) {
 async function loadRecords(targetPage = 1) {
   loading.value = true
   try {
-    const includeCancelled = chequeStatusFilter.value === 'Cancelled'
     const response = await fetchMasterFundMonitoringRecords({
       page: targetPage,
-      includeCancelled,
+      includeCancelled: true,
       chequeStatus: chequeStatusFilter.value,
+      pageSize: pageSize.value,
+      query: query.value,
     })
+
     records.value = response.records || []
     page.value = response.pagination?.page || targetPage
+    currentPageSize.value = response.pagination?.page_size || currentPageSize.value
     totalPages.value = response.pagination?.pages || 1
     totalRecords.value = response.pagination?.count ?? response.pagination?.total ?? records.value.length
+    totalPayments.value = Number(response.totalPayments || 0)
+    totalDownloads.value = Number(response.totalDownloads || 0)
     expandedRows.value = new Set()
   } catch (error) {
     pushErrorToast(error.message || 'Failed to fetch records.')
+    records.value = []
+    totalRecords.value = 0
+    totalPayments.value = 0
+    totalDownloads.value = 0
   } finally {
     loading.value = false
   }
@@ -600,8 +577,6 @@ async function loadRecords(targetPage = 1) {
 // Filtering and expansion
 function toggleStatusFilter(value) {
   chequeStatusFilter.value = chequeStatusFilter.value === value ? '' : value
-  page.value = 1
-  loadRecords(1)
 }
 
 function toggleExpanded(recordId) {
@@ -628,14 +603,13 @@ function sortIndicator(column) {
 }
 
 function handleSearchChange() {
-  page.value = 1
   loadRecords(1)
 }
 
 function handleClear() {
+  skipNextAutoReloadCount = 2
   query.value = ''
   chequeStatusFilter.value = ''
-  page.value = 1
   loadRecords(1)
 }
 
@@ -647,16 +621,35 @@ function isRecordCancelled(record) {
   return Boolean(record?.is_cancelled)
 }
 
-function statusBadgeText(record) {
+function getDisplayChequeStatus(record) {
   if (isRecordCancelled(record)) {
     return 'Cancelled'
   }
-  return record?.cheque_status || 'Pending'
+
+  const normalizedStatus = String(record?.cheque_status || '').trim()
+  if (!normalizedStatus) {
+    return 'Pending'
+  }
+
+  if (normalizedStatus.toLowerCase() === 'cleared') {
+    return 'Cleared'
+  }
+
+  if (normalizedStatus.toLowerCase() === 'pending') {
+    return 'Pending'
+  }
+
+  return normalizedStatus
+}
+
+function statusBadgeText(record) {
+  return getDisplayChequeStatus(record)
 }
 
 function statusBadgeVariant(record) {
-  if (isRecordCancelled(record)) return 'warning'
-  if (record?.cheque_status === 'Cleared') return 'success'
+  const displayStatus = getDisplayChequeStatus(record)
+  if (displayStatus === 'Cancelled') return 'warning'
+  if (displayStatus === 'Cleared') return 'success'
   return 'info'
 }
 
@@ -734,7 +727,7 @@ function openDeleteModal(record) {
 }
 
 function openBulkDeleteModal() {
-  const ids = filteredRecords.value.map((record) => record.id)
+  const ids = records.value.map((record) => record.id)
   if (!ids.length) return
 
   pendingDeleteIds.value = ids
@@ -835,6 +828,9 @@ async function uncancelRecord(record) {
 // Display utilities
 function displayValue(value) {
   if (value === null || value === undefined || value === '') return '—'
+  if (typeof value === 'string' && ['nan', 'none', 'null', '<na>'].includes(value.trim().toLowerCase())) {
+    return '—'
+  }
   return value
 }
 
@@ -863,12 +859,12 @@ function formatDay(dateValue) {
 function chequeStatusTag(status) {
   if (status === 'Cleared') return 'cleared'
   if (status === 'Pending') return 'pending'
+  if (status === 'Cancelled') return 'cancelled'
   return 'unknown'
 }
 
 function rowStatusTag(record) {
-  if (isRecordCancelled(record)) return 'cancelled'
-  return chequeStatusTag(record.cheque_status)
+  return chequeStatusTag(getDisplayChequeStatus(record))
 }
 
 function getSortValue(record, column) {
@@ -902,7 +898,7 @@ function getSortValue(record, column) {
   }
 
   if (column === 'cheque_status') {
-    return String(record?.cheque_status || '')
+    return getDisplayChequeStatus(record)
   }
 
   return ''
@@ -930,8 +926,36 @@ onMounted(() => {
 watch(
   () => chequeStatusFilter.value,
   () => {
-    page.value = 1
-    loadRecords(1)
+    if (skipNextAutoReloadCount > 0) {
+      skipNextAutoReloadCount -= 1
+      return
+    }
+
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer)
+    }
+
+    searchDebounceTimer = setTimeout(() => {
+      loadRecords(1)
+    }, 250)
+  },
+)
+
+watch(
+  () => query.value,
+  () => {
+    if (skipNextAutoReloadCount > 0) {
+      skipNextAutoReloadCount -= 1
+      return
+    }
+
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer)
+    }
+
+    searchDebounceTimer = setTimeout(() => {
+      loadRecords(1)
+    }, 250)
   },
 )
 
@@ -939,6 +963,11 @@ onBeforeUnmount(() => {
   if (unsubscribeArchiveUpdates) {
     unsubscribeArchiveUpdates()
     unsubscribeArchiveUpdates = null
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
   }
 })
 </script>

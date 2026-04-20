@@ -246,7 +246,7 @@ class MasterFundMonitoring(ArchivableModel):
     )
     cheque_status = models.CharField(
         max_length=20,
-        choices=[("Pending", "Pending"), ("Cleared", "Cleared")],
+        choices=[("Pending", "Pending"), ("Cleared", "Cleared"), ("Cancelled", "Cancelled")],
         default="Pending",
     )
     is_cancelled = models.BooleanField(default=False, db_index=True)
