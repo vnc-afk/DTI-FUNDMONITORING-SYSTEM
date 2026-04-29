@@ -490,22 +490,6 @@ def validate_unique_expense_category(value, exclude_id=None):
 # ============================================================================
 
 
-def validate_mooe_format(value):
-    """Validates MOOE category format.
-
-    Empty or None values are permitted when the field is optional; other
-    values must match the prescribed pattern.
-    """
-    if value in (None, ""):
-        return
-
-    if not re.match(r"^[A-Z0-9\-\.]+$", str(value)):
-        raise ValidationError(
-            "MOOE code must contain only uppercase letters (A-Z), numbers (0-9), hyphens, and periods. Lowercase letters are not allowed.",
-            code="invalid_mooe",
-        )
-
-
 def validate_nc_format(value):
     """Validates NC (Neighborhood Code) format"""
     valid_ncs = [

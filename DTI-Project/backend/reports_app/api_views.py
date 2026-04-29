@@ -136,50 +136,6 @@ class ExpenseReportAPIView(BaseMonitoringSummaryAPIView):
                 }
             )
 
-        unclassified_filter = {"date__year": current_year}
-        unclassified_filter[
-            (
-                "account_title__isnull"
-                if is_object_grouping
-                else "expense_classification__isnull"
-            )
-        ] = True
-        unclassified_expenses = MasterFundMonitoring.objects.filter(
-            **unclassified_filter
-        ).values_list("date", "payments")
-
-        if unclassified_expenses:
-            q1 = [Decimal(0), Decimal(0), Decimal(0)]
-            q2 = [Decimal(0), Decimal(0), Decimal(0)]
-            q3 = [Decimal(0), Decimal(0), Decimal(0)]
-            q4 = [Decimal(0), Decimal(0), Decimal(0)]
-
-            for date, payment in unclassified_expenses:
-                if date and payment:
-                    month = date.month - 1
-                    quarter_idx = month // 3
-                    month_in_quarter = month % 3
-
-                    if quarter_idx == 0:
-                        q1[month_in_quarter] += Decimal(str(payment))
-                    elif quarter_idx == 1:
-                        q2[month_in_quarter] += Decimal(str(payment))
-                    elif quarter_idx == 2:
-                        q3[month_in_quarter] += Decimal(str(payment))
-                    elif quarter_idx == 3:
-                        q4[month_in_quarter] += Decimal(str(payment))
-
-            expense_data.append(
-                {
-                    "name": "Unclassified / Not Assigned",
-                    "color": "#6c757d",
-                    "q1": [float(value) for value in q1],
-                    "q2": [float(value) for value in q2],
-                    "q3": [float(value) for value in q3],
-                    "q4": [float(value) for value in q4],
-                }
-            )
-
         return Response(
             {
                 "report": "expense",

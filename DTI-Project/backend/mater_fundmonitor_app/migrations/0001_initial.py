@@ -41,10 +41,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         max_length=100,
                         null=True,
-                        validators=[
-                            dashboard_app.utils.validators.validate_string_length_2_100,
-                            dashboard_app.utils.validators.validate_mooe_format,
-                        ],
                     ),
                 ),
                 (

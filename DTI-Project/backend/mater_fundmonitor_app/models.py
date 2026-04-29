@@ -7,7 +7,6 @@ from dashboard_app.utils.validators import (
     sanitize_string_input,
     validate_check_number_format,
     validate_date_not_in_future,
-    validate_mooe_format,
     validate_no_script_content,
     validate_string_length,
     validate_transaction_amount,
@@ -111,10 +110,6 @@ class MasterFundMonitoring(ArchivableModel):
     )
     mooe = models.CharField(
         max_length=100,
-        validators=[
-            validate_string_length(min_length=2, max_length=100),
-            validate_mooe_format,
-        ],
         null=True,
         blank=True,
     )
