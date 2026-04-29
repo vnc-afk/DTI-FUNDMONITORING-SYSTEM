@@ -290,8 +290,8 @@
                       <div class="detail-grid">
                         <div class="detail-item">
                           <div class="detail-label">DV No.</div>
-                          <div class="detail-value currency font-mono tabular-nums">
-                            {{ record.dv_number ? `₱ ${formatCurrencyRaw(record.dv_number)}` : '—' }}
+                          <div class="detail-value font-mono tabular-nums">
+                            {{ record.dv_number ? record.dv_number : '—' }}
                           </div>
                         </div>
                         <div class="detail-item">

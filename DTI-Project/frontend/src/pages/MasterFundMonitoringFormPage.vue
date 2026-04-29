@@ -141,12 +141,12 @@
             hint="Payment amount"
           />
 
-          <UiCurrencyInput
+          <UiInput
             v-model="form.dv_number"
-            label="DV Amount"
-            required
+            type="number"
+            label="DV No."
             :error="fieldErrors.dv_number?.[0]"
-            hint="DV amount"
+            hint="DV number"
           />
 
           <UiCurrencyInput

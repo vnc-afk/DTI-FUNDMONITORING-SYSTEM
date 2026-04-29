@@ -269,11 +269,6 @@ def validate_string_length(min_length=0, max_length=None):
         # ignore empty strings to allow blank values through
         if str_value == "":
             return
-        if len(str_value) < min_length:
-            raise ValidationError(
-                f"This field must be at least {min_length} characters long.",
-                code="min_length",
-            )
         if max_length and len(str_value) > max_length:
             raise ValidationError(
                 f"This field must be at most {max_length} characters long.",
