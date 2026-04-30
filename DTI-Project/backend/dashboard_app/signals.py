@@ -500,6 +500,8 @@ def log_taxtable_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=Notification)
 def push_notification_realtime(sender, instance, created, **kwargs):
     """Broadcast notification create/update events to the target user in realtime."""
+    created_at_local = instance.get_created_at_local()
+    read_at_local = instance.get_read_at_local()
     payload = {
         "id": instance.id,
         "title": instance.title,
@@ -507,12 +509,10 @@ def push_notification_realtime(sender, instance, created, **kwargs):
         "level": instance.level,
         "category": instance.category,
         "is_read": instance.is_read,
-        "created_at": instance.created_at.isoformat() if instance.created_at else None,
-        "created_display": (
-            instance.created_at.strftime("%b %d, %Y %I:%M %p")
-            if instance.created_at
-            else ""
-        ),
+        "created_at": created_at_local.isoformat() if created_at_local else None,
+        "read_at": read_at_local.isoformat() if read_at_local else None,
+        "created_display": instance.get_created_display(),
+        "read_display": instance.get_read_display(),
     }
     broadcast_to_user(
         instance.user,

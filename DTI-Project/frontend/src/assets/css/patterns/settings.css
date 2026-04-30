@@ -551,6 +551,14 @@
   margin-bottom: var(--space-4);
 }
 
+.settings-modal-body .form-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+
 .form-label svg {
   margin-right: var(--space-1);
   color: var(--brand-navy-600);

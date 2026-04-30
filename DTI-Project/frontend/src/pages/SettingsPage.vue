@@ -30,7 +30,7 @@
             {{ tab.label }}
           </UiButton>
           <hr class="nav-divider">
-          <UiButton variant="ghost" size="sm" class="settings-nav-item" @click="isQuickActionsDrawerOpen = true">
+          <UiButton variant="ghost" size="sm" class="settings-nav-item" @click.stop="openQuickActionsDrawer">
             <ui-icon name="zap" size="18" />
             Quick Actions
           </UiButton>
@@ -201,7 +201,7 @@
                 <ui-icon name="alert-triangle" size="16" />
                 <span>This action cannot be undone. All data will be permanently deleted.</span>
               </div>
-              <UiButton type="button" variant="danger" size="md" class="danger-action-btn">
+              <UiButton type="button" variant="danger" size="md" class="danger-action-btn" @click="openDeleteAccountModal">
                 <ui-icon name="trash-2" size="18"/> Delete account permanently
               </UiButton>
             </div>
@@ -212,7 +212,7 @@
     </div>
 
     <!-- Quick Actions Drawer -->
-    <UiDrawer v-model="isQuickActionsDrawerOpen" title="Quick Actions" side="right">
+    <UiDrawer v-model="isQuickActionsDrawerOpen" title="Quick Actions">
       <div class="drawer-actions">
         <UiButton variant="ghost" size="sm" class="drawer-action-btn" @click="setTheme('dark')">
           <ui-icon name="moon" size="18"/>
@@ -297,6 +297,53 @@
         </div>
       </form>
     </UiModal>
+
+    <!-- Delete Account Confirmation Modal -->
+    <UiModal v-model="isDeleteAccountModalOpen" size="md">
+      <div class="modal-header settings-modal-header">
+        <h5 class="modal-title">
+          <ui-icon name="alert-triangle" size="18" /> Delete Account
+        </h5>
+        <button type="button" class="btn-close" @click="closeDeleteAccountModal"></button>
+      </div>
+
+      <div class="modal-body settings-modal-body">
+        <div class="alert alert--danger" role="alert">
+          <ui-icon name="circle-alert" size="18"/> This action cannot be undone. All your data will be permanently deleted.
+        </div>
+        
+        <Transition name="fade">
+          <div v-if="deleteAccountError" class="alert alert--danger" role="alert">
+            <ui-icon name="circle-alert" size="18"/> {{ deleteAccountError }}
+            <UiButton variant="ghost" size="sm" class="alert-close" aria-label="Close" @click="deleteAccountError = ''">
+              <ui-icon name="x" size="18" />
+            </UiButton>
+          </div>
+        </Transition>
+
+        <p class="my-3">Are you absolutely sure? This will:</p>
+        <ul class="list-unstyled ms-2">
+          <li class="mb-2">
+            <ui-icon name="check" size="16" /> Delete your account permanently
+          </li>
+          <li class="mb-2">
+            <ui-icon name="check" size="16" /> Remove all associated data
+          </li>
+          <li>
+            <ui-icon name="check" size="16" /> Log you out immediately
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-footer settings-modal-footer">
+        <UiButton type="button" variant="secondary" @click="closeDeleteAccountModal" :disabled="deleteAccountSubmitting">
+          <ui-icon name="x" size="18"/> Cancel
+        </UiButton>
+        <UiButton type="button" variant="danger" :disabled="deleteAccountSubmitting" @click="submitDeleteAccount">
+          <ui-icon name="trash-2" size="18"/> {{ deleteAccountSubmitting ? 'Deleting...' : 'Delete permanently' }}
+        </UiButton>
+      </div>
+    </UiModal>
   </DashboardPageLayout>
 </template>
 
@@ -314,6 +361,7 @@ import UiToast from '@/components/ui/UiToast.vue'
 import {
   changePassword,
   createUserPreference,
+  deleteAccount,
   fetchCurrentUserProfile,
   fetchUserAccountById,
   fetchUserPreferences,
@@ -343,9 +391,12 @@ const preferenceId = ref(null)
 const activeSettingsTab = ref('preferences')
 const isPasswordModalOpen = ref(false)
 const isQuickActionsDrawerOpen = ref(false)
+const isDeleteAccountModalOpen = ref(false)
 const passwordSubmitting = ref(false)
 const passwordSuccessMessage = ref('')
 const passwordGeneralError = ref('')
+const deleteAccountSubmitting = ref(false)
+const deleteAccountError = ref('')
 
 const form = reactive({
   theme: 'dark',
@@ -459,6 +510,22 @@ function openPasswordModal() {
 function closePasswordModal() { isPasswordModalOpen.value = false }
 function togglePasswordVisibility(field) { showPassword[field] = !showPassword[field] }
 
+function openQuickActionsDrawer() {
+  window.setTimeout(() => {
+    isQuickActionsDrawerOpen.value = true
+  }, 0)
+}
+
+function openDeleteAccountModal() {
+  deleteAccountError.value = ''
+  isDeleteAccountModalOpen.value = true
+}
+
+function closeDeleteAccountModal() {
+  isDeleteAccountModalOpen.value = false
+  deleteAccountError.value = ''
+}
+
 // ── API ────────────────────────────────────────────────────────────────────────
 async function loadSettingsData() {
   loadError.value = ''
@@ -564,6 +631,30 @@ async function submitPasswordChange() {
     }
   } finally {
     passwordSubmitting.value = false
+  }
+}
+
+async function submitDeleteAccount() {
+  deleteAccountSubmitting.value = true
+  deleteAccountError.value = ''
+  try {
+    if (!accountInfo.id) {
+      deleteAccountError.value = 'Unable to identify account. Please refresh and try again.'
+      return
+    }
+
+    await deleteAccount(accountInfo.id)
+    
+    // Account deleted successfully, redirect to login
+    closeDeleteAccountModal()
+    // Redirect to login page
+    window.location.href = '/login'
+  } catch (error) {
+    deleteAccountError.value = axios.isAxiosError(error)
+      ? error.response?.data?.detail || error.response?.data?.message || 'Failed to delete account. Please try again.'
+      : 'Failed to delete account. Please try again.'
+  } finally {
+    deleteAccountSubmitting.value = false
   }
 }
 

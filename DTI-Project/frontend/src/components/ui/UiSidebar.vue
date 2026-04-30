@@ -131,13 +131,15 @@ const emit = defineEmits(['navigate', 'close', 'profile-click'])
 const route = useRoute()
 const userState = ref({
   id: 0,
+  display_name: '',
+  role_label: '',
   is_staff: false,
   is_superuser: false,
 })
 
 const brandLabel = 'FundMonitor home'
-const displayUserName = computed(() => props.userName || 'Admin User')
-const displayUserRole = computed(() => props.userRole || 'Administrator')
+const displayUserName = computed(() => userState.value.display_name || props.userName || 'User')
+const displayUserRole = computed(() => userState.value.role_label || props.userRole || 'User')
 const userInitials = computed(() => {
   const nameParts = String(displayUserName.value || 'U')
     .trim()
@@ -319,12 +321,16 @@ async function loadSidebarData() {
     const payload = await fetchSidebarData(props.apiEndpoint)
     userState.value = {
       id: Number(payload?.user?.id || 0),
+      display_name: String(payload?.user?.display_name || '').trim(),
+      role_label: String(payload?.user?.role_label || '').trim(),
       is_staff: Boolean(payload?.user?.is_staff),
       is_superuser: Boolean(payload?.user?.is_superuser),
     }
   } catch {
     userState.value = {
       id: 0,
+      display_name: '',
+      role_label: '',
       is_staff: false,
       is_superuser: false,
     }

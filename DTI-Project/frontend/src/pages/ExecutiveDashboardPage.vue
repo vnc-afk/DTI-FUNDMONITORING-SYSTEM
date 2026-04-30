@@ -27,7 +27,13 @@
     <!-- Last Updated Banner -->
     <div class="last-updated-banner">
       <ui-icon name="calendar-days" size="18" />
-      <span>Data as of: <strong>{{ lastUpdatedLabel }}</strong></span>
+      <span>
+        Data as of: <strong>{{ lastUpdatedLabel }}</strong>
+      </span>
+      <span class="last-updated-divider">·</span>
+      <span v-if="lastUpdatedTimeLabel">
+        Time: <strong>{{ lastUpdatedTimeLabel }}</strong>
+      </span>
       <span class="last-updated-divider">·</span>
       <span>Fiscal Year <strong>{{ currentYear }}</strong></span>
     </div>
@@ -215,7 +221,7 @@ import UiIcon from '@/components/ui/UiIcon.vue'
 import ReportPageLayout from '@/components/patterns/ReportPageLayout.vue'
 import { onMounted, ref, computed } from 'vue'
 import * as d3 from 'd3'
-import * as XLSX from 'exceljs'
+import ExcelJS from 'exceljs'
 import '@/assets/css/patterns/executive-dashboard.css'
 import {
   fetchExecutiveDashboardData,
@@ -240,7 +246,25 @@ const performanceMetrics = ref({
   monthlyTransactionAvg: 0,
 })
 const monthlySpendingData = ref({})
-const lastUpdatedLabel = ref(new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }))
+
+const formatLastUpdatedDate = (value) =>
+  value.toLocaleDateString('en-PH', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'Asia/Manila',
+  })
+
+const formatLastUpdatedTime = (value) =>
+  value.toLocaleTimeString('en-PH', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Asia/Manila',
+  })
+
+const lastUpdatedLabel = ref(formatLastUpdatedDate(new Date()))
+const lastUpdatedTimeLabel = ref(formatLastUpdatedTime(new Date()))
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
 
@@ -260,6 +284,24 @@ const formatCurrencyDisplay = (value) => {
 }
 
 const formatNumber = (value) => Number(value || 0).toLocaleString('en-PH')
+
+/** Format currency for display with appropriate scale (K, M, B) */
+const formatCurrencyScaled = (value) => {
+  const num = Number(value || 0)
+  if (num >= 1_000_000_000) return `₱${(num / 1_000_000_000).toFixed(2)}B`
+  if (num >= 1_000_000) return `₱${(num / 1_000_000).toFixed(2)}M`
+  if (num >= 1_000) return `₱${(num / 1_000).toFixed(1)}K`
+  return `₱${num.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`
+}
+
+/** Format number for display with appropriate scale (K, M, B) */
+const formatNumberScaled = (value) => {
+  const num = Number(value || 0)
+  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
+  return num.toLocaleString('en-PH')
+}
 
 const getUtilizationColor = () => {
   if (budgetUtilizationPct.value > 100) return '#c0392b'
@@ -319,7 +361,9 @@ async function fetchDashboardData() {
       monthlySpendingData.value = data.spendings
     }
 
-    lastUpdatedLabel.value = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
+    const now = new Date()
+    lastUpdatedLabel.value = formatLastUpdatedDate(now)
+    lastUpdatedTimeLabel.value = formatLastUpdatedTime(now)
 
     await new Promise(resolve => setTimeout(resolve, 0))
     drawMonthlyChart()
@@ -395,7 +439,7 @@ function drawMonthlyChart() {
       d3.select(this).attr('fill', '#2e6aad')
       tooltip.style('opacity', 1).html(
         `<div style="font-size:14px;font-weight:700;margin-bottom:4px">${d.label}</div>
-         <div style="font-size:16px">₱${(d.value / 1_000_000).toFixed(2)}M</div>`
+         <div style="font-size:16px">${formatCurrencyScaled(d.value)}</div>`
       )
     })
     .on('mousemove', function (event) {
@@ -418,7 +462,7 @@ function drawMonthlyChart() {
     .attr('fill', '#1a3a5c')
     .attr('font-size', '13px')
     .attr('font-weight', '700')
-    .text(d => `₱${(d.value / 1_000_000).toFixed(1)}M`)
+    .text(d => formatCurrencyScaled(d.value))
 
   // X axis — bigger tick labels
   g.append('g')
@@ -432,7 +476,7 @@ function drawMonthlyChart() {
 
   // Y axis — bigger labels
   g.append('g')
-    .call(d3.axisLeft(yScale).ticks(6).tickFormat(d => `₱${d / 1_000_000}M`))
+    .call(d3.axisLeft(yScale).ticks(6).tickFormat(d => formatCurrencyScaled(d)))
     .call(axis => {
       axis.select('.domain').attr('stroke', '#aaa')
       axis.selectAll('text').attr('fill', '#444').attr('font-size', '13px')
@@ -470,7 +514,7 @@ function drawMonthlyChart() {
 
 async function exportData() {
   try {
-    const workbook = new XLSX.Workbook()
+    const workbook = new ExcelJS.Workbook()
     const sheet = workbook.addWorksheet('Executive Dashboard')
 
     sheet.mergeCells('A1:F1')
@@ -501,15 +545,15 @@ async function exportData() {
     const fundHeader = sheet.addRow(['Fund Source', 'Budget', 'Spent', 'Remaining', 'Utilization %', 'Status'])
     fundHeader.eachCell(c => { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E8EDF5' } } })
     fundsData.value.forEach(fund => {
-      sheet.addRow([fund.name, fund.budget, fund.spent, fund.remaining, `${fund.utilization}%`, fund.status])
+      sheet.addRow([fund.name, formatCurrency(fund.budget), formatCurrency(fund.spent), formatCurrency(fund.remaining), `${fund.utilization}%`, fund.status])
     })
     sheet.addRow([])
 
     sheet.addRow(['PERFORMANCE METRICS']).getCell(1).font = { bold: true, size: 13 }
     sheet.addRow(['Metric', 'Value']).eachCell(c => { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E8EDF5' } } })
     sheet.addRow(['Total Transactions', performanceMetrics.value.totalTransactions])
-    sheet.addRow(['Total Downloads', performanceMetrics.value.totalDownloads])
-    sheet.addRow(['Avg Monthly Spending', performanceMetrics.value.avgMonthlySpending])
+    sheet.addRow(['Total Downloads', formatCurrency(performanceMetrics.value.totalDownloads)])
+    sheet.addRow(['Avg Monthly Spending', formatCurrency(performanceMetrics.value.avgMonthlySpending)])
     sheet.addRow(['Monthly Transaction Avg', performanceMetrics.value.monthlyTransactionAvg])
 
     sheet.columns = [{ width: 32 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 18 }, { width: 18 }]
@@ -526,9 +570,19 @@ async function exportData() {
       })
     })
 
-    await workbook.xlsx.writeFile(`ExecutiveDashboard_FY${currentYear.value}_${Date.now()}.xlsx`)
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `ExecutiveDashboard_FY${currentYear.value}_${Date.now()}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   } catch (error) {
     console.error('Export error:', error)
+    alert('Failed to export data. Please try again.')
   }
 }
 

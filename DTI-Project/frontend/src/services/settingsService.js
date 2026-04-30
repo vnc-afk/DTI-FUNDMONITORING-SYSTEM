@@ -63,3 +63,8 @@ export async function changePassword(payload) {
   return response.data
 }
 
+export async function deleteAccount(id) {
+  const response = await apiClient.delete(`/api/user-app/accounts/${id}/`)
+  return response.data
+}
+

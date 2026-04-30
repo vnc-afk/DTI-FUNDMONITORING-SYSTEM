@@ -73,6 +73,8 @@
   --status-danger-bg:    #fce4ec;
   --status-danger-text:  #b71c1c;
   --status-danger-border: #f48fb1;
+  --status-danger:       #c62828;
+  --status-danger-dark:  #b71c1c;
 
   --status-info-bg:      var(--brand-navy-50);
   --status-info-text:    var(--brand-navy-700);
@@ -116,6 +118,8 @@
     --status-warning-text: #f6c344;
     --status-danger-bg:    #2d0a0a;
     --status-danger-text:  #fc8181;
+    --status-danger:       #ef5350;
+    --status-danger-dark:  #f44336;
     --status-info-bg:      #0f1e35;
     --status-info-text:    var(--brand-navy-200);
   }
@@ -146,6 +150,8 @@
   --status-warning-text: #f6c344;
   --status-danger-bg:    #2d0a0a;
   --status-danger-text:  #fc8181;
+  --status-danger:       #ef5350;
+  --status-danger-dark:  #f44336;
   --status-info-bg:      #0f1e35;
   --status-info-text:    var(--brand-navy-200);
 }
@@ -175,6 +181,8 @@
   --status-warning-text: #e65100;
   --status-danger-bg:    #fce4ec;
   --status-danger-text:  #b71c1c;
+  --status-danger:       #c62828;
+  --status-danger-dark:  #b71c1c;
   --status-info-bg:      var(--brand-navy-50);
   --status-info-text:    var(--brand-navy-700);
 }

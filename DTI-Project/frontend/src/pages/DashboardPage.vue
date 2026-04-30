@@ -53,6 +53,14 @@
           </select>
         </div>
 
+        <div class="filter-group">
+          <label for="districtFilter">District</label>
+          <select id="districtFilter" v-model="filterForm.district" name="district">
+            <option value="">All Districts</option>
+            <option v-for="item in districtOptions" :key="item.id" :value="String(item.id)">{{ item.name }}</option>
+          </select>
+        </div>
+
         <div class="filter-actions">
           <button type="submit" class="btn-apply">
             <ui-icon name="filter" size="18" /> Apply Filters
@@ -256,10 +264,11 @@ const monthOptions = [
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
-const filterForm = ref({ year: '', fund_source: '', division: '', date_month: '' })
+const filterForm = ref({ year: '', fund_source: '', division: '', date_month: '', district: '' })
 const yearOptions = ref([])
 const fundSourceOptions = ref([])
 const divisionOptions = ref([])
+const districtOptions = ref([])
 const chartsData = ref({})
 const kpis = ref({
   totalBudget: 0, activeFunds: 0, activeBudget: 0, totalDisbursement: 0,
@@ -282,6 +291,7 @@ function getParams() {
   if (filterForm.value.fund_source) p.fund_source = filterForm.value.fund_source
   if (filterForm.value.division)   p.division   = filterForm.value.division
   if (filterForm.value.date_month) p.date_month = filterForm.value.date_month
+  if (filterForm.value.district)   p.district   = filterForm.value.district
   return p
 }
 
@@ -457,12 +467,14 @@ function drawDonutChart(id, labels, values, fmtFn = v => `₱${Number(v).toLocal
 
   // Center total
   const total = d3.sum(data, d => d.value)
+  const totalLabel = id === 'chequeChart'
+    ? total.toLocaleString()
+    : `\u20b1${d3.format('.2s')(total)}`
   g.append('text').attr('text-anchor', 'middle').attr('dy', '-0.3em')
     .attr('fill', T.text).attr('font-size', '10px').text('Total')
   g.append('text').attr('text-anchor', 'middle').attr('dy', '1.1em')
     .attr('fill', T.textPri).attr('font-size', '13px').attr('font-weight', '600')
-    .text(fmtFn === null ? total.toLocaleString() : `₱${d3.format('.2s')(total)}`)
-
+    .text(fmtFn === null ? total.toLocaleString() : totalLabel)
   // Legend
   const legend = svg.append('g').attr('transform', `translate(${W * 0.76}, ${H / 2 - (data.length * 14) / 2})`)
   data.forEach((d, i) => {
@@ -799,6 +811,7 @@ async function loadFilters() {
     yearOptions.value = (payload?.years || []).filter(y => Number.isFinite(Number(y))).sort((a, b) => Number(b) - Number(a))
     fundSourceOptions.value = payload?.fundSources || []
     divisionOptions.value   = payload?.divisions   || []
+    districtOptions.value   = payload?.districts   || []
     if (!filterForm.value.year && yearOptions.value.length > 0) {
       filterForm.value.year = String(yearOptions.value[0])
     }
@@ -806,6 +819,7 @@ async function loadFilters() {
     yearOptions.value = []
     fundSourceOptions.value = []
     divisionOptions.value = []
+    districtOptions.value = []
     console.error('Failed to load dashboard filters', error)
   }
 }
@@ -852,6 +866,7 @@ async function resetFilters() {
   filterForm.value.fund_source = ''
   filterForm.value.division    = ''
   filterForm.value.date_month  = ''
+  filterForm.value.district    = ''
   await applyFilters()
 }
 

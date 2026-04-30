@@ -199,6 +199,8 @@ CORS_ALLOWED_ORIGINS = get_list_env(
     "CORS_ALLOWED_ORIGINS",
     [
         "https://dti-apo-fund-monitor.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
 )
 
@@ -206,6 +208,8 @@ CSRF_TRUSTED_ORIGINS = get_list_env(
     "CSRF_TRUSTED_ORIGINS",
     [
         "https://dti-apo-fund-monitor.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:8000",
     ],
 )
 

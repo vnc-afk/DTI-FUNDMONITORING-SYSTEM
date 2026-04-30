@@ -1,17 +1,17 @@
 <template>
   <teleport to="body">
-    <div v-if="modelValue" class="drawer-overlay" @click="handleClose">
-      <div class="drawer" :class="[`drawer-${position}`]" @click.stop>
-        <div class="drawer-header">
-          <h2 v-if="title" class="drawer-title">{{ title }}</h2>
-          <button type="button" class="drawer-close" @click="handleClose" aria-label="Close drawer">
+    <div v-if="modelValue" class="drawer-overlay" @click.self="handleClose">
+      <div class="ui-drawer" :class="[`ui-drawer--${position}`]" @click.stop>
+        <div class="ui-drawer__header">
+          <h2 v-if="title" class="ui-drawer__title">{{ title }}</h2>
+          <button type="button" class="ui-drawer__close" @click="handleClose" aria-label="Close drawer">
             <ui-icon name="x" size="20" />
           </button>
         </div>
-        <div class="drawer-body">
+        <div class="ui-drawer__body">
           <slot />
         </div>
-        <div class="drawer-footer" v-if="$slots.footer">
+        <div class="ui-drawer__footer" v-if="$slots.footer">
           <slot name="footer" />
         </div>
       </div>
@@ -47,7 +47,7 @@ const handleClose = () => {
   animation: fadeIn var(--duration-fast) var(--ease-out);
 }
 
-.drawer {
+.ui-drawer {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -57,18 +57,19 @@ const handleClose = () => {
   display: flex;
   flex-direction: column;
   z-index: calc(var(--z-modal) + 1);
+  transform: translateX(0);
   animation: slideIn var(--duration-fast) var(--ease-out);
 }
 
-.drawer-right {
+.ui-drawer--right {
   right: 0;
 }
 
-.drawer-left {
+.ui-drawer--left {
   left: 0;
 }
 
-.drawer-header {
+.ui-drawer__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -77,14 +78,14 @@ const handleClose = () => {
   flex-shrink: 0;
 }
 
-.drawer-title {
+.ui-drawer__title {
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   color: var(--text-primary);
   margin: 0;
 }
 
-.drawer-close {
+.ui-drawer__close {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -93,17 +94,17 @@ const handleClose = () => {
   padding: var(--space-1);
 }
 
-.drawer-close:hover {
+.ui-drawer__close:hover {
   color: var(--text-primary);
 }
 
-.drawer-body {
+.ui-drawer__body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-6);
 }
 
-.drawer-footer {
+.ui-drawer__footer {
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--border-subtle);
   background: var(--surface-subtle);
@@ -124,7 +125,7 @@ const handleClose = () => {
   }
 }
 
-.drawer-left {
+.ui-drawer--left {
   animation: slideInLeft var(--duration-fast) var(--ease-out);
 }
 
@@ -138,7 +139,7 @@ const handleClose = () => {
 }
 
 @media (max-width: 640px) {
-  .drawer {
+  .ui-drawer {
     width: 100%;
   }
 }

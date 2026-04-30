@@ -9,8 +9,8 @@
 
     <UiSidebar
       :is-collapsed="sidebarCollapsed"
-      :user-name="authStore.user?.name || 'Admin User'"
-      :user-role="authStore.user?.role || 'Administrator'"
+      :user-name="sidebarUserName"
+      :user-role="sidebarUserRole"
       @close="closeSidebar"
       @navigate="handleSidebarNavigate"
       @profile-click="showProfileMenu = true"
@@ -49,6 +49,20 @@ const showNotifications = ref(false)
 const showProfileMenu = ref(false)
 
 const showSidebarBackdrop = computed(() => isCompactViewport.value && !sidebarCollapsed.value)
+const sidebarUserName = computed(() => {
+  const currentUser = authStore.user || {}
+  const firstName = String(currentUser.first_name || '').trim()
+  const lastName = String(currentUser.last_name || '').trim()
+  const fullName = `${firstName} ${lastName}`.trim()
+
+  return fullName || String(currentUser.full_name || currentUser.display_name || currentUser.username || 'User').trim() || 'User'
+})
+const sidebarUserRole = computed(() => {
+  const currentUser = authStore.user || {}
+  if (currentUser.is_superuser) return 'Superuser'
+  if (currentUser.is_staff) return 'Staff'
+  return String(currentUser.role_label || currentUser.role || 'User').trim() || 'User'
+})
 
 function syncViewportState() {
   if (typeof window === 'undefined') return

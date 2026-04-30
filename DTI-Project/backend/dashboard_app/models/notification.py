@@ -83,8 +83,30 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.user.username}: {self.title}"
 
+    def get_created_at_local(self):
+        if not self.created_at:
+            return None
+        return timezone.localtime(self.created_at)
+
+    def get_read_at_local(self):
+        if not self.read_at:
+            return None
+        return timezone.localtime(self.read_at)
+
+    def get_created_display(self):
+        created_at_local = self.get_created_at_local()
+        if not created_at_local:
+            return ""
+        return created_at_local.strftime("%b %d, %Y %I:%M %p")
+
+    def get_read_display(self):
+        read_at_local = self.get_read_at_local()
+        if not read_at_local:
+            return ""
+        return read_at_local.strftime("%b %d, %Y %I:%M %p")
+
     def mark_as_read(self):
         if not self.is_read:
             self.is_read = True
-            self.read_at = timezone.now()
+            self.read_at = timezone.localtime()
             self.save(update_fields=["is_read", "read_at"])

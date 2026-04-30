@@ -73,7 +73,7 @@
                 <span v-if="!notif.is_read" class="unread-dot" aria-label="Unread" />
                 <span class="notif-content">
                   <span class="notif-text">{{ notif.message }}</span>
-                  <span class="notif-time">{{ notif.created_at }}</span>
+                  <span class="notif-time">{{ notif.created_display || notif.created_at }}</span>
                 </span>
               </button>
             </div>

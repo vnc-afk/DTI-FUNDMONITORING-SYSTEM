@@ -294,3 +294,20 @@
     padding: var(--space-5) var(--space-6);
   }
 }
+
+@media print {
+  .app-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .topbar,
+  .sidebar,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .main-content {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+}

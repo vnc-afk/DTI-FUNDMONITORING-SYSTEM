@@ -40,6 +40,19 @@ class ActivityLogSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+    created_at = serializers.SerializerMethodField()
+    read_at = serializers.SerializerMethodField()
+    created_display = serializers.CharField(source="get_created_display", read_only=True)
+    read_display = serializers.CharField(source="get_read_display", read_only=True)
+
+    def get_created_at(self, obj):
+        created_at_local = obj.get_created_at_local()
+        return created_at_local.isoformat() if created_at_local else None
+
+    def get_read_at(self, obj):
+        read_at_local = obj.get_read_at_local()
+        return read_at_local.isoformat() if read_at_local else None
+
     class Meta:
         model = Notification
         fields = "__all__"
