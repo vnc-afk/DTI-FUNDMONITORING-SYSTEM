@@ -77,8 +77,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware", 
     "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -195,20 +195,13 @@ SECURE_SSL_REDIRECT = get_bool_env("SECURE_SSL_REDIRECT", not DEBUG)
 
 CORS_ALLOW_CREDENTIALS = False
 
-CORS_ALLOWED_ORIGINS = get_list_env(
-    "CORS_ALLOWED_ORIGINS",
-    [
-        "https://dti-apo-fund-monitor.vercel.app",
-    ],
-)
+CORS_ALLOWED_ORIGINS = [
+    "https://dti-apo-fund-monitor.vercel.app",
+]
 
-CSRF_TRUSTED_ORIGINS = get_list_env(
-    "CSRF_TRUSTED_ORIGINS",
-    [
-        "https://dti-apo-fund-monitor.vercel.app",
-
-    ],
-)
+CSRF_TRUSTED_ORIGINS = [
+    "https://dti-apo-fund-monitor.vercel.app",
+]
 
 CORS_ALLOW_HEADERS = [
     "authorization",
@@ -217,6 +210,15 @@ CORS_ALLOW_HEADERS = [
     "origin",
     "x-requested-with",
     "x-csrftoken",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 
 # Django REST Framework defaults for API-first endpoints.
