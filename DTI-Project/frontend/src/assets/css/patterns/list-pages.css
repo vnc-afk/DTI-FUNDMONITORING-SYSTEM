@@ -357,8 +357,7 @@
 }
 
 /* ── Table Column Headers ──────────────────────────────────────────────────── */
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(thead th) {
+.list-page-table thead th {
   background: var(--bg-elevated);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -367,30 +366,25 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(tbody td) {
+.list-page-table tbody td {
   font-size: var(--text-base);
   font-weight: var(--weight-regular);
   color: var(--text-primary);
   line-height: var(--leading-normal);
 }
 
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(tbody td.numeric) {
+.list-page-table tbody td.numeric {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
   color: var(--text-primary);
 }
 
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(tbody .actions) {
+.list-page-table tbody .actions {
   opacity: 0;
 }
 
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(tbody tr:hover .actions),
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-.list-page-table :deep(tbody tr:focus-within .actions) {
+.list-page-table tbody tr:hover .actions,
+.list-page-table tbody tr:focus-within .actions {
   opacity: 1;
 }
 
