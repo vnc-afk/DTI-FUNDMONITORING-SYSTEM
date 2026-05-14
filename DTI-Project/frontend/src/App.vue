@@ -23,16 +23,17 @@
       </Transition>
     </router-view>
 
-    <ChatBot />
+    <ChatBot v-if="routeName !== 'login' && routePath !== '/login'" />
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { onBeforeUnmount, onMounted, watch, computed } from 'vue'
 
 import ChatBot from '@/components/ui/ChatbotWidget.vue'
 import UiToast from '@/components/ui/UiToast.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useRoute } from 'vue-router'
 import { getAuthSessionState, clearAuthSession } from '@/services/http/authSession'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useSharedStore } from '@/stores/sharedStore'
@@ -41,6 +42,10 @@ import realtimeService from '@/services/realtimeService'
 const authStore = useAuthStore()
 const notificationsStore = useNotificationsStore()
 const sharedStore = useSharedStore()
+
+const route = useRoute()
+const routeName = computed(() => route.name)
+const routePath = computed(() => route.path)
 
 let unsubscribeRealtime = null
 let unsubscribeConnection = null
