@@ -22,12 +22,15 @@
         <component :is="Component" :key="route.matched?.[0]?.path || route.path" />
       </Transition>
     </router-view>
+
+    <ChatBot />
   </div>
 </template>
 
 <script setup>
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 
+import ChatBot from '@/components/ui/ChatbotWidget.vue'
 import UiToast from '@/components/ui/UiToast.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { getAuthSessionState, clearAuthSession } from '@/services/http/authSession'

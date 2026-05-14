@@ -5,6 +5,7 @@ import { useNotificationsStore } from '@/stores/notificationsStore'
 
 const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 const AUTH_ENDPOINTS = ['/api/user-app/auth/login/', '/api/user-app/auth/register/', '/api/user-app/auth/refresh/']
+const SILENT_ENDPOINTS = ['/api/chatbot/', '/api/chatbot/test/intent/']
 
 let initialized = false
 
@@ -35,6 +36,10 @@ function isAuthEndpoint(url = '') {
   return AUTH_ENDPOINTS.some((endpoint) => String(url).includes(endpoint))
 }
 
+function isSilentEndpoint(url = '') {
+  return SILENT_ENDPOINTS.some((endpoint) => String(url).includes(endpoint))
+}
+
 function redirectToLogin() {
   if (window.location.pathname !== '/login') {
     router.replace('/login').catch(() => {})
@@ -58,7 +63,8 @@ function attachFeedbackInterceptors(client, notificationsStore) {
       notificationsStore.endApiCall()
 
       const method = String(response?.config?.method || 'get').toLowerCase()
-      if (MUTATING_METHODS.has(method) && !isAuthEndpoint(response?.config?.url || '')) {
+      const requestUrl = response?.config?.url || ''
+      if (MUTATING_METHODS.has(method) && !isAuthEndpoint(requestUrl) && !isSilentEndpoint(requestUrl)) {
         notificationsStore.pushToast({
           title: 'Success',
           message: normalizeMessage(response?.data?.message, 'Changes saved successfully.'),
