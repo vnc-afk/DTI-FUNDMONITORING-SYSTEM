@@ -1,22 +1,29 @@
 ﻿# Frontend File Structure
 
-Generated on: 2026-04-16 11:09:40
-
 Excluded directories: node_modules, dist, .git, .vite
 
 ```text
 DTI-Project/frontend
-|-- .vscode
+|-- .env.local
+|-- .env.local.example
+|-- .env.vercel.example
+|-- .gitignore
+|-- .vscode/
 |   `-- extensions.json
-|-- public
-|-- src
-|   |-- assets
-|   |   |-- css
-|   |   |   |-- components
+|-- CHATBOT_INTEGRATION.md
+|-- FRONTEND_FILE_STRUCTURE.md
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- public/
+|-- src/
+|   |-- assets/
+|   |   |-- css/
+|   |   |   |-- components/
 |   |   |   |   `-- components.css
-|   |   |   |-- foundations
+|   |   |   |-- foundations/
 |   |   |   |   `-- base.css
-|   |   |   |-- patterns
+|   |   |   |-- patterns/
 |   |   |   |   |-- archive.css
 |   |   |   |   |-- archive-list.css
 |   |   |   |   |-- auth.css
@@ -28,23 +35,23 @@ DTI-Project/frontend
 |   |   |   |   |-- reports.css
 |   |   |   |   |-- settings.css
 |   |   |   |   `-- sidebar.css
-|   |   |   |-- tokens
+|   |   |   |-- tokens/
 |   |   |   |   |-- colors.css
 |   |   |   |   |-- spacing.css
 |   |   |   |   `-- typography.css
-|   |   |   |-- utils
+|   |   |   |-- utils/
 |   |   |   |   `-- utils.css
 |   |   |   `-- index.css
-|   |   `-- images
+|   |   `-- images/
 |   |       `-- DTI_Logo_2019.png
-|   |-- components
-|   |   |-- patterns
+|   |-- components/
+|   |   |-- patterns/
 |   |   |   |-- BaseFormSection.vue
 |   |   |   |-- DashboardPageLayout.vue
 |   |   |   |-- DataTablePage.vue
 |   |   |   |-- FormPage.vue
 |   |   |   `-- ReportPageLayout.vue
-|   |   `-- ui
+|   |   `-- ui/
 |   |       |-- ActionButton.vue
 |   |       |-- DeleteConfirmModal.vue
 |   |       |-- EmptyState.vue
@@ -72,9 +79,11 @@ DTI-Project/frontend
 |   |       |-- UiToast.vue
 |   |       |-- UiToolbar.vue
 |   |       `-- UiTopbar.vue
-|   |-- layouts
+|   |-- composables/
+|   |   `-- useChatbot.js
+|   |-- layouts/
 |   |   `-- Layout.vue
-|   |-- pages
+|   |-- pages/
 |   |   |-- ActivityLogsPage.vue
 |   |   |-- ActivitySummaryPage.vue
 |   |   |-- ArchiveDashboardPage.vue
@@ -83,6 +92,8 @@ DTI-Project/frontend
 |   |   |-- BankStatementFormPage.vue
 |   |   |-- BankStatementPage.vue
 |   |   |-- ChangePasswordPage.vue
+|   |   |-- ChatbotHistoryPage.vue
+|   |   |-- ChatbotPage.vue
 |   |   |-- DashboardPage.vue
 |   |   |-- ExecutiveDashboardPage.vue
 |   |   |-- ExpenseCategoryFormPage.vue
@@ -114,16 +125,16 @@ DTI-Project/frontend
 |   |   |-- UserAccountFormPage.vue
 |   |   |-- UserAccountsListPage.vue
 |   |   `-- UserActivityLogsPage.vue
-|   |-- router
+|   |-- router/
 |   |   `-- index.js
-|   |-- services
+|   |-- services/
 |   |   |-- activityLogsService.js
 |   |   |-- apiFeedbackService.js
 |   |   |-- archiveService.js
-|   |   |-- authAxiosBootstrap.js
 |   |   |-- authService.js
 |   |   |-- bankStatementFormService.js
 |   |   |-- bankStatementService.js
+|   |   |-- chatbotService.js
 |   |   |-- dashboardService.js
 |   |   |-- executiveDashboardService.js
 |   |   |-- expenseCategoryService.js
@@ -131,6 +142,7 @@ DTI-Project/frontend
 |   |   |-- expensesReportService.js
 |   |   |-- fundReportService.js
 |   |   |-- fundSourceService.js
+|   |   |-- http/
 |   |   |-- importService.js
 |   |   |-- masterFundMonitoringFormService.js
 |   |   |-- masterFundMonitoringService.js
@@ -145,20 +157,17 @@ DTI-Project/frontend
 |   |   |-- taxTableService.js
 |   |   |-- topbarService.js
 |   |   `-- userAccountsService.js
-|   |-- stores
+|   |-- stores/
 |   |   |-- authStore.js
+|   |   |-- chatbotStore.js
 |   |   |-- index.js
 |   |   |-- notificationsStore.js
 |   |   `-- sharedStore.js
-|   |-- utils
+|   |-- utils/
 |   |   |-- archiveRefresh.js
 |   |   `-- excelExport.js
 |   |-- App.vue
 |   `-- main.js
-|-- .gitignore
-|-- FRONTEND_FILE_STRUCTURE.md
-|-- index.html
-|-- package.json
-|-- package-lock.json
+|-- vercel.json
 `-- vite.config.js
 ```

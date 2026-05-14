@@ -4,14 +4,32 @@ A Django-based financial monitoring platform for the Department of Trade and Ind
 
 ## Overview
 
-The system centralizes financial operations across multiple modules:
+The DTI Fund Monitoring System is a comprehensive financial management platform that centralizes fund operations, transaction tracking, and analytics. Key capabilities include:
 
-- Fund source and allocation tracking
-- Expense recording with classification and reporting support
-- Supplier profiling and transaction monitoring
-- Bank statement import and reconciliation workflows
-- Role-aware dashboards and activity logging
-- User and staff account management
+**Core Financial Operations:**
+- Multi-source fund management with annual budget tracking and allocation breakdowns by category
+- Comprehensive transaction recording with DV/check numbers, tax classifications (goods, services, fuel, VAT), and status tracking
+- Expense categorization and object-based accounting with hierarchical chart-of-accounts organization
+- Bank statement reconciliation with automatic balance calculations and transaction clearing status
+- Purchase order tracking with multiple purchase types (Direct, Competitive Bidding, Small Purchase, etc.)
+
+**Master Data & Configuration:**
+- Supplier profiling with TIN, VAT status, PhilGEPS registration, and contact information
+- Organizational structure management (divisions, staff assignments, negosyo centers, districts)
+- Bulk data import capabilities for master records, bank statements, suppliers, and staff (Excel/CSV support)
+- Tax configuration and rate management for compliance
+
+**Insights & Reporting:**
+- Executive dashboards with real-time fund utilization, budget vs. actual, and year-over-year trends
+- Pre-built financial reports: Expense breakdown, MOOE, Negosyo Center summaries, Fund utilization, TIN/supplier analysis
+- Comprehensive activity logging with 15+ tracked actions (Create, Update, Delete, View, Download, Import, Login, etc.)
+- Archive management with year-wise transaction retrieval and restoration
+
+**User Experience:**
+- Role-based access control with JWT authentication and group-based permissions
+- AI-powered financial chatbot with 13+ intents for instant data queries (fund status, expense summaries, supplier info, reconciliation status)
+- Real-time notifications and activity summaries
+- User preference management (theme, notifications, pagination)
 
 ## Technology Stack
 
@@ -20,6 +38,7 @@ The system centralizes financial operations across multiple modules:
 - Database (default): SQLite (`DTI-Project/backend/db.sqlite3`)
 - Optional database: PostgreSQL (configure in Django settings)
 - Async/background processing: Celery + Redis (optional, if enabled)
+- AI/Chatbot: Integrated chatbot service with LLM support
 - Data tools: Pandas and NumPy
 - Excel processing/export: OpenPyXL (backend) and ExcelJS (frontend)
 
@@ -33,6 +52,7 @@ DTI-FUNDMONITORING-SYSTEM/
     |   |-- manage.py
     |   |-- requirements.txt
     |   |-- fundmonitor/               # project settings, urls, asgi, wsgi
+    |   |-- chatbot_app/
     |   |-- dashboard_app/
     |   |-- mater_fundmonitor_app/
     |   |-- bank_statement_app/
@@ -42,7 +62,11 @@ DTI-FUNDMONITORING-SYSTEM/
     `-- frontend/
         |-- package.json
         |-- vite.config.js
-        `-- src/
+        |-- src/
+        |   |-- pages/
+        |   |-- services/
+        |   `-- stores/
+        `-- ...
 ```
 
 ## Prerequisites
@@ -159,9 +183,10 @@ celery -A fundmonitor beat -l info
 
 ## Main Application Areas
 
+- `chatbot_app`: AI-powered chatbot service for financial queries and assistance
 - `dashboard_app`: executive and operational dashboards, notifications, activity logs
 - `mater_fundmonitor_app`: core fund and transaction domain workflows
-- `bank_statement_app`: statement upload and reconciliation support
+- `bank_statement_app`: statement and reconciliation
 - `data_management_app`: maintenance of reference and transactional data
 - `reports_app`: summary and printable/exportable reporting
 - `user_app`: login, account lifecycle, and access management
@@ -170,6 +195,7 @@ celery -A fundmonitor beat -l info
 
 URL patterns are composed in `fundmonitor/urls.py` and include app-level routes from:
 
+- `chatbot_app`
 - `user_app`
 - `dashboard_app`
 - `mater_fundmonitor_app`
