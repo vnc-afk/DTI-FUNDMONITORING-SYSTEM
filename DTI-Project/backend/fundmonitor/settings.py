@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "data_management_app",
     "reports_app",
     "user_app",
+    "chatbot_app",
     "django.contrib.humanize",
     "rest_framework",
 ]
@@ -197,10 +198,14 @@ CORS_ALLOW_CREDENTIALS = False
 
 CORS_ALLOWED_ORIGINS = [
     "https://dti-apo-fund-monitor.vercel.app",
+    "http://127.0.0.1:8000",
+    "http://localhost:5173"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://dti-apo-fund-monitor.vercel.app",
+    "http://127.0.0.1:8000",
+    "http://localhost:5173"
 ]
 
 CORS_ALLOW_HEADERS = [

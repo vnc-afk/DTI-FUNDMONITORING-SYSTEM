@@ -28,4 +28,5 @@ urlpatterns = [
     path("", include("bank_statement_app.urls")),
     path("", include("data_management_app.urls")),
     path("", include("reports_app.urls")),
+    path("", include("chatbot_app.urls")),
 ]
