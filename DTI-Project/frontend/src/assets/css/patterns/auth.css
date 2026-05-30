@@ -24,6 +24,13 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
+.auth-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
 .auth-logo {
   display: flex;
   align-items: center;
@@ -36,6 +43,11 @@
 
 .dti-logo {
   width: 40px;
+  height: auto;
+}
+
+.bagong-logo {
+  width: 44px;
   height: auto;
 }
 

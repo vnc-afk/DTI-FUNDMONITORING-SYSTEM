@@ -12,10 +12,15 @@
       </button>
 
       <div class="auth-header">
-        <div class="auth-logo">
-          <img :src="logoSrc" alt="DTI Logo" class="dti-logo">
+        <div class="auth-logos">
+          <div class="auth-logo">
+            <img :src="logoSrc" alt="DTI Logo" class="dti-logo">
+          </div>
+          <div class="auth-logo">
+            <img :src="bagongLogoSrc" alt="Bagong Pilipinas Logo" class="bagong-logo">
+          </div>
         </div>
-        <h1>DTI Fund Monitoring</h1>
+        <h1>DTI APO Fund Monitoring</h1>
         <p>Fund Management System</p>
       </div>
 
@@ -109,6 +114,7 @@ import axios from 'axios'
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logoSrc from '@/assets/images/DTI_Logo_2019.png'
+import bagongLogoSrc from '@/assets/images/Bagong_Pilipinas_logo.png'
 import UiIcon from '@/components/ui/UiIcon.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiButton from '@/components/ui/UiButton.vue'
