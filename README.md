@@ -8,21 +8,19 @@ The DTI Fund Monitoring System is a comprehensive financial management platform 
 
 **Core Financial Operations:**
 - Multi-source fund management with annual budget tracking and allocation breakdowns by category
-- Comprehensive transaction recording with DV/check numbers, tax classifications (goods, services, fuel, VAT), and status tracking
-- Expense categorization and object-based accounting with hierarchical chart-of-accounts organization
+- Comprehensive transaction recording with DV/check numbers, tax classifications (goods, services, VAT), and status tracking
 - Bank statement reconciliation with automatic balance calculations and transaction clearing status
-- Purchase order tracking with multiple purchase types (Direct, Competitive Bidding, Small Purchase, etc.)
 
 **Master Data & Configuration:**
 - Supplier profiling with TIN, VAT status, PhilGEPS registration, and contact information
-- Organizational structure management (divisions, staff assignments, negosyo centers, districts)
+- Organizational structure management (divisions, negosyo centers, districts)
 - Bulk data import capabilities for master records, bank statements, suppliers, and staff (Excel/CSV support)
 - Tax configuration and rate management for compliance
 
 **Insights & Reporting:**
 - Executive dashboards with real-time fund utilization, budget vs. actual, and year-over-year trends
-- Pre-built financial reports: Expense breakdown, MOOE, Negosyo Center summaries, Fund utilization, TIN/supplier analysis
-- Comprehensive activity logging with 15+ tracked actions (Create, Update, Delete, View, Download, Import, Login, etc.)
+- Pre-built financial reports: Expense breakdown, MOOE, Negosyo Center summaries, Fund utilization
+- Comprehensive activity logging with 10+ tracked actions (Create, Update, Delete, View, Download, Import, Login, etc.)
 - Archive management with year-wise transaction retrieval and restoration
 
 **User Experience:**
@@ -205,58 +203,8 @@ URL patterns are composed in `fundmonitor/urls.py` and include app-level routes 
 
 Admin portal: `/admin/`
 
-## Configuration Notes
-
-Important settings file:
-
-- `DTI-Project/backend/fundmonitor/settings.py`
-
-Review these before deployment:
-
-- `DEBUG`
-- `SECRET_KEY`
-- `ALLOWED_HOSTS`
-- `DATABASES`
-- `SESSION_COOKIE_SECURE`
-
-## Troubleshooting
-
-### App cannot connect to database
-
-- Confirm PostgreSQL service is running
-- Verify `HOST`, `PORT`, `NAME`, `USER`, and `PASSWORD` in `settings.py`
-- Ensure the target database already exists
-
-### Static files are missing or outdated
-
-- Run `py manage.py collectstatic --noinput`
-- Verify `STATIC_URL`, `STATICFILES_DIRS`, and `STATIC_ROOT`
-
-### Celery commands fail
-
-- Confirm Redis is running and reachable
-- Ensure the virtual environment is active
-- Run commands from `DTI-Project/backend`
-
-### Frontend cannot start
-
-- Confirm you are in `DTI-Project/frontend`
-- Run `npm install` before `npm run dev`
-- Ensure `package.json`, `index.html`, and `vite.config.js` exist in the frontend folder
-
-## Security Checklist for Deployment
-
-- Set `DEBUG = False`
-- Move secrets and credentials out of source code
-- Use a strong, private `SECRET_KEY`
-- Restrict `ALLOWED_HOSTS` to trusted domains/IPs
-- Enable HTTPS and secure session/cookie settings
 
 ## Contributors
 
 - Vince
 - Nard
-- VNard
-- Nardince
-- Levince
-- Si workfromhome
